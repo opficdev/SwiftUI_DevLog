@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		DFD48B002DC4D6E2005905C5 /* SwiftUI_DevLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftUI_DevLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFD48B002DC4D6E2005905C5 /* DevLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DevLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DFD48B102DC4D6E4005905C5 /* Exceptions for "SwiftUI_DevLog" folder in "SwiftUI_DevLog" target */ = {
+		DFEA638A2DCAE47A00616AEC /* Exceptions for "DevLog" folder in "DevLog" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = DFD48AFF2DC4D6E2005905C5 /* SwiftUI_DevLog */;
+			target = DFD48AFF2DC4D6E2005905C5 /* DevLog */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		DFD48B022DC4D6E2005905C5 /* SwiftUI_DevLog */ = {
+		DFD48B022DC4D6E2005905C5 /* DevLog */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				DFD48B102DC4D6E4005905C5 /* Exceptions for "SwiftUI_DevLog" folder in "SwiftUI_DevLog" target */,
+				DFEA638A2DCAE47A00616AEC /* Exceptions for "DevLog" folder in "DevLog" target */,
 			);
-			path = SwiftUI_DevLog;
+			path = DevLog;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		DFD48AF72DC4D6E2005905C5 = {
 			isa = PBXGroup;
 			children = (
-				DFD48B022DC4D6E2005905C5 /* SwiftUI_DevLog */,
+				DFD48B022DC4D6E2005905C5 /* DevLog */,
 				DFD48B012DC4D6E2005905C5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 		DFD48B012DC4D6E2005905C5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DFD48B002DC4D6E2005905C5 /* SwiftUI_DevLog.app */,
+				DFD48B002DC4D6E2005905C5 /* DevLog.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,9 +61,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DFD48AFF2DC4D6E2005905C5 /* SwiftUI_DevLog */ = {
+		DFD48AFF2DC4D6E2005905C5 /* DevLog */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DFD48B112DC4D6E4005905C5 /* Build configuration list for PBXNativeTarget "SwiftUI_DevLog" */;
+			buildConfigurationList = DFD48B112DC4D6E4005905C5 /* Build configuration list for PBXNativeTarget "DevLog" */;
 			buildPhases = (
 				DFD48AFC2DC4D6E2005905C5 /* Sources */,
 				DFD48AFD2DC4D6E2005905C5 /* Frameworks */,
@@ -74,13 +74,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				DFD48B022DC4D6E2005905C5 /* SwiftUI_DevLog */,
+				DFD48B022DC4D6E2005905C5 /* DevLog */,
 			);
-			name = SwiftUI_DevLog;
+			name = DevLog;
 			packageProductDependencies = (
 			);
 			productName = SwiftUI_DevLog;
-			productReference = DFD48B002DC4D6E2005905C5 /* SwiftUI_DevLog.app */;
+			productReference = DFD48B002DC4D6E2005905C5 /* DevLog.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -98,12 +98,11 @@
 					};
 				};
 			};
-			buildConfigurationList = DFD48AFB2DC4D6E2005905C5 /* Build configuration list for PBXProject "SwiftUI_DevLog" */;
-			developmentRegion = en;
+			buildConfigurationList = DFD48AFB2DC4D6E2005905C5 /* Build configuration list for PBXProject "DevLog" */;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
-				Base,
+				ko,
 			);
 			mainGroup = DFD48AF72DC4D6E2005905C5;
 			minimizedProjectReferenceProxies = 1;
@@ -112,7 +111,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				DFD48AFF2DC4D6E2005905C5 /* SwiftUI_DevLog */,
+				DFD48AFF2DC4D6E2005905C5 /* DevLog */,
 			);
 		};
 /* End PBXProject section */
@@ -143,29 +142,32 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwiftUI_DevLog/SwiftUI_DevLog.entitlements;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = DevLog/DevLog.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4CPC6N38WA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwiftUI_DevLog/Info.plist;
+				INFOPLIST_FILE = DevLog/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DevLog;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "opfic.SwiftUI-DevLog";
+				PRODUCT_BUNDLE_IDENTIFIER = opfic.DevLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -181,29 +183,32 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwiftUI_DevLog/SwiftUI_DevLog.entitlements;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = DevLog/DevLog.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4CPC6N38WA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwiftUI_DevLog/Info.plist;
+				INFOPLIST_FILE = DevLog/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DevLog;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "opfic.SwiftUI-DevLog";
+				PRODUCT_BUNDLE_IDENTIFIER = opfic.DevLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -338,7 +343,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DFD48AFB2DC4D6E2005905C5 /* Build configuration list for PBXProject "SwiftUI_DevLog" */ = {
+		DFD48AFB2DC4D6E2005905C5 /* Build configuration list for PBXProject "DevLog" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DFD48B142DC4D6E4005905C5 /* Debug */,
@@ -347,7 +352,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DFD48B112DC4D6E4005905C5 /* Build configuration list for PBXNativeTarget "SwiftUI_DevLog" */ = {
+		DFD48B112DC4D6E4005905C5 /* Build configuration list for PBXNativeTarget "DevLog" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DFD48B122DC4D6E4005905C5 /* Debug */,
