@@ -1,6 +1,6 @@
 //
-//  SwiftUI_DevLogApp.swift
-//  SwiftUI_DevLog
+//  DevLogApp.swift
+//  DevLog
 //
 //  Created by opfic on 5/2/25.
 //
@@ -8,7 +8,8 @@
 import SwiftUI
 
 @main
-struct SwiftUI_DevLogApp: App {
+struct DevLogApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @AppStorage("theme") var theme: SystemTheme = .automatic
 
     var body: some Scene {
