@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ThemeView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
+    @EnvironmentObject var settingVM: SettingViewModel
     
     var body: some View {
         List {
@@ -16,7 +17,7 @@ struct ThemeView: View {
                 theme = .automatic
             }) {
                 HStack {
-                    Text("자동")
+                    Text(SystemTheme.automatic.localizedName)
                         .foregroundStyle(Color.primary)
                     Spacer()
                     if  theme == .automatic {
@@ -28,7 +29,7 @@ struct ThemeView: View {
                 theme = .light
             }) {
                 HStack {
-                    Text("라이트 모드")
+                    Text(SystemTheme.light.localizedName)
                         .foregroundStyle(Color.primary)
                     Spacer()
                     if theme == .light {
@@ -40,7 +41,7 @@ struct ThemeView: View {
                 theme = .dark
             }) {
                 HStack {
-                    Text("다크 모드")
+                    Text(SystemTheme.dark.localizedName)
                         .foregroundStyle(Color.primary)
                     Spacer()
                     if theme == .dark {
@@ -57,6 +58,9 @@ struct ThemeView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: theme.localizedName) { newValue in
+            settingVM.theme = newValue
+        }
     }
 }
 
