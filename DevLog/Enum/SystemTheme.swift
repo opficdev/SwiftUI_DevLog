@@ -7,12 +7,12 @@
 
 import SwiftUI
 
-enum SystemTheme: Int, Identifiable {
+enum SystemTheme: String, Identifiable {
     case automatic
     case light
     case dark
     
-    var id: Int {
+    var id: String {
         rawValue
     }
     
