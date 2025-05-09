@@ -300,7 +300,7 @@ extension FirebaseViewModel {
 extension FirebaseViewModel {
     func signInGithub() async {
         do {
-            try await signInGithubHelper()
+            await signInGithubHelper()
             self.signIn = true
         }
     }
@@ -329,7 +329,7 @@ extension FirebaseViewModel {
     }
 
     // MARK: - GitHub OAuth Code 요청
-    func requestGithubAuthorizationCode() async throws -> String {
+    private func requestGithubAuthorizationCode() async throws -> String {
         guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GITHUB_CLIENT_ID") as? String,
               let redirectURL = Bundle.main.object(forInfoDictionaryKey: "APP_REDIRECT_URL") as? String else {
             throw URLError(.badURL)
