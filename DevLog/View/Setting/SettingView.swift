@@ -19,7 +19,7 @@ struct SettingView: View {
                         Text("테마")
                             .foregroundStyle(Color.primary)
                         Spacer()
-                        Text("\(settingVM.theme)")
+                        Text(settingVM.theme)
                             .foregroundStyle(Color.gray)
                     }
                     .onAppear {
