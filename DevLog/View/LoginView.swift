@@ -34,7 +34,7 @@ struct LoginView: View {
                     LoginButton(logo: Image("Google"), text: "구글 계정으로 로그인") {
                         if firebaseVM.isConnected {
                             Task {
-                                try await firebaseVM.signInGoogle()
+                                await firebaseVM.signInGoogle()
                             }
                         }
                         else {
@@ -46,7 +46,7 @@ struct LoginView: View {
                     LoginButton(logo: Image("Github"), text: "깃헙 계정으로 로그인") {
                         if firebaseVM.isConnected {
                             Task {
-                                
+                                await firebaseVM.signInGithub()
                             }
                         }
                         else {
@@ -58,7 +58,7 @@ struct LoginView: View {
                     LoginButton(logo: Image("Apple"), text: "애플 계정으로 로그인") {
                         if firebaseVM.isConnected {
                             Task {
-                                try await firebaseVM.signInApple()
+                                await firebaseVM.signInApple()
                             }
                         }
                         else {
