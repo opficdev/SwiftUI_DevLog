@@ -63,6 +63,7 @@
 			isa = PBXGroup;
 			children = (
 				DFD48B022DC4D6E2005905C5 /* DevLog */,
+				DFE28EB62DCCF26300B28FE5 /* Frameworks */,
 				DFD48B012DC4D6E2005905C5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -73,6 +74,13 @@
 				DFD48B002DC4D6E2005905C5 /* DevLog.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DFE28EB62DCCF26300B28FE5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
