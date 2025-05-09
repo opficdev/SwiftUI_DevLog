@@ -381,7 +381,7 @@ extension FirebaseViewModel {
             }
 
             session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = true
+            session.prefersEphemeralWebBrowserSession = false
             
             if !session.start() {
                 continuation.resume(throwing: URLError(.userCancelledAuthentication))
