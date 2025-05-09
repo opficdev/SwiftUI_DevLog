@@ -341,7 +341,7 @@ extension FirebaseViewModel {
 
         // Generate a random state for CSRF protection
         let state = UUID().uuidString
-        let scope = "read:user"
+        let scope = "read:user user:email"
         
         // Use URLComponents for proper encoding
         var components = URLComponents(string: "https://github.com/login/oauth/authorize")!
