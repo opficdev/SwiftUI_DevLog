@@ -52,16 +52,16 @@ struct SettingView: View {
             
             Section {
                 Button(role: .destructive, action: {
-                    settingVM.logoutAlert = true
+                    settingVM.signOutAlert = true
                 }) {
                     Text("로그아웃")
                 }
             }
         }
         .navigationTitle("설정")
-        .alert("로그아웃", isPresented: $settingVM.logoutAlert) {
+        .alert("로그아웃", isPresented: $settingVM.signOutAlert) {
             Button(role: .cancel, action: {
-                settingVM.logoutAlert = false
+                settingVM.signOutAlert = false
             }) {
                 Text("취소")
             }
