@@ -9,7 +9,7 @@ import SwiftUI
 
 class SettingViewModel: ObservableObject {
     @Published var signOutAlert = false
-    
+    @Published var deleteUserAlert = false
     @Published var theme: String = ""
     @Published var appIcon: String = ""
 }

@@ -431,6 +431,37 @@ extension FirebaseViewModel {
             }
         }
     }
+    
+    func deleteUser() async -> Bool {
+        guard let user = Auth.auth().currentUser, let userId = userId else { return false }
+        
+        self.signIn = false
+        
+        // 유저가 작성한 데이터들을 삭제하는 cloud functions 구현 예정
+        do {
+            let batch = db.batch()
+      
+            let userRef = db.collection(userId).document("info")
+            batch.deleteDocument(userRef)
+        
+            if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
+                let appleToken = try await refreshAppleAccessToken()
+                try await revokeAppleAccessToken(token: appleToken)
+            }
+            if user.providerData.contains(where: { $0.providerID == "github.com" }) {
+                try await revokeGitHubAccessToken()
+            }
+        
+            try await batch.commit()
+            try await signOut()
+            try await user.delete()
+        } catch {
+            print("Error delete User: \(error.localizedDescription)")
+            return false
+        }
+        
+        return true
+    }
 }
 
 

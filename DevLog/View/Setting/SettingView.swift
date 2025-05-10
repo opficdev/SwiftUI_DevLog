@@ -57,6 +57,17 @@ struct SettingView: View {
                     Text("로그아웃")
                 }
             }
+            
+            HStack {
+                Spacer()
+                Button(role: .destructive, action: {
+                    settingVM.deleteUserAlert = true
+                }) {
+                    Text("회원 탈퇴")
+                        .font(.headline)
+                }
+                Spacer()
+            }
         }
         .navigationTitle("설정")
         .alert("로그아웃", isPresented: $settingVM.signOutAlert) {
@@ -74,6 +85,22 @@ struct SettingView: View {
             }
         } message: {
             Text("로그아웃하시겠습니까?")
+        }
+        .alert("정말 탈퇴하시겠습니까?", isPresented: $settingVM.deleteUserAlert) {
+            Button(role: .cancel, action: {
+                settingVM.deleteUserAlert = false
+            }) {
+                Text("취소")
+            }
+            Button(role: .destructive, action: {
+                Task {
+                    await firebaseVM.deleteUser()
+                }
+            }) {
+                Text("탈퇴")
+            }
+        } message: {
+            Text("회원 탈퇴가 진행되면 모든 데이터가 지워지고 복구할 수 없습니다.")
         }
     }
 }
