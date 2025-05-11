@@ -96,10 +96,12 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             }
             
             let userRef = db.collection(user.uid).document("info")
+            let doc = try await userRef.getDocument()
             
-            try await userRef.updateData(["fcmToken": FieldValue.delete()])
+            if doc.exists {
+                try await userRef.updateData(["fcmToken": FieldValue.delete()])
+            }
             
-            try Auth.auth().signOut()
             try await Messaging.messaging().deleteToken()
         } catch {
             print("SignOut Error: \(error)")
@@ -116,18 +118,6 @@ extension FirebaseViewModel {
             self.signIn = true
         } catch {
             print("Google SignIn Error: \(error)")
-        }
-    }
-    
-    func signOutGoogle() async throws {
-        do {
-            try Auth.auth().signOut()
-            GIDSignIn.sharedInstance.signOut()
-            try await GIDSignIn.sharedInstance.disconnect()
-            self.signIn = false
-        } catch {
-            print("Google SignOut Error: \(error)")
-            throw error
         }
     }
     
@@ -187,14 +177,6 @@ extension FirebaseViewModel {
         }
     }
     
-    func signOutApple() async {
-        do {
-            try Auth.auth().signOut()
-            self.signIn = false
-        } catch {
-            print("Apple SignOut Error: \(error)")
-        }
-    }
     
     private func signInAppleHelper() async throws {
         let nonce = UUID().uuidString
