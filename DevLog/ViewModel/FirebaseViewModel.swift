@@ -389,6 +389,22 @@ extension FirebaseViewModel {
             throw error
         }
     }
+    
+    private func revokeGitHubAccessToken() async throws {
+        guard let _ = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        let revokeFunction = functions.httpsCallable("revokeGithubAccessToken")
+        
+        do {
+            let _ = try await revokeFunction.call()
+        } catch {
+            print("Error revoking GitHub Token: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
 }
 
 extension FirebaseViewModel {
