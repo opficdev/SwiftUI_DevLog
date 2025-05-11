@@ -287,27 +287,26 @@ extension FirebaseViewModel {
         }
     }
 
-    private func signInGithubHelper() async {
+    private func signInGithubHelper() async throws {
         // 1. GitHub OAuth 로그인 (Safari 등으로 사용자 인증 후, authorizationCode 수신)
-        do {
-            let authorizationCode = try await requestGithubAuthorizationCode()
-            
-            // 2. Firebase Functions를 통해 customToken 발급 요청
-            let (accessToken, customToken) = try await getGithubCustomTokens(authorizationCode: authorizationCode)
-            
-            // 3. Firebase 로그인
-            let result = try await Auth.auth().signIn(withCustomToken: customToken)
-            
-            // 서버로부터 받은 정보로 인증 및 제공자 연결
+        let authorizationCode = try await requestGithubAuthorizationCode()
+        
+        // 2. Firebase Functions를 통해 customToken 발급 요청
+        let (accessToken, customToken) = try await getGithubCustomTokens(authorizationCode: authorizationCode)
+        
+        // 3. Firebase 로그인
+        let result = try await Auth.auth().signIn(withCustomToken: customToken)
+        
+        // 4. 서버로부터 받은 정보로 인증 및 제공자 연결
+        
+        if !result.user.providerData.contains(where: { $0.providerID == "github.com" }) {
             let credential = OAuthProvider.credential(providerID: AuthProviderID.gitHub, accessToken: accessToken)
-            try await Auth.auth().currentUser?.link(with: credential)
-            
-            let fcmToken = try await Messaging.messaging().token()
-            
-            upsertUser(user: result.user, fcmToken: fcmToken)
-        } catch {
-            
+            try await result.user.link(with: credential)
         }
+        // 5. Firebase Messaging을 통해 FCM 토큰 발급
+        let fcmToken = try await Messaging.messaging().token()
+        
+        upsertUser(user: result.user, fcmToken: fcmToken, accessToken: accessToken)
     }
 
     // MARK: - GitHub OAuth Code 요청
