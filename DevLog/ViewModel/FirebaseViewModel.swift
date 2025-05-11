@@ -261,7 +261,7 @@ extension FirebaseViewModel {
     }
     
     // 애플 액세스 토큰 취소 메서드
-    func revokeAppleAccessToken(token: String) async throws -> Bool {
+    private func revokeAppleAccessToken(token: String) async throws {
         guard let _ = userId else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -270,7 +270,6 @@ extension FirebaseViewModel {
         
         do {
             let _ = try await revokeFunction.call(["token": token])
-            return true
         } catch {
             print("Error revoke Apple Token: \(error.localizedDescription)")
             throw error
@@ -433,8 +432,8 @@ extension FirebaseViewModel {
         }
     }
     
-    func deleteUser() async -> Bool {
-        guard let user = Auth.auth().currentUser, let userId = userId else { return false }
+    func deleteUser() async {
+        guard let user = Auth.auth().currentUser, let userId = userId else { return }
         
         self.signIn = false
         
@@ -453,10 +452,7 @@ extension FirebaseViewModel {
             try await user.delete()
         } catch {
             print("Error delete User: \(error.localizedDescription)")
-            return false
         }
-        
-        return true
     }
 }
 
