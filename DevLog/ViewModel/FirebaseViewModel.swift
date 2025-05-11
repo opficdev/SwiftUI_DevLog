@@ -407,9 +407,9 @@ extension FirebaseViewModel {
 }
 
 extension FirebaseViewModel {
-    func upsertUser(user: User, fcmToken: String) {
+    private func upsertUser(user: User, fcmToken: String, accessToken: String? = nil) {
         let userRef = db.collection(user.uid).document("info")
-        let data: [String: Any] = [
+        var data: [String: Any] = [
             "email": user.email ?? "",
             "name": user.displayName ?? "",
             "avatarURL": user.photoURL?.absoluteString ?? "",
@@ -418,6 +418,10 @@ extension FirebaseViewModel {
             "allowPushAlarm": true,
             "lastLogin": FieldValue.serverTimestamp()
         ]
+        
+        if let accessToken = accessToken {
+            data["githubAccessToken"] = accessToken
+        }
         
         userRef.setData(data, merge: true) { error in
             if let error = error {
