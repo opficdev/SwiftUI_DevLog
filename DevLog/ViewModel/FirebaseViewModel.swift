@@ -305,7 +305,7 @@ extension FirebaseViewModel {
         // 5. Firebase Messaging을 통해 FCM 토큰 발급
         let fcmToken = try await Messaging.messaging().token()
         
-        upsertUser(user: result.user, fcmToken: fcmToken, accessToken: accessToken)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", githubAccessToken: accessToken)
     }
 
     // MARK: - GitHub OAuth Code 요청
@@ -399,30 +399,32 @@ extension FirebaseViewModel {
 }
 
 extension FirebaseViewModel {
-    private func upsertUser(user: User, fcmToken: String, accessToken: String? = nil) {
+    private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil) async throws {
         let userRef = db.collection(user.uid).document("info")
-        var data: [String: Any] = [
+        let doc = try await userRef.getDocument()
+        var field: [String: Any] = [
             "email": user.email ?? "",
             "name": user.displayName ?? "",
-            "avatarURL": user.photoURL?.absoluteString ?? "",
             "theme": "automatic",
             "fcmToken": fcmToken,
             "allowPushAlarm": true,
-            "lastLogin": FieldValue.serverTimestamp()
+            "lastLogin": FieldValue.serverTimestamp(),
+            "lastProvider": provider
         ]
         
-        if let accessToken = accessToken {
-            data["githubAccessToken"] = accessToken
+        if token != nil || provider == "github.com" {
+            // GitHub Access Token 저장
+            field["githubAccessToken"] = token!
+            field["githubAvatarURL"] = user.photoURL?.absoluteString ?? ""
+        }
+        else if provider == "apple.com" {
+            field["appleAvatarURL"] = user.photoURL?.absoluteString ?? ""
+        }
+        else {
+            field["googleAvatarURL"] = user.photoURL?.absoluteString ?? ""
         }
         
-        userRef.setData(data, merge: true) { error in
-            if let error = error {
-                print("Error saving user data: \(error)")
-            }
-            else {
-                print("User data saved successfully.")
-            }
-        }
+        try await userRef.setData(field, merge: true)
     }
     
     func deleteUser() async {
