@@ -18,14 +18,14 @@ import Network
 
 @MainActor
 final class FirebaseViewModel: NSObject, ObservableObject {
+    private var appleSignInDelegate: AppleSignInDelegate?
+    private var cancellables = Set<AnyCancellable>()
+    private let db = Firestore.firestore()
+    var email: String { Auth.auth().currentUser?.email ?? "" }
+    private let functions = Functions.functions(region: "asia-northeast3")
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
     private var userId: String? { Auth.auth().currentUser?.uid }
-    private var appleSignInDelegate: AppleSignInDelegate?
-    private let db = Firestore.firestore()
-    private let functions = Functions.functions(region: "asia-northeast3")
-    private var cancellables = Set<AnyCancellable>()
-    var email: String { Auth.auth().currentUser?.email ?? "" }
     
     @Published var isConnected = true
     @Published var showNetworkAlert = false
