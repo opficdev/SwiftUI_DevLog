@@ -94,7 +94,7 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
-                    await firebaseVM.deleteUser()
+                    try await firebaseVM.deleteUser()
                 }
             }) {
                 Text("탈퇴")

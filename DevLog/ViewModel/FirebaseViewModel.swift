@@ -83,14 +83,14 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     }
     
     func signOut() async throws {
-        guard let user = Auth.auth().currentUser else {
-            throw URLError(.userAuthenticationRequired)
-        }
-        
-        self.signIn = false
-        
         do {
-            if Auth.auth().currentUser?.providerData.contains(where: { $0.providerID == "google.com" }) ?? false {
+            guard let user = Auth.auth().currentUser else {
+                throw URLError(.userAuthenticationRequired)
+            }
+            
+            self.signIn = false
+        
+            if user.providerData.contains(where: { $0.providerID == "google.com" }) {
                 GIDSignIn.sharedInstance.signOut()
                 try await GIDSignIn.sharedInstance.disconnect()
             }
@@ -103,8 +103,10 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             }
             
             try await Messaging.messaging().deleteToken()
+            
+            try Auth.auth().signOut()
         } catch {
-            print("SignOut Error: \(error)")
+            print("Error signing out: \(error.localizedDescription)")
             throw error
         }
     }
@@ -112,12 +114,13 @@ final class FirebaseViewModel: NSObject, ObservableObject {
 
 // MARK: - Google Sign In/Out
 extension FirebaseViewModel {
-    func signInGoogle() async {
+    func signInGoogle() async throws {
         do {
             try await signInGoogleHelper()
             self.signIn = true
         } catch {
-            print("Google SignIn Error: \(error)")
+            print("Error signing in with Google: \(error.localizedDescription)")
+            throw error
         }
     }
     
@@ -139,7 +142,7 @@ extension FirebaseViewModel {
         
         let fcmToken = try await Messaging.messaging().token()
 
-        upsertUser(user: result.user, fcmToken: fcmToken)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
     }
     
     func topViewController(controller: UIViewController? = nil) -> UIViewController? {
@@ -168,12 +171,13 @@ extension FirebaseViewModel {
 
 // MARK: - Apple Sign In/Out
 extension FirebaseViewModel {
-    func signInApple() async {
+    func signInApple() async throws {
         do {
             try await signInAppleHelper()
             self.signIn = true
         } catch {
-            print("Apple SignIn Error: \(error)")
+            print("Error signing in with Apple: \(error.localizedDescription)")
+            throw error
         }
     }
     
@@ -213,7 +217,7 @@ extension FirebaseViewModel {
         
         let fcmToken = try await Messaging.messaging().token()
         
-        upsertUser(user: result.user, fcmToken: fcmToken)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
         
         try await requestAppleRefreshToken(authorizationCode: authorizationCode)
     }
@@ -230,34 +234,25 @@ extension FirebaseViewModel {
             "authorizationCode": authorizationCode,
             "userId": userId
         ]
-            
-        do {
-            let _ = try await getFuction.call(params)
-        } catch {
-            print("Error get Apple Refresh Token: \(error)")
-            throw error
-        }
+        
+        let _ = try await requestFuction.call(params)
     }
     
     // 애플 액세스 토큰 재발급 메서드
-    func refreshAppleAccessToken() async throws -> String {
+    private func refreshAppleAccessToken() async throws -> String {
         guard let _ = userId else {
             throw URLError(.userAuthenticationRequired)
         }
-        
+    
         let refreshFunction = functions.httpsCallable("refreshAppleAccessToken")
+        let result = try await refreshFunction.call()
         
-        do {
-            let result = try await refreshFunction.call()
-            
-            if let data = result.data as? [String: Any], let accessToken = data["token"] as? String {
-                return accessToken
-            }
-            return ""
-        } catch {
-            print("Error refresh Apple Token: \(error.localizedDescription)")
-            throw error
+        guard let data = result.data as? [String: Any],
+              let accessToken = data["token"] as? String else {
+            throw URLError(.cannotParseResponse)
         }
+        
+        return accessToken
     }
     
     // 애플 액세스 토큰 취소 메서드
@@ -268,21 +263,20 @@ extension FirebaseViewModel {
        
         let revokeFunction = functions.httpsCallable("revokeAppleAccessToken")
         
-        do {
-            let _ = try await revokeFunction.call(["token": token])
-        } catch {
-            print("Error revoke Apple Token: \(error.localizedDescription)")
-            throw error
-        }
+        let _ = try await revokeFunction.call(["token": token])
     }
 }
 
 // MARK: - GitHub Sign In/Out
 extension FirebaseViewModel {
-    func signInGithub() async {
+    func signInGithub() async throws {
         do {
-            await signInGithubHelper()
+            try await signInGithubHelper()
             self.signIn = true
+        }
+        catch {
+            print("Error signing in with GitHub: \(error.localizedDescription)")
+            throw error
         }
     }
 
@@ -379,6 +373,7 @@ extension FirebaseViewModel {
            let customToken = data["customToken"] as? String {
             return (accessToken, customToken)
         }
+        throw URLError(.badServerResponse)
     }
     
     private func revokeGitHubAccessToken() async throws {
@@ -388,12 +383,7 @@ extension FirebaseViewModel {
         
         let revokeFunction = functions.httpsCallable("revokeGithubAccessToken")
         
-        do {
-            let _ = try await revokeFunction.call()
-        } catch {
-            print("Error revoking GitHub Token: \(error.localizedDescription)")
-            throw error
-        }
+        let _ = try await revokeFunction.call()
     }
 
 }
@@ -427,8 +417,10 @@ extension FirebaseViewModel {
         try await userRef.setData(field, merge: true)
     }
     
-    func deleteUser() async {
-        guard let user = Auth.auth().currentUser, let userId = userId else { return }
+    func deleteUser() async throws {
+        guard let user = Auth.auth().currentUser, let userId = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
         
         self.signIn = false
         
@@ -447,6 +439,7 @@ extension FirebaseViewModel {
             try await user.delete()
         } catch {
             print("Error delete User: \(error.localizedDescription)")
+            throw error
         }
     }
 }
