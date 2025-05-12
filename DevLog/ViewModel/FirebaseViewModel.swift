@@ -114,9 +114,9 @@ final class FirebaseViewModel: NSObject, ObservableObject {
 
 // MARK: - Google Sign In/Out
 extension FirebaseViewModel {
-    func signInGoogle() async throws {
+    func signInWithGoogle() async throws {
         do {
-            try await signInGoogleHelper()
+            try await signInWithGoogleHelper()
             self.signIn = true
         } catch {
             print("Error signing in with Google: \(error.localizedDescription)")
@@ -124,7 +124,7 @@ extension FirebaseViewModel {
         }
     }
     
-    private func signInGoogleHelper() async throws {
+    private func signInWithGoogleHelper() async throws {
         guard let topVC = topViewController() else {
             throw URLError(.cannotFindHost)
         }
@@ -171,9 +171,9 @@ extension FirebaseViewModel {
 
 // MARK: - Apple Sign In/Out
 extension FirebaseViewModel {
-    func signInApple() async throws {
+    func signInWithApple() async throws {
         do {
-            try await signInAppleHelper()
+            try await signInWithAppleHelper()
             self.signIn = true
         } catch {
             print("Error signing in with Apple: \(error.localizedDescription)")
@@ -182,7 +182,7 @@ extension FirebaseViewModel {
     }
     
     
-    private func signInAppleHelper() async throws {
+    private func signInWithAppleHelper() async throws {
         let nonce = UUID().uuidString
         let hashedNonce = SHA256.hash(data: Data(nonce.utf8)).map { String(format: "%02x", $0) }.joined()
         
@@ -217,7 +217,7 @@ extension FirebaseViewModel {
         
         let fcmToken = try await Messaging.messaging().token()
         
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com", credential: credential)
         
         try await requestAppleRefreshToken(authorizationCode: authorizationCode)
     }
@@ -269,9 +269,9 @@ extension FirebaseViewModel {
 
 // MARK: - GitHub Sign In/Out
 extension FirebaseViewModel {
-    func signInGithub() async throws {
+    func signInWithGithub() async throws {
         do {
-            try await signInGithubHelper()
+            try await signInWithGithubHelper()
             self.signIn = true
         }
         catch {
@@ -280,7 +280,7 @@ extension FirebaseViewModel {
         }
     }
 
-    private func signInGithubHelper() async throws {
+    private func signInWithGithubHelper() async throws {
         // 1. GitHub OAuth 로그인 (Safari 등으로 사용자 인증 후, authorizationCode 수신)
         let authorizationCode = try await requestGithubAuthorizationCode()
         
