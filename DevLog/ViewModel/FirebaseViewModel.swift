@@ -188,7 +188,7 @@ extension FirebaseViewModel {
         
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
-        request.requestedScopes = [.email]
+        request.requestedScopes = [.fullName, .email]
         request.nonce = hashedNonce
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
@@ -215,9 +215,18 @@ extension FirebaseViewModel {
         
         let result = try await Auth.auth().signIn(with: firebaseCredential)
         
+        if let fullName = credential.fullName {
+            let fmt = PersonNameComponentsFormatter()
+            fmt.style = .long
+            let displayName = fmt.string(from: fullName)
+            let changeRequest = result.user.createProfileChangeRequest()
+            changeRequest.displayName = displayName
+            try await changeRequest.commitChanges()
+        }
+        
         let fcmToken = try await Messaging.messaging().token()
         
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com", credential: credential)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
         
         try await requestAppleRefreshToken(authorizationCode: authorizationCode)
     }
