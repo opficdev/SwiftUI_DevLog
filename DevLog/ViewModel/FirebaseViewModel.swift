@@ -215,16 +215,16 @@ extension FirebaseViewModel {
         
         upsertUser(user: result.user, fcmToken: fcmToken)
         
-        try await getAppleRefreshToken(authorizationCode: authorizationCode)
+        try await requestAppleRefreshToken(authorizationCode: authorizationCode)
     }
     
-    private func getAppleRefreshToken(authorizationCode: Data) async throws {
+    private func requestAppleRefreshToken(authorizationCode: Data) async throws {
         guard let userId = userId,
               let authorizationCode = String(data: authorizationCode, encoding: .utf8) else {
             throw URLError(.userAuthenticationRequired)
         }
         
-        let getFuction = functions.httpsCallable("getAppleRefreshToken")
+        let requestFuction = functions.httpsCallable("requestAppleRefreshToken")
         
         let params: [String: Any] = [
             "authorizationCode": authorizationCode,
@@ -291,7 +291,7 @@ extension FirebaseViewModel {
         let authorizationCode = try await requestGithubAuthorizationCode()
         
         // 2. Firebase Functions를 통해 customToken 발급 요청
-        let (accessToken, customToken) = try await getGithubCustomTokens(authorizationCode: authorizationCode)
+        let (accessToken, customToken) = try await requestGithubCustomTokens(authorizationCode: authorizationCode)
         
         // 3. Firebase 로그인
         let result = try await Auth.auth().signIn(withCustomToken: customToken)
@@ -370,21 +370,14 @@ extension FirebaseViewModel {
     }
 
     // MARK: - Firebase Function 호출: Custom Token 발급
-    private func getGithubCustomTokens(authorizationCode: String) async throws -> (String, String) {
-        let getTokenFunction = functions.httpsCallable("getGithubCustomTokens")
-
-        do {
-            let result = try await getTokenFunction.call(["code": authorizationCode])
-            if let data = result.data as? [String: Any],
-               let accessToken = data["accessToken"] as? String,
-               let customToken = data["customToken"] as? String {
-                return (accessToken, customToken)
-            } else {
-                throw URLError(.badServerResponse)
-            }
-        } catch {
-            print("Error getting GitHub Custom Token: \(error.localizedDescription)")
-            throw error
+    private func requestGithubCustomTokens(authorizationCode: String) async throws -> (String, String) {
+        let requestTokenFunction = functions.httpsCallable("requestGithubCustomTokens")
+        let result = try await requestTokenFunction.call(["code": authorizationCode])
+        
+        if let data = result.data as? [String: Any],
+           let accessToken = data["accessToken"] as? String,
+           let customToken = data["customToken"] as? String {
+            return (accessToken, customToken)
         }
     }
     
