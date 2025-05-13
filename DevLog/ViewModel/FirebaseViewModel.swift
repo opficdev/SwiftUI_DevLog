@@ -451,6 +451,40 @@ extension FirebaseViewModel {
             throw error
         }
     }
+    
+    func upsertStatusMsg() async throws {
+        do {
+            guard let userId = userId else {
+                throw URLError(.userAuthenticationRequired)
+            }
+            
+            let userRef = db.collection(userId).document("info")
+            
+            let field = ["statusMsg": statusMsg]
+            try await userRef.setData(field, merge: true)
+        } catch {
+            print("Error upsert status message: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func fetchStatusMsg() async throws {
+        do {
+            guard let userId = userId else {
+                throw URLError(.userAuthenticationRequired)
+            }
+            
+            let userRef = db.collection(userId).document("info")
+            let doc = try await userRef.getDocument()
+            
+            if let statusMsg = doc.data()?["statusMsg"] as? String {
+                self.statusMsg = statusMsg
+            }
+        } catch {
+            print("Error fetching status message: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 
