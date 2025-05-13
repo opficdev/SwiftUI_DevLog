@@ -46,7 +46,6 @@ final class FirebaseViewModel: NSObject, ObservableObject {
         createAuthStatePublisher()
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
-                self?.signIn = user != nil
                 // GitHub 로그인 상태 확인
                 self?.signInWithGithub = user?.providerData.contains { provider in
                     provider.providerID == "github.com"
