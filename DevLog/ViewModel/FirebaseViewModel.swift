@@ -323,12 +323,21 @@ extension FirebaseViewModel {
         // 3. Firebase 로그인
         let result = try await Auth.auth().signIn(withCustomToken: customToken)
         
-        // 4. 서버로부터 받은 정보로 인증 및 제공자 연결
+        let githubUser = try await requestGitHubUserProfile(accessToken: accessToken)
+        
+        // 5. Firebase Auth 사용자 프로필 업데이트
+        if let photoURL = githubUser.avatarUrl, let url = URL(string: photoURL) {
+            let changeRequest = result.user.createProfileChangeRequest()
+            changeRequest.photoURL = url
+            changeRequest.displayName = githubUser.name ?? githubUser.login
+            try await changeRequest.commitChanges()
+        }
         
         if !result.user.providerData.contains(where: { $0.providerID == "github.com" }) {
             let credential = OAuthProvider.credential(providerID: AuthProviderID.gitHub, accessToken: accessToken)
             try await result.user.link(with: credential)
         }
+        
         // 5. Firebase Messaging을 통해 FCM 토큰 발급
         let fcmToken = try await Messaging.messaging().token()
         
@@ -419,12 +428,29 @@ extension FirebaseViewModel {
         let _ = try await revokeFunction.call()
     }
 
+    
+    // GitHub API로 사용자 프로필 정보 가져오기
+    private func requestGitHubUserProfile(accessToken: String) async throws -> GitHubUser {
+        var request = URLRequest(url: URL(string: "https://api.github.com/user")!)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let decoder = JSONDecoder()
+        return try decoder.decode(GitHubUser.self, from: data)
+    }
 }
 
 extension FirebaseViewModel {
     private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil) async throws {
         let userRef = db.collection(user.uid).document("info")
-        let doc = try await userRef.getDocument()
         var field: [String: Any] = [
             "email": user.email ?? "",
             "name": user.displayName ?? "",
@@ -435,16 +461,9 @@ extension FirebaseViewModel {
             "lastProvider": provider
         ]
         
-        if token != nil || provider == "github.com" {
-            // GitHub Access Token 저장
-            field["githubAccessToken"] = token!
-            field["githubAvatarURL"] = user.photoURL?.absoluteString ?? ""
-        }
-        else if provider == "apple.com" {
-            field["appleAvatarURL"] = user.photoURL?.absoluteString ?? ""
-        }
-        else {
-            field["googleAvatarURL"] = user.photoURL?.absoluteString ?? ""
+        if let token = token, provider == "github.com" {
+            field["githubAvatarUrl"] = user.photoURL?.absoluteString
+            field["githubAccessToken"] = token
         }
         
         try await userRef.setData(field, merge: true)
