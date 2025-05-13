@@ -360,16 +360,13 @@ extension FirebaseViewModel {
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", githubAccessToken: accessToken)
     }
 
-    // MARK: - GitHub OAuth Code 요청
     private func requestGithubAuthorizationCode() async throws -> String {
         guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GITHUB_CLIENT_ID") as? String,
-              let redirectURL = Bundle.main.object(forInfoDictionaryKey: "APP_REDIRECT_URL") as? String else {
+              let redirectURL = Bundle.main.object(forInfoDictionaryKey: "APP_REDIRECT_URL") as? String,
+              let urlComponents = URLComponents(string: redirectURL),
+              let callbackURLScheme = urlComponents.scheme else {
             throw URLError(.badURL)
         }
-
-        // Extract URL scheme from the redirect URI
-        let urlComponents = URLComponents(string: redirectURL)
-        let callbackURLScheme = urlComponents?.scheme ?? "DevLog"
 
         // Generate a random state for CSRF protection
         let state = UUID().uuidString
