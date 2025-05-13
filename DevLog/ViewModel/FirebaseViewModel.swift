@@ -157,6 +157,14 @@ extension FirebaseViewModel {
         let fcmToken = try await Messaging.messaging().token()
         
         let result = try await Auth.auth().signIn(with: credential)
+        
+        if let photoURL = gidSignIn.user.profile?.imageURL(withDimension: 200) {
+            let changeRequest = result.user.createProfileChangeRequest()
+            changeRequest.photoURL = photoURL
+            changeRequest.displayName = gidSignIn.user.profile?.name
+            
+            try await changeRequest.commitChanges()
+        }
 
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
     }
