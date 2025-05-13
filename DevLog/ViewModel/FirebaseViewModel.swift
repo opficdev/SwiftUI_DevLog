@@ -47,6 +47,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     @Published var showNetworkAlert = false
     @Published var signIn = false
     @Published var signInWithGithub = false
+    @Published var statusMsg = ""
     
     override init() {
         super.init()
