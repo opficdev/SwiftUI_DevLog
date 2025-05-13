@@ -137,9 +137,9 @@ extension FirebaseViewModel {
         let accessToken = gidSignIn.user.accessToken.tokenString
         let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
         
-        let result = try await Auth.auth().signIn(with: credential)
-        
         let fcmToken = try await Messaging.messaging().token()
+        
+        let result = try await Auth.auth().signIn(with: credential)
 
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
     }
