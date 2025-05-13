@@ -418,7 +418,7 @@ extension FirebaseViewModel {
         }
     }
 
-    // MARK: - Firebase Function 호출: Custom Token 발급
+    // Firebase Function 호출: Custom Token 발급
     private func requestGithubCustomTokens(authorizationCode: String) async throws -> (String, String) {
         let requestTokenFunction = functions.httpsCallable("requestGithubCustomTokens")
         let result = try await requestTokenFunction.call(["code": authorizationCode])
@@ -471,7 +471,8 @@ extension FirebaseViewModel {
             "fcmToken": fcmToken,
             "allowPushAlarm": true,
             "lastLogin": FieldValue.serverTimestamp(),
-            "lastProvider": provider
+            "lastProvider": provider,
+            "statusMsg": ""
         ]
         
         if let token = token, provider == "github.com" {
