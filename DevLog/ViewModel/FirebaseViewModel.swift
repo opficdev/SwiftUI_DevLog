@@ -239,12 +239,28 @@ extension FirebaseViewModel {
         
         let result = try await Auth.auth().signIn(with: firebaseCredential)
         
+        let changeRequest = result.user.createProfileChangeRequest()
+        var displayName: String? = nil
+
         if let fullName = credential.fullName {
-            let fmt = PersonNameComponentsFormatter()
-            fmt.style = .long
-            let displayName = fmt.string(from: fullName)
-            let changeRequest = result.user.createProfileChangeRequest()
+            let formatter = PersonNameComponentsFormatter()
+            formatter.style = .long
+            let formattedName = formatter.string(from: fullName)
+            if !formattedName.isEmpty {
+                displayName = formattedName
+            }
+        }
+
+        if displayName == nil {
+            let userRef = db.collection(result.user.uid).document("info")
+            let doc = try await userRef.getDocument()
+            displayName = doc.data()?["appleName"] as? String
+        }
+
+        // nil이 될 확률은 희박하지만, nil일 경우를 대비하여 처리
+        if let displayName = displayName {
             changeRequest.displayName = displayName
+            changeRequest.photoURL = URL(string: "")
             try await changeRequest.commitChanges()
         }
         
@@ -464,6 +480,9 @@ extension FirebaseViewModel {
         if let token = token, provider == "github.com" {
             field["githubAvatarUrl"] = user.photoURL?.absoluteString
             field["githubAccessToken"] = token
+        }
+        else if provider == "apple.com", let displayName = user.displayName {
+            field["appleName"] = displayName
         }
         
         try await userRef.setData(field, merge: true)
