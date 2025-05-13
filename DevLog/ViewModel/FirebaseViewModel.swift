@@ -21,11 +21,27 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     private var appleSignInDelegate: AppleSignInDelegate?
     private var cancellables = Set<AnyCancellable>()
     private let db = Firestore.firestore()
-    var email: String { Auth.auth().currentUser?.email ?? "" }
     private let functions = Functions.functions(region: "asia-northeast3")
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
     private var userId: String? { Auth.auth().currentUser?.uid }
+
+    var name: String { Auth.auth().currentUser?.displayName ?? "" }
+    var email: String { Auth.auth().currentUser?.email ?? "" }
+    var avatar: some View {
+        AsyncImage(url: Auth.auth().currentUser?.photoURL) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFit()
+            default:
+                Image(systemName: "person.crop.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+            }
+        }
+    }
     
     @Published var isConnected = true
     @Published var showNetworkAlert = false
