@@ -11,6 +11,7 @@ struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
     @StateObject private var settingVM = SettingViewModel()
     @EnvironmentObject private var firebaseVM: FirebaseViewModel
+    let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     
     var body: some View {
         List {
@@ -46,6 +47,38 @@ struct SettingView: View {
                         Spacer()
                         Text(settingVM.notification)
                             .foregroundStyle(Color.gray)
+                    }
+                }
+            }
+            
+            Section {
+                HStack {
+                    Text("버전 정보")
+                    Spacer()
+                    Text(appVersion)
+                }
+                if let ppurl = Bundle.main.object(forInfoDictionaryKey: "PRIVACY_POLICY_URL") as? String {
+                    Link(destination: URL(string: ppurl)!) {
+                        Text("개인정보 처리방침")
+                            .foregroundColor(Color.blue)
+                    }
+                }
+                Button(action: {
+                    if let url = URL(string: "itms-beta://") {
+                           UIApplication.shared.open(url, options: [:]) { success in
+                               if !success {
+                                   if let appStoreURL = URL(string: "https://apps.apple.com/app/testflight/id899247664") {
+                                       UIApplication.shared.open(appStoreURL)
+                                   }
+                               }
+                           }
+                       }
+                }) {
+                    VStack(alignment:. leading) {
+                        Text("베타 테스트 참여")
+                        Text("신규 기능을 빠르게 만나볼 수 있습니다")
+                            .foregroundStyle(Color.gray)
+                            .font(.caption)
                     }
                 }
             }
