@@ -506,12 +506,16 @@ extension FirebaseViewModel {
         
         // 유저가 작성한 데이터들을 삭제하는 cloud functions 구현 예정
         do {
-            if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
-                let appleToken = try await refreshAppleAccessToken()
-                try await revokeAppleAccessToken(token: appleToken)
+            if user.providerData.contains(where: { $0.providerID == "google.com" }) {
+                GIDSignIn.sharedInstance.signOut()
+                try await GIDSignIn.sharedInstance.disconnect()
             }
             if user.providerData.contains(where: { $0.providerID == "github.com" }) {
                 try await revokeGitHubAccessToken()
+            }
+            if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
+                let appleToken = try await refreshAppleAccessToken()
+                try await revokeAppleAccessToken(token: appleToken)
             }
         
             try await db.collection(userId).document("info").delete()
