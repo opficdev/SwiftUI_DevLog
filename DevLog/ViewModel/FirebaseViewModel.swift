@@ -47,30 +47,34 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     
     @Published var isConnected = true
     @Published var showNetworkAlert = false
-    @Published var signIn = false
-    @Published var signInWithGithub = false
+    @Published var signIn: Bool? = nil
     @Published var statusMsg = ""
     @Published var providers: [String] = []
     @Published var isLoading = false    // 네트워크 작업 중인지 여부
     
     override init() {
         super.init()
-        Task {
-            if let _ = Auth.auth().currentUser {
-                self.signIn = true
-            }
-            else {
-                self.signIn = false
-            }
-        }
         
+        //  Auth.auth().currentUser가 변경될 때만 감지한다. -> 즉 앱이 시작될 때 or 로그인/로그아웃 될 때
         createAuthStatePublisher()
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
-                // GitHub 로그인 상태 확인
-                self?.signInWithGithub = user?.providerData.contains { provider in
-                    provider.providerID == "github.com"
-                } ?? false
+                self?.signIn = user != nil
+                Task {
+                    if self?.signIn == true {
+                        let userRef = self?.db.collection(user!.uid).document("info")
+                        let doc = try await userRef?.getDocument()
+                        if let data = doc?.data() {
+                            if let provider = data["currentProvider"] as? String {
+                                self?.currentProvider = provider
+                            }
+                            if let statusMsg = data["statusMsg"] as? String {
+                                self?.statusMsg = statusMsg
+                            }
+                            self?.providers = user!.providerData.compactMap({ $0.providerID })
+                        }
+                    }
+                }
             }
             .store(in: &cancellables)
         
@@ -94,12 +98,11 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             publisher.send(user)
         }
         
-        // 메모리 관리를 위해 deinit 시 리스너 제거
-        _ = AnyCancellable {
-            Auth.auth().removeStateDidChangeListener(handle)
-        }
-        
-        return publisher.eraseToAnyPublisher()
+        return publisher
+            .handleEvents(receiveCancel: {
+                Auth.auth().removeStateDidChangeListener(handle)
+            })
+            .eraseToAnyPublisher()
     }
     
     func signOut() async throws {
