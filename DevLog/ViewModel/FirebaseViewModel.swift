@@ -26,6 +26,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     private let queue = DispatchQueue(label: "NetworkMonitor")
     private var userId: String? { Auth.auth().currentUser?.uid }
 
+    // 뷰에서 직접 변경하지 않는 프로퍼티
     var name: String { Auth.auth().currentUser?.displayName ?? "" }
     var email: String { Auth.auth().currentUser?.email ?? "" }
     var avatar: some View {
@@ -42,12 +43,15 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             }
         }
     }
+    var currentProvider = ""
     
     @Published var isConnected = true
     @Published var showNetworkAlert = false
     @Published var signIn = false
     @Published var signInWithGithub = false
     @Published var statusMsg = ""
+    @Published var providers: [String] = []
+    @Published var isLoading = false    // 네트워크 작업 중인지 여부
     
     override init() {
         super.init()
@@ -140,7 +144,7 @@ extension FirebaseViewModel {
         }
     }
     
-    private func signInWithGoogleHelper() async throws {
+    private func signInWithGoogleHelper(refreshing: Bool = true) async throws {
         guard let topVC = topViewController() else {
             throw URLError(.cannotFindHost)
         }
@@ -158,7 +162,7 @@ extension FirebaseViewModel {
         
         let result = try await Auth.auth().signIn(with: credential)
         
-        if let photoURL = gidSignIn.user.profile?.imageURL(withDimension: 200) {
+        if refreshing, let photoURL = gidSignIn.user.profile?.imageURL(withDimension: 200) {
             let changeRequest = result.user.createProfileChangeRequest()
             changeRequest.photoURL = photoURL
             changeRequest.displayName = gidSignIn.user.profile?.name
@@ -166,7 +170,7 @@ extension FirebaseViewModel {
             try await changeRequest.commitChanges()
         }
 
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com", refreshing: refreshing)
     }
     
     func topViewController(controller: UIViewController? = nil) -> UIViewController? {
@@ -206,7 +210,7 @@ extension FirebaseViewModel {
     }
     
     
-    private func signInWithAppleHelper() async throws {
+    private func signInWithAppleHelper(refreshing: Bool = true) async throws {
         let nonce = UUID().uuidString
         let hashedNonce = SHA256.hash(data: Data(nonce.utf8)).map { String(format: "%02x", $0) }.joined()
         
@@ -258,7 +262,7 @@ extension FirebaseViewModel {
         }
 
         // nil이 될 확률은 희박하지만, nil일 경우를 대비하여 처리
-        if let displayName = displayName {
+        if refreshing, let displayName = displayName {
             changeRequest.displayName = displayName
             changeRequest.photoURL = URL(string: "")
             try await changeRequest.commitChanges()
@@ -266,7 +270,7 @@ extension FirebaseViewModel {
         
         let fcmToken = try await Messaging.messaging().token()
         
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com", refreshing: refreshing)
         
         try await requestAppleRefreshToken(authorizationCode: authorizationCode)
     }
@@ -329,7 +333,7 @@ extension FirebaseViewModel {
         }
     }
 
-    private func signInWithGithubHelper() async throws {
+    private func signInWithGithubHelper(refreshing: Bool = true) async throws {
         // 1. GitHub OAuth 로그인 (Safari 등으로 사용자 인증 후, authorizationCode 수신)
         let authorizationCode = try await requestGithubAuthorizationCode()
         
@@ -342,7 +346,7 @@ extension FirebaseViewModel {
         let githubUser = try await requestGitHubUserProfile(accessToken: accessToken)
         
         // 5. Firebase Auth 사용자 프로필 업데이트
-        if let photoURL = githubUser.avatarUrl, let url = URL(string: photoURL) {
+        if refreshing, let photoURL = githubUser.avatarUrl, let url = URL(string: photoURL) {
             let changeRequest = result.user.createProfileChangeRequest()
             changeRequest.photoURL = url
             changeRequest.displayName = githubUser.name ?? githubUser.login
@@ -357,7 +361,7 @@ extension FirebaseViewModel {
         // 5. Firebase Messaging을 통해 FCM 토큰 발급
         let fcmToken = try await Messaging.messaging().token()
         
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", githubAccessToken: accessToken)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", githubAccessToken: accessToken, refreshing: refreshing)
     }
 
     private func requestGithubAuthorizationCode() async throws -> String {
@@ -462,7 +466,7 @@ extension FirebaseViewModel {
 }
 
 extension FirebaseViewModel {
-    private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil) async throws {
+    private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil, refreshing: Bool) async throws {
         let userRef = db.collection(user.uid).document("info")
         var field: [String: Any] = [
             "email": user.email ?? "",
@@ -471,9 +475,13 @@ extension FirebaseViewModel {
             "fcmToken": fcmToken,
             "allowPushAlarm": true,
             "lastLogin": FieldValue.serverTimestamp(),
-            "lastProvider": provider,
             "statusMsg": ""
         ]
+        
+        if refreshing {
+            field["currentProvider"] = provider
+            self.currentProvider = provider
+        }
         
         if let token = token, provider == "github.com" {
             field["githubAvatarUrl"] = user.photoURL?.absoluteString
@@ -542,6 +550,71 @@ extension FirebaseViewModel {
             }
         } catch {
             print("Error fetching status message: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func connectWithProvider(provider: String) async throws {
+        guard let _ = Auth.auth().currentUser else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            if provider == "google.com" {
+                try await signInWithGoogleHelper(refreshing: false)
+            }
+            else if provider == "github.com" {
+                try await signInWithGithubHelper(refreshing: false)
+            }
+            else if provider == "apple.com" {
+                try await signInWithAppleHelper(refreshing: false)
+            }
+            self.providers.append(provider)
+        } catch {
+            print("Error connecting with \(provider): \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func disconnectWithProvider(provider: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            if let index = self.providers.firstIndex(of: provider) {
+                self.providers.remove(at: index)
+            }
+            
+            if provider == "google.com" {
+                if user.providerData.contains(where: { $0.providerID == provider }) {
+                    GIDSignIn.sharedInstance.signOut()
+                    try await GIDSignIn.sharedInstance.disconnect()
+                }
+            }
+            else if provider == "github.com" {
+                if user.providerData.contains(where: { $0.providerID == provider }) {
+                    try await revokeGitHubAccessToken()
+                }
+            }
+            else if provider == "apple.com" {
+                if user.providerData.contains(where: { $0.providerID == provider }) {
+                    let appleToken = try await refreshAppleAccessToken()
+                    try await revokeAppleAccessToken(token: appleToken)
+                }
+            }
+            _ = try await user.unlink(fromProvider: provider)
+        } catch {
+            print("Error disconnecting \(provider): \(error.localizedDescription)")
+            self.providers.append(provider)
             throw error
         }
     }

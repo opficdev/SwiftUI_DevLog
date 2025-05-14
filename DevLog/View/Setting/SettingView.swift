@@ -84,6 +84,9 @@ struct SettingView: View {
             }
             
             Section {
+                NavigationLink(destination: AccountView().environmentObject(firebaseVM)) {
+                    Text("계정 연동")
+                }
                 Button(role: .destructive, action: {
                     settingVM.signOutAlert = true
                 }) {
