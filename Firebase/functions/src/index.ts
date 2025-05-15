@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 
 // Apple 인증 관련 함수 가져오기
 import {
+  requestAppleCustomToken,
   requestAppleRefreshToken,
   refreshAppleAccessToken,
   revokeAppleAccessToken
@@ -26,6 +27,7 @@ admin.initializeApp();
 
 // Apple 인증 함수들 내보내기
 export { 
+  requestAppleCustomToken,
   requestAppleRefreshToken,
   refreshAppleAccessToken,
   revokeAppleAccessToken
