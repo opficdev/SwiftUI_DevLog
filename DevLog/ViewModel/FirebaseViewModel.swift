@@ -118,11 +118,11 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                 try await GIDSignIn.sharedInstance.disconnect()
             }
             
-            let userRef = db.collection(user.uid).document("info")
-            let doc = try await userRef.getDocument()
+            let infoRef = db.document("users/\(user.uid)/userData/info")
+            let doc = try await infoRef.getDocument()
             
             if doc.exists {
-                try await userRef.updateData(["fcmToken": FieldValue.delete()])
+                try await infoRef.updateData(["fcmToken": FieldValue.delete()])
             }
             
             try await Messaging.messaging().deleteToken()
@@ -259,8 +259,7 @@ extension FirebaseViewModel {
         }
 
         if displayName == nil {
-            let userRef = db.collection(result.user.uid).document("info")
-            let doc = try await userRef.getDocument()
+            let doc = try await db.document("users/\(result.user.uid)/userData/info").getDocument()
             displayName = doc.data()?["appleName"] as? String
         }
 
@@ -468,33 +467,42 @@ extension FirebaseViewModel {
     }
 }
 
+// MARK: etc
 extension FirebaseViewModel {
-    private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil, refreshing: Bool) async throws {
-        let userRef = db.collection(user.uid).document("info")
+    private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil) async throws {
+        let infoRef = db.document("users/\(user.uid)/userData/info")
+        let tokenRef = db.document("users/\(user.uid)/userData/token")
+        let settingsRef = db.document("users/\(user.uid)/userData/settings")
+        
+        // 사용자 기본 정보
         var field: [String: Any] = [
-            "email": user.email ?? "",
-            "name": user.displayName ?? "",
-            "theme": "automatic",
-            "fcmToken": fcmToken,
-            "allowPushAlarm": true,
+            "statusMsg": "",
             "lastLogin": FieldValue.serverTimestamp(),
-            "statusMsg": ""
+            "provider": provider,
         ]
         
-        if refreshing {
-            field["currentProvider"] = provider
-            self.currentProvider = provider
+        // 공급자 이슈로 인한 nil 방지
+        if let email = user.email {
+            field["email"] = email
         }
+        
+        if let displayName = user.displayName {
+            field["name"] = displayName
+        }
+        
+        self.currentProvider = provider
+        
+        try await infoRef.setData(field, merge: true); field.removeAll()
+        
+        field["fcmToken"] = fcmToken
         
         if let token = token, provider == "github.com" {
-            field["githubAvatarUrl"] = user.photoURL?.absoluteString
             field["githubAccessToken"] = token
         }
-        else if provider == "apple.com", let displayName = user.displayName {
-            field["appleName"] = displayName
-        }
         
-        try await userRef.setData(field, merge: true)
+        try await tokenRef.setData(field, merge: true); field.removeAll()
+        
+        try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic","appIcon": "automatic"], merge: true)
     }
     
     func deleteUser() async throws {
