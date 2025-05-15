@@ -469,7 +469,7 @@ extension FirebaseViewModel {
 
 // MARK: etc
 extension FirebaseViewModel {
-    private func upsertUser(user: User, fcmToken: String, provider: String, githubAccessToken token : String? = nil) async throws {
+    private func upsertUser(user: User, fcmToken: String, provider: String, accessToken: String? = nil) async throws {
         let infoRef = db.document("users/\(user.uid)/userData/info")
         let tokenRef = db.document("users/\(user.uid)/userData/token")
         let settingsRef = db.document("users/\(user.uid)/userData/settings")
@@ -496,8 +496,8 @@ extension FirebaseViewModel {
         
         field["fcmToken"] = fcmToken
         
-        if let token = token, provider == "github.com" {
-            field["githubAccessToken"] = token
+        if provider == "github.com", let accessToken = accessToken {
+            field["githubAccessToken"] = accessToken
         }
         
         try await tokenRef.setData(field, merge: true); field.removeAll()
