@@ -181,12 +181,6 @@ export const requestAppleRefreshToken = onCall({
         throw new HttpsError("invalid-argument", "Authorization code and userId are required");
       }
   
-      // Apple 설정 불러오기
-      const teamId = process.env.APPLE_TEAM_ID;
-      const clientId = process.env.APPLE_CLIENT_ID;
-      const keyId = process.env.APPLE_KEY_ID;
-      const privateKey = (process.env.APPLE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
-  
       if (!teamId || !clientId || !keyId || !privateKey) {
         throw new HttpsError("internal", "Missing Apple configuration");
       }
@@ -271,13 +265,6 @@ export const refreshAppleAccessToken = onCall({
     
     console.log("Successfully retrieved refresh token from Firestore");
     
-    // Apple configuration
-    const teamId = process.env.APPLE_TEAM_ID;
-    const clientId = process.env.APPLE_CLIENT_ID;
-    const keyId = process.env.APPLE_KEY_ID;
-    const privateKey = (process.env.APPLE_PRIVATE_KEY || "")
-      .replace(/\\n/g, "\n");
-
     if (!teamId || !clientId || !keyId || !privateKey) {
       throw new HttpsError(
         "internal",
@@ -362,12 +349,6 @@ export const revokeAppleAccessToken = onCall({
     if (!token) {
       throw new HttpsError("invalid-argument", "Token is required");
     }
-
-    // Apple 설정 불러오기
-    const teamId = process.env.APPLE_TEAM_ID;
-    const clientId = process.env.APPLE_CLIENT_ID;
-    const keyId = process.env.APPLE_KEY_ID;
-    const privateKey = (process.env.APPLE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
 
     if (!teamId || !clientId || !keyId || !privateKey) {
       throw new HttpsError("internal", "Missing Apple configuration");
