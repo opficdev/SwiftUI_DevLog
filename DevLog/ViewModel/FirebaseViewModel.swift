@@ -212,14 +212,14 @@ extension FirebaseViewModel {
         }
     }
     
-    
-    private func signInWithAppleHelper(refreshing: Bool = true) async throws {
+    private func signInWithAppleHelper() async throws {
+        // 자체 nonce 생성 및 해시화
         let nonce = UUID().uuidString
         let hashedNonce = SHA256.hash(data: Data(nonce.utf8)).map { String(format: "%02x", $0) }.joined()
         
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
-        request.requestedScopes = [.fullName, .email]
+        request.requestedScopes = [.fullName, .email]   //  사용자 정보 요청
         request.nonce = hashedNonce
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
@@ -231,24 +231,27 @@ extension FirebaseViewModel {
             controller.performRequests()
         }
         
+        // Apple ID 인증 결과 처리
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let appleIDToken = credential.identityToken,
               let authorizationCode = credential.authorizationCode,
               let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
             throw URLError(.badServerResponse)
         }
-        
-        let firebaseCredential = OAuthProvider.credential(
-            providerID: AuthProviderID.apple,
+                
+        // Firebase Function을 통해 customToken 요청
+        let customToken = try await requestAppleCustomToken(
             idToken: idTokenString,
-            rawNonce: nonce
+            authorizationCode: String(data: authorizationCode, encoding: .utf8) ?? ""
         )
         
-        let result = try await Auth.auth().signIn(with: firebaseCredential)
+        // customToken으로 Firebase 로그인
+        let result = try await Auth.auth().signIn(withCustomToken: customToken)
         
         let changeRequest = result.user.createProfileChangeRequest()
         var displayName: String? = nil
 
+        // 최초 사용자 가입 시 사용자 이름 설정
         if let fullName = credential.fullName {
             let formatter = PersonNameComponentsFormatter()
             formatter.style = .long
@@ -258,23 +261,44 @@ extension FirebaseViewModel {
             }
         }
 
+        // 이미 가입된 사용자일 경우 Firestore에서 사용자 이름 가져오기
         if displayName == nil {
             let doc = try await db.document("users/\(result.user.uid)/userData/info").getDocument()
             displayName = doc.data()?["appleName"] as? String
         }
 
-        // nil이 될 확률은 희박하지만, nil일 경우를 대비하여 처리
-        if refreshing, let displayName = displayName {
-            changeRequest.displayName = displayName
-            changeRequest.photoURL = URL(string: "")
-            try await changeRequest.commitChanges()
+        // FirebaseAuth 사용자 프로필 업데이트
+        changeRequest.displayName = displayName ?? ""
+        changeRequest.photoURL = URL(string: "")    //  Apple ID 프로필 사진 URL은 제공되지 않음
+        try await changeRequest.commitChanges()
+        
+        // FirebaseAuth 계정에 Apple ID 연결
+        if !result.user.providerData.contains(where: { $0.providerID == "apple.com" }) {
+            let appleCredential = OAuthProvider.credential(
+                providerID: AuthProviderID.apple,
+                idToken: idTokenString,
+                rawNonce: nonce
+            )
+            try await result.user.link(with: appleCredential)
         }
         
         let fcmToken = try await Messaging.messaging().token()
         
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com", refreshing: refreshing)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
+    }
+
+    // Apple Custom Token 발급
+    private func requestAppleCustomToken(idToken: String, authorizationCode: String) async throws -> String {
+        let requestTokenFunction = functions.httpsCallable("requestAppleCustomToken")
+        let result = try await requestTokenFunction.call([
+            "idToken": idToken,
+            "authorizationCode": authorizationCode
+        ])
         
-        try await requestAppleRefreshToken(authorizationCode: authorizationCode)
+        if let data = result.data as? [String: Any], let customToken = data["customToken"] as? String{
+            return customToken
+        }
+        throw URLError(.badServerResponse)
     }
     
     private func requestAppleRefreshToken(authorizationCode: Data) async throws {
