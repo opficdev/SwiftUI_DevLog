@@ -161,8 +161,6 @@ extension FirebaseViewModel {
         let accessToken = gidSignIn.user.accessToken.tokenString
         let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
         
-        let fcmToken = try await Messaging.messaging().token()
-        
         let result = try await Auth.auth().signIn(with: credential)
         
         if refreshing, let photoURL = gidSignIn.user.profile?.imageURL(withDimension: 200) {
@@ -172,6 +170,8 @@ extension FirebaseViewModel {
             
             try await changeRequest.commitChanges()
         }
+        
+        let fcmToken = try await Messaging.messaging().token()
 
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com", refreshing: refreshing)
     }
