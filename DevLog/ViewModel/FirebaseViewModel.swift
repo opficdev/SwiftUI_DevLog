@@ -173,7 +173,7 @@ extension FirebaseViewModel {
         
         let fcmToken = try await Messaging.messaging().token()
 
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com", refreshing: refreshing)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
     }
     
     func topViewController(controller: UIViewController? = nil) -> UIViewController? {
@@ -398,8 +398,8 @@ extension FirebaseViewModel {
         }
     }
 
-    private func signInWithGithubHelper(refreshing: Bool = true) async throws {
-        // 1. GitHub OAuth 로그인 (Safari 등으로 사용자 인증 후, authorizationCode 수신)
+    private func signInWithGithubHelper() async throws {
+        // 1. GitHub OAuth 로그인 요청
         let authorizationCode = try await requestGithubAuthorizationCode()
         
         // 2. Firebase Functions를 통해 customToken 발급 요청
@@ -410,8 +410,7 @@ extension FirebaseViewModel {
         
         let githubUser = try await requestGitHubUserProfile(accessToken: accessToken)
         
-        // 5. Firebase Auth 사용자 프로필 업데이트
-        if refreshing, let photoURL = githubUser.avatarUrl, let url = URL(string: photoURL) {
+        if let photoURL = githubUser.avatarUrl, let url = URL(string: photoURL) {
             let changeRequest = result.user.createProfileChangeRequest()
             changeRequest.photoURL = url
             changeRequest.displayName = githubUser.name ?? githubUser.login
@@ -426,7 +425,7 @@ extension FirebaseViewModel {
         // 5. Firebase Messaging을 통해 FCM 토큰 발급
         let fcmToken = try await Messaging.messaging().token()
         
-        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", githubAccessToken: accessToken, refreshing: refreshing)
+        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
     }
 
     private func requestGithubAuthorizationCode() async throws -> String {
