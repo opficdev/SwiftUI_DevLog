@@ -17,6 +17,16 @@ struct MainView: View {
                     Image(systemName: "house.fill")
                     Text("홈")
                 }
+            NotificationView()
+                .tabItem {
+                    Image(systemName: "bell.fill")
+                    Text("알림")
+                }
+            SearchView()
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("검색")
+                }
             ProfileView()
                 .tabItem {
                     Image(systemName: "person.crop.circle.fill")
