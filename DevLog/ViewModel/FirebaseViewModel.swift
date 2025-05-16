@@ -59,6 +59,8 @@ final class FirebaseViewModel: NSObject, ObservableObject {
         createAuthStatePublisher()
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
+                // 새 로그인이 아닌 기존 로그인 후 세션 확인하는 조건문을 추가해야할듯
+                
                 self?.signIn = user != nil
                 Task {
                     if self?.signIn == true {
@@ -325,7 +327,7 @@ extension FirebaseViewModel {
         let _ = try await requestFuction.call(params)
     }
     
-    // 애플 액세스 토큰 재발급 메서드
+    // Apple AceessToken 재발급 메서드
     private func refreshAppleAccessToken() async throws -> String {
         guard let _ = userId else {
             throw URLError(.userAuthenticationRequired)
@@ -342,7 +344,7 @@ extension FirebaseViewModel {
         return accessToken
     }
     
-    // 애플 액세스 토큰 취소 메서드
+    // Apple AccessToken 취소 메서드
     private func revokeAppleAccessToken(token: String) async throws {
         guard let _ = userId else {
             throw URLError(.userAuthenticationRequired)
@@ -412,6 +414,7 @@ extension FirebaseViewModel {
         // 3. Firebase 로그인
         let result = try await Auth.auth().signIn(withCustomToken: customToken)
         
+        // 4. Firebase Auth 사용자 프로필 업데이트
         let githubUser = try await requestGitHubUserProfile(accessToken: accessToken)
         
         if let photoURL = githubUser.avatarUrl, let url = URL(string: photoURL) {
@@ -421,12 +424,13 @@ extension FirebaseViewModel {
             try await changeRequest.commitChanges()
         }
         
+        // 5. GitHub 계정과 Firebase Auth 계정 연결
         if !result.user.providerData.contains(where: { $0.providerID == "github.com" }) {
             let credential = OAuthProvider.credential(providerID: AuthProviderID.gitHub, accessToken: accessToken)
             try await result.user.link(with: credential)
         }
         
-        // 5. Firebase Messaging을 통해 FCM 토큰 발급
+        // 6. Firebase Messaging을 통해 FCM 토큰 발급
         let fcmToken = try await Messaging.messaging().token()
         
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
@@ -440,9 +444,9 @@ extension FirebaseViewModel {
             throw URLError(.badURL)
         }
 
-        // Generate a random state for CSRF protection
+        // state: CSRF(사이트 간 요청 위조) 공격 방지용 랜덤 문자열
         let state = UUID().uuidString
-        let scope = "read:user user:email"
+        let scope = "read:user user:email"  //  공개된 정보와 이메일 요청
         
         // Use URLComponents for proper encoding
         var components = URLComponents(string: "https://github.com/login/oauth/authorize")!
@@ -471,7 +475,7 @@ extension FirebaseViewModel {
                     return
                 }
 
-                // Validate the returned state parameter
+                // 반환된 state 값 확인 / 받아온 값이 다르면 CSRF 공격 가능성 있음
                 guard let returnedState = queryItems.first(where: { $0.name == "state" })?.value,
                     returnedState == state else {
                     continuation.resume(throwing: URLError(.userCancelledAuthentication))
@@ -482,7 +486,7 @@ extension FirebaseViewModel {
             }
 
             session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = false
+            session.prefersEphemeralWebBrowserSession = false   //  웹에서 깃헙 로그인 후 세션 유지
             
             if !session.start() {
                 continuation.resume(throwing: URLError(.userCancelledAuthentication))
@@ -535,6 +539,7 @@ extension FirebaseViewModel {
 
 // MARK: etc
 extension FirebaseViewModel {
+    // 유저를 Firestore에 저장 및 업데이트
     private func upsertUser(user: User, fcmToken: String, provider: String, accessToken: String? = nil) async throws {
         let infoRef = db.document("users/\(user.uid)/userData/info")
         let tokensRef = db.document("users/\(user.uid)/userData/tokens")
@@ -562,6 +567,7 @@ extension FirebaseViewModel {
         
         field["fcmToken"] = fcmToken
         
+        // 깃헙, 애플 로그인 시 추가 정보 저장
         if provider == "github.com", let accessToken = accessToken {
             field["githubAccessToken"] = accessToken
         }
