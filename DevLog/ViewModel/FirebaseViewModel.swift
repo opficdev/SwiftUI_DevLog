@@ -591,6 +591,7 @@ extension FirebaseViewModel {
             _ = try await cleanUpFunction.call(["userId": userId])
             try await signOut()
             try await user.delete()
+            self.signIn = false
         } catch {
             print("Error delete User: \(error.localizedDescription)")
             throw error
