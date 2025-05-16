@@ -663,6 +663,11 @@ extension FirebaseViewModel {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     let appleToken = try await refreshAppleAccessToken()
                     try await revokeAppleAccessToken(token: appleToken)
+                    let tokensRef = db.document("users/\(user.uid)/userData/tokens")
+                    let doc = try await tokensRef.getDocument()
+                    if doc.exists {
+                        try await tokensRef.updateData(["appleRefreshToken": FieldValue.delete()])
+                    }
                 }
             }
             _ = try await user.unlink(fromProvider: provider)
