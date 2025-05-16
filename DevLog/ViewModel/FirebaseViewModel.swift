@@ -364,7 +364,7 @@ extension FirebaseViewModel {
         let authorizationCode = try await requestGithubAuthorizationCode()
         
         // 2. Firebase Functions를 통해 customToken 발급 요청
-        let (accessToken, customToken) = try await requestGithubCustomTokens(authorizationCode: authorizationCode)
+        let (accessToken, customToken) = try await requestGithubTokens(authorizationCode: authorizationCode)
         
         // 3. Firebase 로그인
         let result = try await Auth.auth().signIn(withCustomToken: customToken)
@@ -449,8 +449,8 @@ extension FirebaseViewModel {
     }
 
     // Firebase Function 호출: Custom Token 발급
-    private func requestGithubCustomTokens(authorizationCode: String) async throws -> (String, String) {
-        let requestTokenFunction = functions.httpsCallable("requestGithubCustomTokens")
+    private func requestGithubTokens(authorizationCode: String) async throws -> (String, String) {
+        let requestTokenFunction = functions.httpsCallable("requestGithubTokens")
         let result = try await requestTokenFunction.call(["code": authorizationCode])
         
         if let data = result.data as? [String: Any],

@@ -11,7 +11,7 @@ import {
 
 // GitHub 인증 관련 함수 가져오기
 import {
-  requestGithubCustomTokens,
+  requestGithubTokens,
   revokeGithubAccessToken
 } from "./auth/github";
 
@@ -39,7 +39,7 @@ export {
 
 // GitHub 인증 함수들 내보내기
 export {
-  requestGithubCustomTokens,
+  requestGithubTokens,
   revokeGithubAccessToken
 };
 
