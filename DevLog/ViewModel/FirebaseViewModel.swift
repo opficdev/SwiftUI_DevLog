@@ -534,9 +534,6 @@ extension FirebaseViewModel {
             throw URLError(.userAuthenticationRequired)
         }
         
-        self.signIn = false
-        
-        // 유저가 작성한 데이터들을 삭제하는 cloud functions 구현 예정
         do {
             if user.providerData.contains(where: { $0.providerID == "google.com" }) {
                 GIDSignIn.sharedInstance.signOut()
@@ -550,7 +547,9 @@ extension FirebaseViewModel {
                 try await revokeAppleAccessToken(token: appleToken)
             }
         
-            try await db.collection(userId).document("info").delete()
+            let cleanUpFunction = functions.httpsCallable("userCleanup")
+            
+            _ = try await cleanUpFunction.call(["userId": userId])
             try await signOut()
             try await user.delete()
         } catch {

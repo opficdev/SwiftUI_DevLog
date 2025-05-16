@@ -19,6 +19,10 @@ import {
 
 } from "./auth/google";
 
+import {
+  userCleanup
+} from "./user/cleanup";
+
 // .env 파일 로드
 dotenv.config();
 
@@ -40,4 +44,7 @@ export {
 };
 
 // Google 인증 함수들 (나중에 구현되면 추가)
-// export { ... } from "./auth/google";
+
+export {
+  userCleanup
+};
