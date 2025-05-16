@@ -213,31 +213,12 @@ extension FirebaseViewModel {
     }
     
     private func signInWithAppleHelper() async throws {
-        // 자체 nonce 생성 및 해시화
-        let nonce = UUID().uuidString
-        let hashedNonce = SHA256.hash(data: Data(nonce.utf8)).map { String(format: "%02x", $0) }.joined()
+        let response = try await authenticateWithAppleAsync()
         
-        let provider = ASAuthorizationAppleIDProvider()
-        let request = provider.createRequest()
-        request.requestedScopes = [.fullName, .email]   //  사용자 정보 요청
-        request.nonce = hashedNonce
-        
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        
-        let authorization = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<ASAuthorization, Error>) in
-            self.appleSignInDelegate = AppleSignInDelegate(continuation: continuation)
-            controller.delegate = self.appleSignInDelegate
-            controller.presentationContextProvider = self.appleSignInDelegate
-            controller.performRequests()
-        }
-        
-        // Apple ID 인증 결과 처리
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-              let appleIDToken = credential.identityToken,
-              let authorizationCode = credential.authorizationCode,
-              let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-            throw URLError(.badServerResponse)
-        }
+        let nonce = response.nonce
+        let credential = response.credential
+        let authorizationCode = response.authorizationCode
+        let idTokenString = response.idTokenString
                 
         // Firebase Function을 통해 customToken 요청
         let customToken = try await requestAppleCustomToken(
@@ -343,6 +324,41 @@ extension FirebaseViewModel {
         let revokeFunction = functions.httpsCallable("revokeAppleAccessToken")
         
         let _ = try await revokeFunction.call(["token": token])
+    }
+    
+    private func authenticateWithAppleAsync() async throws -> AppleAuthResponse {
+        // 자체 nonce 생성 및 해시화
+        let nonce = UUID().uuidString
+        let hashedNonce = SHA256.hash(data: Data(nonce.utf8)).map { String(format: "%02x", $0) }.joined()
+        
+        let provider = ASAuthorizationAppleIDProvider()
+        let request = provider.createRequest()
+        request.requestedScopes = [.fullName, .email]   //  사용자 정보 요청
+        request.nonce = hashedNonce //  Apple API는 SHA256 해시값을 요구함
+        
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        
+        let authorization = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<ASAuthorization, Error>) in
+            self.appleSignInDelegate = AppleSignInDelegate(continuation: continuation)
+            controller.delegate = self.appleSignInDelegate
+            controller.presentationContextProvider = self.appleSignInDelegate
+            controller.performRequests()
+        }
+        
+        // Apple ID 인증 결과 처리
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let appleIdToken = credential.identityToken,
+              let authorizationCode = credential.authorizationCode,
+              let idTokenString = String(data: appleIdToken, encoding: .utf8) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        return AppleAuthResponse(
+                nonce: nonce,
+                credential: credential,
+                authorizationCode: authorizationCode,
+                idTokenString: idTokenString
+        )
     }
 }
 
