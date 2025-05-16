@@ -54,38 +54,7 @@ export const requestAppleCustomToken = onCall({
       throw new HttpsError('invalid-argument', 'Failed to decode Apple ID token');
     }
 
-    // 2. Generate Apple client secret and exchange authorization code for tokens
-    const clientSecret = jwt.sign({}, privateKey, {
-      algorithm: "ES256",
-      expiresIn: "5m",
-      audience: "https://appleid.apple.com",
-      issuer: teamId,
-      subject: clientId,
-      keyid: keyId,
-    });
-
-    const tokenResponse = await axios.post<{
-      access_token: string,
-      refresh_token: string,
-      id_token: string,
-      token_type: string,
-      expires_in: number
-    }>(
-      "https://appleid.apple.com/auth/token",
-      new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code: authorizationCode,
-        grant_type: "authorization_code",
-      }).toString(),
-      {
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      }
-    );
-
-    const refreshToken = tokenResponse.data.refresh_token;
-
-    // 3. Get user information from the decoded token
+    // 2. Get user information from the decoded token
     const userId = decodedToken.sub; // Apple's unique user ID
     const email = decodedToken.email;
 
@@ -184,48 +153,19 @@ export const requestAppleRefreshToken = onCall({
       if (!teamId || !clientId || !keyId || !privateKey) {
         throw new HttpsError("internal", "Missing Apple configuration");
       }
-  
-      // JWT 생성
-      const clientSecret = jwt.sign({}, privateKey, {
-        algorithm: "ES256",
-        expiresIn: "5m",
-        audience: "https://appleid.apple.com",
-        issuer: teamId,
-        subject: clientId,
-        keyid: keyId,
-      });
-  
-      // Apple 서버에 토큰 요청 (authorization_code 사용)
-      const response = await axios.post<{
-        access_token: string,
-        refresh_token: string,
-        id_token: string,
-        token_type: string,
-        expires_in: number
-      }>(
-        "https://appleid.apple.com/auth/token",
-        new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          code: authorizationCode,
-          grant_type: "authorization_code",
-        }).toString(),
-        {
-          headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        }
-      );
-  
-      // 리프레시 토큰을 Firestore에 저장 - 클라이언트 구조에 맞게 수정
-      if (response.data && response.data.refresh_token) {
-        // 클라이언트 구조에 맞게 collection(userId).document("info")로 변경
-        await admin.firestore().collection(userId).doc("info").set({
-          appleRefreshToken: response.data.refresh_token
-        }, { merge: true }); // merge: true로 기존 필드 유지
-        
-        return { success: true };
-      } else {
-        throw new HttpsError("internal", "Failed to request refresh token from Apple");
-      }
+
+      const refreshToken = await requestAppleRefreshTokenHelper(authorizationCode);
+      console.log("appleRefreshToken:", refreshToken);
+      // Apple 서버에서 받은 응답을 확인
+
+      await admin.firestore().collection("users").doc(uid).collection("userData").doc("tokens").set({
+        appleRefreshToken: refreshToken
+      }, { merge: true });
+
+      return {
+        success: true,
+        refreshToken: refreshToken
+      };
     } catch (error) {
       console.error("Error request Apple refresh token:", error);
       throw new HttpsError("internal", "Failed to process Apple sign in");
@@ -408,3 +348,47 @@ export const revokeAppleAccessToken = onCall({
     }
   }
 });
+
+
+export async function requestAppleRefreshTokenHelper(authorizationCode: string): Promise<string> {
+  // Apple 설정 불러오기
+  if (!teamId || !clientId || !keyId || !privateKey) {
+    throw new HttpsError('internal', 'Missing Apple configuration');
+  }
+
+  // JWT 생성
+  const clientSecret = jwt.sign({}, privateKey, {
+    algorithm: "ES256",
+    expiresIn: "5m",
+    audience: "https://appleid.apple.com",
+    issuer: teamId,
+    subject: clientId,
+    keyid: keyId,
+  });
+
+  // Apple 서버에 토큰 요청 (authorization_code 사용)
+  const tokenResponse = await axios.post<{
+    access_token: string,
+    refresh_token: string,
+    id_token: string,
+    token_type: string,
+    expires_in: number
+  }>(
+    "https://appleid.apple.com/auth/token",
+    new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: authorizationCode,
+      grant_type: "authorization_code",
+    }).toString(),
+    {
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    }
+  );
+
+  const refreshToken = tokenResponse.data.refresh_token;
+  if (!refreshToken) {
+    throw new HttpsError('internal', 'Apple에서 refresh_token을 받아오지 못했습니다.');
+  }
+  return refreshToken;
+}
