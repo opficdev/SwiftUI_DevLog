@@ -128,7 +128,7 @@ export const revokeGithubAccessToken = onCall(
         throw new HttpsError("internal", "GitHub 클라이언트 설정이 누락되었습니다.");
       }
 
-      const tokenDoc = await admin.firestore().collection(uid).doc("info").get();
+      const tokenDoc = await admin.firestore().collection("users").doc(uid).collection("userData").doc("tokens").get();
       const accessToken = tokenDoc.exists ? tokenDoc.data()?.githubAccessToken : null;
 
       if (!accessToken) {

@@ -62,7 +62,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                 self?.signIn = user != nil
                 Task {
                     if self?.signIn == true {
-                        let userRef = self?.db.collection(user!.uid).document("info")
+                        let userRef = self?.db.document("users/\(user!.uid)/userData/info")
                         let doc = try await userRef?.getDocument()
                         if let data = doc?.data() {
                             if let provider = data["currentProvider"] as? String {
@@ -511,7 +511,7 @@ extension FirebaseViewModel {
 extension FirebaseViewModel {
     private func upsertUser(user: User, fcmToken: String, provider: String, accessToken: String? = nil) async throws {
         let infoRef = db.document("users/\(user.uid)/userData/info")
-        let tokenRef = db.document("users/\(user.uid)/userData/token")
+        let tokensRef = db.document("users/\(user.uid)/userData/tokens")
         let settingsRef = db.document("users/\(user.uid)/userData/settings")
         
         // 사용자 기본 정보
@@ -540,7 +540,7 @@ extension FirebaseViewModel {
             field["githubAccessToken"] = accessToken
         }
         
-        try await tokenRef.setData(field, merge: true); field.removeAll()
+        try await tokensRef.setData(field, merge: true); field.removeAll()
         
         try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic","appIcon": "automatic"], merge: true)
     }
@@ -580,10 +580,10 @@ extension FirebaseViewModel {
                 throw URLError(.userAuthenticationRequired)
             }
             
-            let userRef = db.collection(userId).document("info")
+            let infoRef = db.document("users/\(userId)/userData/info")
             
             let field = ["statusMsg": statusMsg]
-            try await userRef.setData(field, merge: true)
+            try await infoRef.setData(field, merge: true)
         } catch {
             print("Error upsert status message: \(error.localizedDescription)")
             throw error

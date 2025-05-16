@@ -95,14 +95,14 @@ export const requestAppleCustomToken = onCall({
         }
       }
 
-      // 5. Save refresh token to Firestore
-      if (refreshToken) {
-        await admin.firestore().collection(uid).doc("info").set({
-          appleRefreshToken: refreshToken
-        }, { merge: true });
-      }
+      // 4. Save refresh token to Firestore
+      const refreshToken = await requestAppleRefreshTokenHelper(authorizationCode);
 
-      // 6. Create Firebase custom token
+      await admin.firestore().collection("users").doc(uid).collection("userData").doc("tokens").set({
+        appleRefreshToken: refreshToken
+      }, { merge: true });
+
+      // 5. Create Firebase custom token
       const customToken = await admin.auth().createCustomToken(uid);
       
       return {
@@ -187,8 +187,8 @@ export const refreshAppleAccessToken = onCall({
     console.log("Auth user ID:", userId);
     
     // 클라이언트 경로에서만 시도
-    console.log(`Fetching from collection(${userId})/doc(info)`);
-    const userDoc = await admin.firestore().collection(userId).doc("info").get();
+    console.log(`Fetching from collection(${uid})/doc(info)`);
+    const userDoc = await admin.firestore().collection("users").doc(uid).collection("userData").doc("tokens").get();
     
     if (!userDoc.exists) {
       console.error(`User document not found for ID: ${userId}`);
