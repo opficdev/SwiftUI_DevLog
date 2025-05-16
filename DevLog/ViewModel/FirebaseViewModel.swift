@@ -619,8 +619,8 @@ extension FirebaseViewModel {
                 throw URLError(.userAuthenticationRequired)
             }
             
-            let userRef = db.collection(userId).document("info")
-            let doc = try await userRef.getDocument()
+            let infoRef = db.document("users/\(userId)/userData/info")
+            let doc = try await infoRef.getDocument()
             
             if let statusMsg = doc.data()?["statusMsg"] as? String {
                 self.statusMsg = statusMsg
