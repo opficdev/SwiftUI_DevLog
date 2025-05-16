@@ -292,7 +292,7 @@ extension FirebaseViewModel {
         
         let params: [String: Any] = [
             "authorizationCode": authorizationCode,
-            "userId": userId
+            "uid": userId
         ]
         
         let _ = try await requestFuction.call(params)

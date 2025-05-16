@@ -42,7 +42,7 @@ export const requestAppleCustomToken = onCall({
       throw new HttpsError('internal', 'Missing Apple configuration');
     }
 
-    // 1. Verify and decode the Apple ID token
+    // // 1. Verify and decode the Apple ID token
     let decodedToken: AppleTokenPayload;
     try {
       decodedToken = jwt.decode(idToken) as AppleTokenPayload;
@@ -62,9 +62,9 @@ export const requestAppleCustomToken = onCall({
       throw new HttpsError('internal', 'Could not get user ID from Apple token');
     }
     
-    // 4. Find or create Firebase user
-
+    // 3. Find or create Firebase user
     let uid;
+
     try {
       // 애플에서 받아오는 토큰에서 이메일이 존재하는 경우
       if (email) {
@@ -147,7 +147,7 @@ export const requestAppleRefreshToken = onCall({
       const { authorizationCode, userId } = request.data;
       
       if (!authorizationCode || !userId) {
-        throw new HttpsError("invalid-argument", "Authorization code and userId are required");
+        throw new HttpsError("invalid-argument", "Authorization code and uid are required");
       }
   
       if (!teamId || !clientId || !keyId || !privateKey) {
@@ -158,7 +158,7 @@ export const requestAppleRefreshToken = onCall({
       console.log("appleRefreshToken:", refreshToken);
       // Apple 서버에서 받은 응답을 확인
 
-      await admin.firestore().collection("users").doc(uid).collection("userData").doc("tokens").set({
+      await admin.firestore().collection("users").doc(userId).collection("userData").doc("tokens").set({
         appleRefreshToken: refreshToken
       }, { merge: true });
 
@@ -183,16 +183,15 @@ export const refreshAppleAccessToken = onCall({
   }
 
   try {
-    const userId = request.auth.uid;
-    console.log("Auth user ID:", userId);
+    const uid = request.auth.uid;
     
     // 클라이언트 경로에서만 시도
     console.log(`Fetching from collection(${uid})/doc(info)`);
     const userDoc = await admin.firestore().collection("users").doc(uid).collection("userData").doc("tokens").get();
     
     if (!userDoc.exists) {
-      console.error(`User document not found for ID: ${userId}`);
-      throw new HttpsError("not-found", `User document not found at collection('${userId}')/doc('info')`);
+      console.error(`User document not found for ID: ${uid}`);
+      throw new HttpsError("not-found", `User document not found at collection('/users/${uid}')/userData/doc('info')`);
     }
     
     const userData = userDoc.data();
@@ -247,11 +246,8 @@ export const refreshAppleAccessToken = onCall({
     }
   } catch (error: unknown) {
     console.error("Error refreshing Apple token:", error);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((axios as any).isAxiosError(error)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       console.error("Axios error details:", (error as any).response?.data);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       throw new HttpsError(
         "internal",
         `Token refresh failed: ${
