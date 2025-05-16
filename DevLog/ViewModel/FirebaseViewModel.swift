@@ -267,6 +267,29 @@ extension FirebaseViewModel {
         
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
     }
+    
+    private func linkWithApple() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        let response = try await authenticateWithAppleAsync()
+        
+        let nonce = response.nonce
+        let authorizationCode = response.authorizationCode
+        let idTokenString = response.idTokenString
+        
+        // Firebase Function을 통해 appleRefreshToken 생성
+        try await requestAppleRefreshToken(authorizationCode: authorizationCode)
+        
+        let appleCredential = OAuthProvider.credential(
+            providerID: AuthProviderID.apple,
+            idToken: idTokenString,
+            rawNonce: nonce
+        )
+        
+        try await user.link(with: appleCredential)
+    }
 
     // Apple Custom Token 발급
     private func requestAppleCustomToken(idToken: String, authorizationCode: String) async throws -> String {
@@ -625,7 +648,7 @@ extension FirebaseViewModel {
                 try await signInWithGithubHelper(refreshing: false)
             }
             else if provider == "apple.com" {
-                try await signInWithAppleHelper(refreshing: false)
+                try await linkWithApple()
             }
             self.providers.append(provider)
         } catch {
