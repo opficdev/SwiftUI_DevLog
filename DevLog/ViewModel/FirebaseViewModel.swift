@@ -223,7 +223,7 @@ extension FirebaseViewModel {
         // Firebase Function을 통해 customToken 요청
         let customToken = try await requestAppleCustomToken(
             idToken: idTokenString,
-            authorizationCode: String(data: authorizationCode, encoding: .utf8) ?? ""
+            authorizationCode: authorizationCode
         )
         
         // customToken으로 Firebase 로그인
@@ -291,8 +291,12 @@ extension FirebaseViewModel {
         try await user.link(with: appleCredential)
     }
 
-    // Apple Custom Token 발급
-    private func requestAppleCustomToken(idToken: String, authorizationCode: String) async throws -> String {
+    // Apple CustomToken 발급
+    private func requestAppleCustomToken(idToken: String, authorizationCode: Data) async throws -> String {
+        guard let authorizationCode = String(data: authorizationCode, encoding: .utf8) else {
+            throw URLError(.badServerResponse)
+        }
+        
         let requestTokenFunction = functions.httpsCallable("requestAppleCustomToken")
         let result = try await requestTokenFunction.call([
             "idToken": idToken,
