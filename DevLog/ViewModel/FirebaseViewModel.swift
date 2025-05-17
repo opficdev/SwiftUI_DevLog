@@ -60,20 +60,20 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
                 // 새 로그인이 아닌 기존 로그인 후 세션 확인하는 조건문을 추가해야할듯
-                
-                self?.signIn = user != nil
+                guard let self = self else { return }
+                self.signIn = user != nil
                 Task {
-                    if self?.signIn == true {
-                        let userRef = self?.db.document("users/\(user!.uid)/userData/info")
-                        let doc = try await userRef?.getDocument()
-                        if let data = doc?.data() {
+                    if self.signIn == true {
+                        let userRef = self.db.document("users/\(user!.uid)/userData/info")
+                        let doc = try await userRef.getDocument()
+                        if let data = doc.data() {
                             if let provider = data["currentProvider"] as? String {
-                                self?.currentProvider = provider
+                                self.currentProvider = provider
                             }
                             if let statusMsg = data["statusMsg"] as? String {
-                                self?.statusMsg = statusMsg
+                                self.statusMsg = statusMsg
                             }
-                            self?.providers = user!.providerData.compactMap({ $0.providerID })
+                            self.providers = user!.providerData.compactMap({ $0.providerID })
                         }
                     }
                 }
