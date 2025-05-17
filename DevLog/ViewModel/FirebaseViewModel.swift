@@ -61,9 +61,8 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             .sink { [weak self] user in
                 // 새 로그인이 아닌 기존 로그인 후 세션 확인하는 조건문을 추가해야할듯
                 guard let self = self else { return }
-                self.signIn = user != nil
                 Task {
-                    if self.signIn == true {
+                    if user != nil {
                         let userRef = self.db.document("users/\(user!.uid)/userData/info")
                         let doc = try await userRef.getDocument()
                         if let data = doc.data() {
@@ -76,8 +75,9 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                             self.providers = user!.providerData.compactMap({ $0.providerID })
                         }
                     }
+                    self.isLoading = false
+                    self.signIn = user != nil
                 }
-                self.isLoading = false
             }
             .store(in: &cancellables)
         
