@@ -549,7 +549,7 @@ extension FirebaseViewModel {
         var field: [String: Any] = [
             "statusMsg": "",
             "lastLogin": FieldValue.serverTimestamp(),
-            "provider": provider,
+            "currentProvider": provider,
         ]
         
         // 공급자 이슈로 인한 nil 방지
