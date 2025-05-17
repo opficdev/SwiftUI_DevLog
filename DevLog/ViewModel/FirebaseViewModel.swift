@@ -50,7 +50,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     @Published var signIn: Bool? = nil
     @Published var statusMsg = ""
     @Published var providers: [String] = []
-    @Published var isLoading = false    // 네트워크 작업 중인지 여부
+    @Published var isLoading = true    // 네트워크 작업 중인지 여부
     
     override init() {
         super.init()
@@ -77,6 +77,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                         }
                     }
                 }
+                self.isLoading = false
             }
             .store(in: &cancellables)
         
@@ -109,6 +110,10 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     
     func signOut() async throws {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             guard let user = Auth.auth().currentUser else {
                 throw URLError(.userAuthenticationRequired)
             }
@@ -141,6 +146,10 @@ final class FirebaseViewModel: NSObject, ObservableObject {
 extension FirebaseViewModel {
     func signInWithGoogle() async throws {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             try await signInWithGoogleHelper()
             self.signIn = true
         } catch {
@@ -206,6 +215,10 @@ extension FirebaseViewModel {
 extension FirebaseViewModel {
     func signInWithApple() async throws {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             try await signInWithAppleHelper()
             self.signIn = true
         } catch {
@@ -395,6 +408,10 @@ extension FirebaseViewModel {
 extension FirebaseViewModel {
     func signInWithGithub() async throws {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             try await signInWithGithubHelper()
             self.signIn = true
         }
@@ -583,6 +600,10 @@ extension FirebaseViewModel {
         }
         
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             if user.providerData.contains(where: { $0.providerID == "google.com" }) {
                 GIDSignIn.sharedInstance.signOut()
                 try await GIDSignIn.sharedInstance.disconnect()
@@ -609,6 +630,10 @@ extension FirebaseViewModel {
     
     func upsertStatusMsg() async throws {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             guard let userId = userId else {
                 throw URLError(.userAuthenticationRequired)
             }
@@ -625,6 +650,10 @@ extension FirebaseViewModel {
     
     func fetchStatusMsg() async throws {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
             guard let userId = userId else {
                 throw URLError(.userAuthenticationRequired)
             }

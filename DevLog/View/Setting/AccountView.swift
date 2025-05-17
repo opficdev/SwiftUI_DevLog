@@ -102,12 +102,7 @@ struct AccountView: View {
                 isShowingAlert = false
             }
         } message: {
-            Text("계정 삭제에 실패했습니다.")
-        }
-        .overlay {
-            if firebaseVM.isLoading {
-                ProgressView()
-            }
+            Text(alertMsg)
         }
     }
 }

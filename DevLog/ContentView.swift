@@ -31,6 +31,9 @@ struct ContentView: View {
                             }
                         }
                 }
+                if firebaseVM.isLoading {
+                    LoadingView()
+                }
             }
             else {
                 Color.clear.onAppear {
