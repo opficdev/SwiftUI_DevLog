@@ -19,11 +19,11 @@ enum SystemTheme: String, Identifiable {
     var localizedName: String {
         switch self {
         case .automatic:
-            return NSLocalizedString("자동", comment: "automatic")
+            return NSLocalizedString("system_theme_automatic", comment: "System theme: automatic")
         case .light:
-            return NSLocalizedString("라이트 모드", comment: "light")
+            return NSLocalizedString("system_theme_light", comment: "System theme: light")
         case .dark:
-            return NSLocalizedString("다크 모드", comment: "dark")
+            return NSLocalizedString("system_theme_dark", comment: "System theme: dark")
         }
     }
     
