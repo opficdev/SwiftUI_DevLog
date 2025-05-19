@@ -1,6 +1,94 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
+    "lime_green" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라임 그린"
+          }
+        }
+      }
+    },
+    "night_sky" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "밤하늘"
+          }
+        }
+      }
+    },
+    "orange" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오렌지"
+          }
+        }
+      }
+    },
+    "pink" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "핑크"
+          }
+        }
+      }
+    },
+    "primary" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기본"
+          }
+        }
+      }
+    },
+    "rainbow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "무지개"
+          }
+        }
+      }
+    },
+    "sky" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하늘"
+          }
+        }
+      }
+    },
+    "sun" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "태양"
+          }
+        }
+      }
+    },
     "system_theme_automatic" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -37,7 +37,7 @@ struct SettingView: View {
                             .foregroundStyle(Color.gray)
                     }
                     .onAppear {
-                        
+                        settingVM.appIcon = appIcon.localizedName
                     }
                 }
                 NavigationLink(destination: AlertView()) {

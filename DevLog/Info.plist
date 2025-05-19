@@ -24,6 +24,68 @@
 	<string>$(GITHUB_CLIENT_ID)</string>
 	<key>APP_REDIRECT_URL</key>
 	<string>$(APP_REDIRECT_URL)</string>
+    <key>CFBundleIcons</key>
+    <dict>
+      <key>CFBundlePrimaryIcon</key>
+      <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+          <string>Primary</string>
+        </array>
+      </dict>
+      <key>CFBundleAlternateIcons</key>
+      <dict>
+        <key>LimeGreen</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>LimeGreen</string>
+          </array>
+        </dict>
+        <key>NightSky</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>NightSky</string>
+          </array>
+        </dict>
+        <key>Orange</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>Orange</string>
+          </array>
+        </dict>
+        <key>Pink</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>Pink</string>
+          </array>
+        </dict>
+        <key>Rainbow</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>Rainbow</string>
+          </array>
+        </dict>
+        <key>Sky</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>Sky</string>
+          </array>
+        </dict>
+        <key>Sun</key>
+        <dict>
+          <key>CFBundleIconFiles</key>
+          <array>
+            <string>Sun</string>
+          </array>
+        </dict>
+      </dict>
+    </dict>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
