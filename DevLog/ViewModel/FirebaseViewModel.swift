@@ -580,6 +580,10 @@ extension FirebaseViewModel {
         
         self.currentProvider = provider
         
+        if provider == "apple.com" {
+            field["appleName"] = user.displayName
+        }
+        
         try await infoRef.setData(field, merge: true); field.removeAll()
         
         field["fcmToken"] = fcmToken
