@@ -114,6 +114,8 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
+                    // AppStorage 전체를 삭제하는 코드
+                    UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
                     try await firebaseVM.signOut()
                 }
             }) {
@@ -130,6 +132,8 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
+                    // AppStorage 전체를 삭제하는 코드
+                    UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
                     try await firebaseVM.deleteUser()
                 }
             }) {
