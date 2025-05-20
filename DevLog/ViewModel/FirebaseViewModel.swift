@@ -542,6 +542,20 @@ extension FirebaseViewModel {
         let decoder = JSONDecoder()
         return try decoder.decode(GitHubUser.self, from: data)
     }
+    
+    private func linkWithGithub() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        let tokensRef = db.document("users/\(user.uid)/userData/tokens")
+        let authorizationCode = try await requestGithubAuthorizationCode()
+        let (accessToken, _) = try await requestGithubTokens(authorizationCode: authorizationCode)
+        
+        try await tokensRef.setData(["githubAccessToken": accessToken], merge: true)
+        
+        let credential = OAuthProvider.credential(providerID: AuthProviderID.gitHub, accessToken: accessToken)
+        try await user.link(with: credential)
+    }
 }
 
 // MARK: etc
@@ -670,20 +684,17 @@ extension FirebaseViewModel {
     }
     
     func linkWithProviders(provider: String) async throws {
-        guard let user = Auth.auth().currentUser else {
-            throw URLError(.userAuthenticationRequired)
-        }
-        
         do {
             self.isLoading = true
             defer {
                 self.isLoading = false
             }
+        
             if provider == "google.com" {
                 try await signInWithGoogleHelper(refreshing: false)
             }
             else if provider == "github.com" {
-                try await signInWithGithubHelper(refreshing: false)
+                try await linkWithGithub()
             }
             else if provider == "apple.com" {
                 try await linkWithApple()
