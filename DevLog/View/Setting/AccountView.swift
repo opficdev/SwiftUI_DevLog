@@ -13,10 +13,12 @@ struct AccountView: View {
     @State private var isShowingAlert = false
     @State private var connectedProviders: [String] = []
     @State private var disconnectedProviders: [String] = []
+    @State private var alertTitle: String = ""
+    @State private var alertMsg: String = ""
     
     var body: some View {
         List {
-            Section {
+            Section("현재 계정") {
                 HStack {
                     // provider에서 첫번째 글자만 대문자로 바꾸고 .을 포함한 뒤는 다 제거 ex) google.com -> Google
                     let formattedProvider = firebaseVM.currentProvider.prefix(1).uppercased() + firebaseVM.currentProvider.dropFirst().prefix(while: { $0 != "." })
@@ -27,7 +29,7 @@ struct AccountView: View {
                     Text(formattedProvider)
                 }
             }
-            Section {
+            Section("연동된 계정") {
                 ForEach(connectedProviders, id: \.self) { provider in
                     HStack {
                         let formattedProvider = provider.prefix(1).uppercased() + provider.dropFirst().prefix(while: { $0 != "." })
@@ -80,6 +82,16 @@ struct AccountView: View {
                                 do {
                                     try await firebaseVM.linkWithProviders(provider: provider)
                                 } catch {
+                                    alertTitle = "계정 연동 실패"
+                                    if let emailError = error as? EmailFetchError, emailError == .emailNotFound {
+                                        alertMsg = "연동하려는 계정의 이메일을 확인할 수 없습니다."
+                                    }
+                                    else if let emailError = error as? EmailFetchError, emailError == .emailMismatch {
+                                        alertMsg = "동일한 이메일을 가진 계정과 연동을 시도해주세요."
+                                    }
+                                    else {
+                                        alertMsg = "알 수 없는 오류가 발생했습니다."
+                                    }
                                     isShowingAlert = true
                                 }
                             }
@@ -97,7 +109,7 @@ struct AccountView: View {
                 }
             }
         }
-        .alert("계정 삭제 실패", isPresented: $isShowingAlert) {
+        .alert(alertTitle, isPresented: $isShowingAlert) {
             Button("확인", role: .cancel) {
                 isShowingAlert = false
             }

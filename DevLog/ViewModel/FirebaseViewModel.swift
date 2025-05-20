@@ -188,6 +188,14 @@ extension FirebaseViewModel {
         
         let gidSignIn = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
         
+        guard let googleEmail = gidSignIn.user.profile?.email else {
+            throw EmailFetchError.emailNotFound
+        }
+        
+        if googleEmail != email {
+            throw EmailFetchError.emailMismatch
+        }
+        
         guard let idToken = gidSignIn.user.idToken?.tokenString else {
             throw URLError(.badServerResponse)
         }
@@ -302,11 +310,22 @@ extension FirebaseViewModel {
         let response = try await authenticateWithAppleAsync()
         
         let nonce = response.nonce
+        let credential = response.credential
         let authorizationCode = response.authorizationCode
         let idTokenString = response.idTokenString
-        
+
         // Firebase Function을 통해 appleRefreshToken 생성
-        try await requestAppleRefreshToken(authorizationCode: authorizationCode)
+        let refreshToken = try await requestAppleRefreshToken(authorizationCode: authorizationCode)
+        
+        guard let appleEmail = credential.email else {
+            try await revokeAppleAccessToken(token: refreshToken)
+            throw EmailFetchError.emailNotFound
+        }
+        
+        if appleEmail != email {
+            try await revokeAppleAccessToken(token: refreshToken)
+            throw EmailFetchError.emailMismatch
+        }
         
         let appleCredential = OAuthProvider.credential(
             providerID: AuthProviderID.apple,
@@ -329,13 +348,13 @@ extension FirebaseViewModel {
             "authorizationCode": authorizationCode
         ])
         
-        if let data = result.data as? [String: Any], let customToken = data["customToken"] as? String{
+        if let data = result.data as? [String: Any], let customToken = data["customToken"] as? String {
             return customToken
         }
         throw URLError(.badServerResponse)
     }
     
-    private func requestAppleRefreshToken(authorizationCode: Data) async throws {
+    private func requestAppleRefreshToken(authorizationCode: Data) async throws -> String {
         guard let userId = userId,
               let authorizationCode = String(data: authorizationCode, encoding: .utf8) else {
             throw URLError(.userAuthenticationRequired)
@@ -345,10 +364,15 @@ extension FirebaseViewModel {
         
         let params: [String: Any] = [
             "authorizationCode": authorizationCode,
-            "uid": userId
+            "userId": userId
         ]
         
-        let _ = try await requestFuction.call(params)
+        let result = try await requestFuction.call(params)
+        
+        if let data = result.data as? [String: Any], let accessToken = data["refreshToken"] as? String {
+            return accessToken
+        }
+        throw URLError(.badServerResponse)
     }
     
     // Apple AceessToken 재발급 메서드
@@ -535,14 +559,20 @@ extension FirebaseViewModel {
         throw URLError(.badServerResponse)
     }
     
-    private func revokeGitHubAccessToken() async throws {
+    private func revokeGitHubAccessToken(accessToken: String? = nil) async throws {
         guard let _ = userId else {
             throw URLError(.userAuthenticationRequired)
         }
         
+        var param: [String: Any] = [:]
+        
+        if let accessToken = accessToken {
+            param["accessToken"] = accessToken
+        }
+        
         let revokeFunction = functions.httpsCallable("revokeGithubAccessToken")
         
-        let _ = try await revokeFunction.call()
+        let _ = try await revokeFunction.call(param)
     }
 
     
@@ -571,6 +601,18 @@ extension FirebaseViewModel {
         let tokensRef = db.document("users/\(user.uid)/userData/tokens")
         let authorizationCode = try await requestGithubAuthorizationCode()
         let (accessToken, _) = try await requestGithubTokens(authorizationCode: authorizationCode)
+        
+        let githubUser = try await requestGitHubUserProfile(accessToken: accessToken)
+        
+        guard let githubEmail = githubUser.email else {
+            try await revokeGitHubAccessToken(accessToken: accessToken)
+            throw EmailFetchError.emailNotFound
+        }
+        
+        if githubEmail != email {
+            try await revokeGitHubAccessToken(accessToken: accessToken)
+            throw EmailFetchError.emailMismatch
+        }
         
         try await tokensRef.setData(["githubAccessToken": accessToken], merge: true)
         
