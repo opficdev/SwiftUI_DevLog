@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("isFirstLaunch") var isFirstLaunch = true
+    @AppStorage("isFirstLaunch") var isFirstLaunch = true   // 앱을 최초 설치했을 때 기존 로그인 세션이 남아있으면 자동 로그인됨을 막음
     @StateObject var firebaseVM = FirebaseViewModel()
     
     var body: some View {
