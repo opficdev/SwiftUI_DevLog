@@ -17,16 +17,8 @@ struct LoginView: View {
         ZStack {
             VStack {
                 Spacer()
-                Group {
-//                    if colorScheme == .light {
-                        Image("DevLog")
-                            .resizable()
-//                    }
-//                    else {
-//                        Image("dark_logo")
-//                            .resizable()
-//                    }
-                }
+                Image("Primary")
+                    .resizable()
                 .scaledToFit()
                 .frame(width: screenWidth / 5)
                 Spacer()
