@@ -177,7 +177,28 @@ extension FirebaseViewModel {
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
     }
     
-    func topViewController(controller: UIViewController? = nil) -> UIViewController? {
+    private func linkWithGoogle() async throws {
+        guard let user = Auth.auth().currentUser, let topVC = topViewController() else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        if GIDSignIn.sharedInstance.hasPreviousSignIn() {
+            GIDSignIn.sharedInstance.signOut()
+        }
+        
+        let gidSignIn = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
+        
+        guard let idToken = gidSignIn.user.idToken?.tokenString else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let accessToken = gidSignIn.user.accessToken.tokenString
+        let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+        
+        try await user.link(with: credential)
+    }
+    
+    private func topViewController(controller: UIViewController? = nil) -> UIViewController? {
         let keyWindow = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
@@ -691,7 +712,7 @@ extension FirebaseViewModel {
             }
         
             if provider == "google.com" {
-                try await signInWithGoogleHelper(refreshing: false)
+                try await linkWithGoogle()
             }
             else if provider == "github.com" {
                 try await linkWithGithub()
