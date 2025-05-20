@@ -666,8 +666,8 @@ extension FirebaseViewModel {
         }
     }
     
-    func connectWithProvider(provider: String) async throws {
-        guard let _ = Auth.auth().currentUser else {
+    func linkWithProviders(provider: String) async throws {
+        guard let user = Auth.auth().currentUser else {
             throw URLError(.userAuthenticationRequired)
         }
         
@@ -687,12 +687,12 @@ extension FirebaseViewModel {
             }
             self.providers.append(provider)
         } catch {
-            print("Error connecting with \(provider): \(error.localizedDescription)")
+            print("Error linkinging with \(provider): \(error.localizedDescription)")
             throw error
         }
     }
     
-    func disconnectWithProvider(provider: String) async throws {
+    func unlinkWithProviders(provider: String) async throws {
         guard let user = Auth.auth().currentUser else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -730,7 +730,7 @@ extension FirebaseViewModel {
             }
             _ = try await user.unlink(fromProvider: provider)
         } catch {
-            print("Error disconnecting \(provider): \(error.localizedDescription)")
+            print("Error unlinking \(provider): \(error.localizedDescription)")
             self.providers.append(provider)
             throw error
         }

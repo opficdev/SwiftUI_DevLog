@@ -41,7 +41,7 @@ struct AccountView: View {
                         Button(role: .destructive, action: {
                             Task {
                                 do {
-                                    try await firebaseVM.disconnectWithProvider(provider: provider)
+                                    try await firebaseVM.unlinkWithProviders(provider: provider)
                                 } catch {
                                     isShowingAlert = true
                                 }
@@ -78,7 +78,7 @@ struct AccountView: View {
                         Button(action: {
                             Task {
                                 do {
-                                    try await firebaseVM.connectWithProvider(provider: provider)
+                                    try await firebaseVM.linkWithProviders(provider: provider)
                                 } catch {
                                     isShowingAlert = true
                                 }
