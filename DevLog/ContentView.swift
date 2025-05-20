@@ -57,6 +57,14 @@ struct ContentView: View {
         } message: {
             Text("네트워크 연결을 확인해주세요")
         }
+        .onChange(of: isFirstLaunch) { newValue in
+            if isFirstLaunch {
+                Task {
+                    isFirstLaunch = false
+                    try await firebaseVM.signOut()
+                }
+            }
+        }
     }
 }
 
