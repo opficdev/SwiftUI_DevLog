@@ -55,29 +55,19 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     override init() {
         super.init()
         
-        //  Auth.auth().currentUser가 변경될 때만 감지한다. -> 즉 앱이 시작될 때 or 로그인/로그아웃 될 때
+        //  Auth.auth().currentUser가 변경될 때만 감지한다. -> 로그인/로그아웃 될 때
         createAuthStatePublisher()
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
                 // 새 로그인이 아닌 기존 로그인 후 세션 확인하는 조건문을 추가해야할듯
                 guard let self = self else { return }
-                Task {
-                    if user != nil {
-                        let userRef = self.db.document("users/\(user!.uid)/userData/info")
-                        let doc = try await userRef.getDocument()
-                        if let data = doc.data() {
-                            if let provider = data["currentProvider"] as? String {
-                                self.currentProvider = provider
-                            }
-                            if let statusMsg = data["statusMsg"] as? String {
-                                self.statusMsg = statusMsg
-                            }
-                            self.providers = user!.providerData.compactMap({ $0.providerID })
-                        }
+                if user != nil {
+                    Task {
+                        try await self.fetchUserInfo()
                     }
-                    self.isLoading = false
-                    self.signIn = user != nil
                 }
+                self.signIn = user != nil
+                self.isLoading = false
             }
             .store(in: &cancellables)
         
@@ -652,25 +642,27 @@ extension FirebaseViewModel {
         }
     }
     
-    func fetchStatusMsg() async throws {
+    private func fetchUserInfo() async throws {
         do {
             self.isLoading = true
             defer {
                 self.isLoading = false
             }
-            guard let userId = userId else {
+            guard let user = Auth.auth().currentUser, let userId = userId else {
                 throw URLError(.userAuthenticationRequired)
             }
-            
+                        
             let infoRef = db.document("users/\(userId)/userData/info")
             let doc = try await infoRef.getDocument()
-            
-            if let statusMsg = doc.data()?["statusMsg"] as? String {
-                self.statusMsg = statusMsg
+            if let data = doc.data() {
+                if let provider = data["currentProvider"] as? String {
+                    self.currentProvider = provider
+                }
+                if let statusMsg = data["statusMsg"] as? String {
+                    self.statusMsg = statusMsg
+                }
+                self.providers = user.providerData.compactMap({ $0.providerID })
             }
-        } catch {
-            print("Error fetching status message: \(error.localizedDescription)")
-            throw error
         }
     }
     

@@ -36,7 +36,6 @@ struct ProfileView: View {
                     HStack {
                         HStack {
                             Image(systemName: "face.smiling")
-                            
                             TextField(text: $firebaseVM.statusMsg) {
                                 HStack {
                                     Text("상태 설정")
@@ -91,15 +90,6 @@ struct ProfileView: View {
                         }) {
                             Image(systemName: "plus")
                         }
-                    }
-                }
-            }
-            .onAppear {
-                Task {
-                    do {
-                        try await firebaseVM.fetchStatusMsg()
-                    } catch {
-                        
                     }
                 }
             }
