@@ -663,6 +663,9 @@ extension FirebaseViewModel {
                 }
                 self.providers = user.providerData.compactMap({ $0.providerID })
             }
+        } catch {
+            print("Error fetching user info: \(error.localizedDescription)")
+            throw error
         }
     }
     
