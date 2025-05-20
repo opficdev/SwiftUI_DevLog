@@ -620,7 +620,7 @@ extension FirebaseViewModel {
         
         try await tokensRef.setData(field, merge: true); field.removeAll()
         
-        try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic","appIcon": "automatic"], merge: true)
+        try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic", "appIcon": "automatic"], merge: true)
     }
     
     func deleteUser() async throws {
@@ -633,10 +633,7 @@ extension FirebaseViewModel {
             defer {
                 self.isLoading = false
             }
-            if user.providerData.contains(where: { $0.providerID == "google.com" }) {
-                GIDSignIn.sharedInstance.signOut()
-                try await GIDSignIn.sharedInstance.disconnect()
-            }
+            
             if user.providerData.contains(where: { $0.providerID == "github.com" }) {
                 try await revokeGitHubAccessToken()
             }
