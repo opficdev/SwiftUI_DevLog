@@ -67,7 +67,7 @@ struct AppIconView: View {
                     Spacer()
                     Image(systemName: "checkmark")
                         .foregroundStyle(Color.accentColor)
-                        .opacity(icon.lowercased() == appIcon.rawValue ? 1 : 0)
+                        .opacity(icon.lowercased() == appIcon.rawValue.lowercased() ? 1 : 0)
                 }
             }
         }

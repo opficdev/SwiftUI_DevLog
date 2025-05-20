@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
+    @AppStorage("appIcon") var appIcon: AppIcon = .primary
     @StateObject private var settingVM = SettingViewModel()
     @EnvironmentObject private var firebaseVM: FirebaseViewModel
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
@@ -28,7 +29,7 @@ struct SettingView: View {
                         settingVM.theme = theme.localizedName
                     }
                 }
-                NavigationLink(destination: AppIconView()) {
+                NavigationLink(destination: AppIconView().environmentObject(settingVM)) {
                     HStack {
                         Text("앱 아이콘")
                             .foregroundStyle(Color.primary)
