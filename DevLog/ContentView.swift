@@ -25,7 +25,6 @@ struct ContentView: View {
                         .onAppear {
                             if isFirstLaunch {
                                 Task {
-                                    try await firebaseVM.signOut()
                                     isFirstLaunch = false
                                 }
                             }
@@ -40,8 +39,8 @@ struct ContentView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
                         if firebaseVM.signIn == nil {
                             Task {
-                                try await firebaseVM.signOut()
                                 isFirstLaunch = true
+                                try await firebaseVM.signOut()
                             }
                         }
                     }
