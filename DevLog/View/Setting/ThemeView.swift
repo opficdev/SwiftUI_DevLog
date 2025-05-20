@@ -20,7 +20,7 @@ struct ThemeView: View {
                     Text(SystemTheme.automatic.localizedName)
                         .foregroundStyle(Color.primary)
                     Spacer()
-                    if  theme == .automatic {
+                    if theme == .automatic {
                         Image(systemName: "checkmark")
                     }
                 }
