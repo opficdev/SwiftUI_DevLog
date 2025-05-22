@@ -11,6 +11,9 @@ struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var searchText: String = ""
     @State private var isFocused: Bool = false
+    @State private var addNewLink: Bool = false
+    @State private var newTitle: String = ""
+    @State private var newURL: String = ""
     
     var body: some View {
         NavigationStack {
@@ -38,6 +41,37 @@ struct SearchView: View {
                     .frame(minHeight: isFocused && searchText.isEmpty ? geometry.size.height : 0)
                 }
                 .navigationTitle("검색")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            addNewLink = true
+                        }) {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+                .alert("개발자 문서 추가", isPresented: $addNewLink) {
+                    TextField("제목", text: $newTitle)
+                    TextField("URL", text: $newURL)
+                    
+                    HStack {
+                        Button(action: {
+                            newTitle = ""
+                            newURL = ""
+                            dismiss()
+                        }) {
+                            Text("취소")
+                        }
+                        Button(action: {
+                            
+                            newTitle = ""
+                            newURL = ""
+                            dismiss()
+                        }) {
+                            Text("추가")
+                        }
+                    }
+                }
             }
         }
     }
