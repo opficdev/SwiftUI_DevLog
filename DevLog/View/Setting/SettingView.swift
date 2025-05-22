@@ -41,13 +41,13 @@ struct SettingView: View {
                         settingVM.appIcon = appIcon.localizedName
                     }
                 }
-                NavigationLink(destination: AlertView()) {
+                NavigationLink(destination: PushNotificationSettingsView()) {
                     HStack {
                         Text("알림")
                             .foregroundStyle(Color.primary)
                         Spacer()
-                        Text(settingVM.notification)
-                            .foregroundStyle(Color.gray)
+//                        Text(settingVM.notification)
+//                            .foregroundStyle(Color.gray)
                     }
                 }
             }
