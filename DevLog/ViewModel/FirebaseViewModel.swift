@@ -15,6 +15,7 @@ import GoogleSignIn
 import AuthenticationServices
 import CryptoKit
 import Network
+import LinkPresentation
 
 @MainActor
 final class FirebaseViewModel: NSObject, ObservableObject {
@@ -64,6 +65,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                 if user != nil {
                     Task {
                         try await self.fetchUserInfo()
+//                        try await self.requestDevDocs()
                     }
                 }
                 self.signIn = user != nil
@@ -809,7 +811,59 @@ extension FirebaseViewModel {
             throw error
         }
     }
+    
+    func requestDevDocs() async throws -> [DeveloperDoc] {
+        guard let userId = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            let devDocsRef = db.document("users/\(userId)/userData/devDocs")
+            let doc = try await devDocsRef.getDocument()
+            
+            if doc.exists, let data = doc.data(), let devDocs = data["devDocs"] as? [String] {
+                var result = [DeveloperDoc]()
+                for url in devDocs {
+                    let doc = try await DeveloperDoc.fetch(from: url)
+                    result.append(doc)
+                }
+                return result
+            }
+            throw URLError(.badServerResponse)
+            
+        } catch {
+            print("Error fetching dev docs: \(error.localizedDescription)")
+            throw error
+        }
+
+    }
+        
+    func upsertDevDocs(_ doc: DeveloperDoc, urlString: String) async throws {
+        guard let userId = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            let devDocsRef = db.document("users/\(userId)/userData/devDocs")
+            try await devDocsRef.updateData(["devDocs": FieldValue.arrayUnion([urlString])])
+            
+        } catch {
+            print("Error upserting dev docs: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
+
 
 
 extension FirebaseViewModel: ASWebAuthenticationPresentationContextProviding {
