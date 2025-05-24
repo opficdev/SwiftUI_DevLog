@@ -636,7 +636,7 @@ extension FirebaseViewModel {
         
         self.currentProvider = provider
         
-        if provider == "apple.com" {
+        if provider == "apple.com" && user.displayName != nil && user.displayName != "" {
             field["appleName"] = user.displayName
         }
         
