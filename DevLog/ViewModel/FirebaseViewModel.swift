@@ -30,25 +30,12 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     // 뷰에서 직접 변경하지 않는 프로퍼티
     var name: String { Auth.auth().currentUser?.displayName ?? "" }
     var email: String { Auth.auth().currentUser?.email ?? "" }
-    var avatar: some View {
-        AsyncImage(url: Auth.auth().currentUser?.photoURL) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFit()
-            default:
-                Image(systemName: "person.crop.circle.fill")
-                    .resizable()
-                    .scaledToFit()
-            }
-        }
-    }
     var currentProvider = ""
     
     @Published var isConnected = true
     @Published var showNetworkAlert = false
     @Published var signIn: Bool? = nil
+    @Published var avatar = Image(systemName: "person.crop.circle.fill")
     @Published var statusMsg = ""
     @Published var providers: [String] = []
     @Published var isLoading = true    // 네트워크 작업 중인지 여부
@@ -726,6 +713,13 @@ extension FirebaseViewModel {
             }
             guard let user = Auth.auth().currentUser, let userId = userId else {
                 throw URLError(.userAuthenticationRequired)
+            }
+            
+            if let url = user.photoURL {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let uiImage = UIImage(data: data) {
+                    self.avatar = Image(uiImage: uiImage)
+                }
             }
                         
             let infoRef = db.document("users/\(userId)/userData/info")

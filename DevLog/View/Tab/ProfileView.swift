@@ -18,10 +18,11 @@ struct ProfileView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         firebaseVM.avatar
+                            .resizable()
                             .scaledToFill()
                             .frame(width: 60, height: 60)
                             .cornerRadius(30)
-                            .foregroundStyle(Color(UIColor.systemGray4))
+                            .foregroundStyle(Color.gray)
                         
                         VStack(alignment: .leading) {
                             Text(firebaseVM.name)
