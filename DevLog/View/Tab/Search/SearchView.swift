@@ -41,7 +41,7 @@ struct SearchView: View {
                                         .font(.title2)
                                         .bold()
                                     ForEach(firebaseVM.devDocs, id: \.id) { doc in
-                                        NavigationLink(destination: WebView(url: URL(string: doc.urlString)!)) {
+                                        NavigationLink(destination: WebView(url: doc.url)) {
                                             ZStack(alignment: .bottom) {
                                                 Color.white
                                                 if let uiImage = doc.image {

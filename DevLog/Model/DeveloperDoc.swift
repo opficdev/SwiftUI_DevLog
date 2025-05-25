@@ -13,11 +13,13 @@ struct DeveloperDoc: Identifiable {
     let id = UUID()
     var image: UIImage?
     var title: String
+    var url: URL
     var urlString: String
 
-    init(image: UIImage?, title: String, urlString: String) {
+    init(image: UIImage?, title: String, url: URL, urlString: String) {
         self.image = image
         self.title = title
+        self.url = url
         self.urlString = urlString
     }
 
@@ -44,7 +46,7 @@ struct DeveloperDoc: Identifiable {
             print("Error fetching metadata: \(error.localizedDescription)")
         }
 
-        return DeveloperDoc(image: image, title: title, urlString: urlString)
+        return DeveloperDoc(image: image, title: title, url: url, urlString: urlString)
     }
 
     static func convertToImage(_ metaData: LPLinkMetadata) async throws -> UIImage? {
