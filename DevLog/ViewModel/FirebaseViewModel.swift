@@ -866,7 +866,7 @@ extension FirebaseViewModel {
             }
             
             let devDocsRef = db.document("users/\(userId)/userData/devDocs")
-            try await devDocsRef.updateData(["devDocs": FieldValue.arrayUnion([urlString])])
+            try await devDocsRef.setData(["devDocs": FieldValue.arrayUnion([urlString])], merge: true)
             
         } catch {
             print("Error upserting dev docs: \(error.localizedDescription)")
