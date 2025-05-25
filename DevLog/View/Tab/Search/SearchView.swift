@@ -6,11 +6,10 @@
 //
 
 import SwiftUI
-import LinkPresentation
-import UniformTypeIdentifiers
 
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var firebaseVM: FirebaseViewModel
     @State private var searchText: String = ""
     @State private var isFocused: Bool = false
     @State private var addNewLink: Bool = false
@@ -111,17 +110,9 @@ struct SearchView: View {
                             }
                             Button(action: {
                                 Task {
-                                    if let url = URL(string: newURL) {
-                                        let provider = LPMetadataProvider()
-                                        let metadata = try await provider.startFetchingMetadata(for: url)
-                                        
-                                        let uiImage = try await convertToImage(metadata)
-                                        let title = metadata.title ?? ""
-                                        let urlString = metadata.url?.host() ?? newURL
-
-                                        let newDoc = DeveloperDoc(title, urlString: urlString, uiImage: uiImage)
-                                        devDocs.append(newDoc)
-                                    }
+                                    let newDoc = try await DeveloperDoc.fetch(from: newURL)
+                                    try await firebaseVM.upsertDevDocs(newDoc, urlString: newURL)
+                                    devDocs.append(newDoc)
                                     newURL = "https://"
                                     dismiss()
                                 }
@@ -132,35 +123,11 @@ struct SearchView: View {
                     }
                 }
             }
-        }
-    }
-    
-    private func convertToImage(_ metaData: LPLinkMetadata) async throws -> UIImage? {
-        let imageType = UTType.image.identifier
-
-        if let imageProvider = metaData.imageProvider,
-            imageProvider.hasItemConformingToTypeIdentifier(imageType) {
-            let imageItem = try await imageProvider.loadItem(forTypeIdentifier: imageType)
-            
-            switch imageItem {
-            case let uiImage as UIImage:
-                return uiImage
-                
-            case let url as URL:
-                if let data = try? Data(contentsOf: url) {
-                    return UIImage(data: data)
+            .onAppear {
+                Task {
+                    devDocs = try await firebaseVM.requestDevDocs()
                 }
-                
-            case let data as Data:
-                return UIImage(data: data)
-                
-            case let nsData as NSData:
-                return UIImage(data: nsData as Data)
-                
-            default:
-                return nil
             }
         }
-        return nil
     }
 }

@@ -23,6 +23,7 @@ struct MainView: View {
                     Text("알림")
                 }
             SearchView()
+                .environmentObject(firebaseVM)
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                     Text("검색")
