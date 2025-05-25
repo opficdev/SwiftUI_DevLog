@@ -33,13 +33,19 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     var email: String { Auth.auth().currentUser?.email ?? "" }
     var currentProvider = ""
     
-    @Published var isConnected = true
+    // ui
+    @Published var isConnected = true   //  셀룰러 또는 와이파이 연결 상태
+    @Published var isLoading = true    // 네트워크 작업 중인지 여부
     @Published var showNetworkAlert = false
     @Published var signIn: Bool? = nil
+    
+    // SearchView
+    @Published var devDocs: [DeveloperDoc] = [] // 개발자 문서 목록
+    
+    // ProfileView
     @Published var avatar = Image(systemName: "person.crop.circle.fill")
     @Published var statusMsg = ""
     @Published var providers: [String] = []
-    @Published var isLoading = true    // 네트워크 작업 중인지 여부
     
     override init() {
         super.init()
@@ -51,9 +57,9 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                 guard let self = self else { return }
                 if user != nil {
                     Task {
+                        try await self.requestDevDocs()
                         if self.didSignedInBySession {
                             try await self.fetchUserInfo()
-//                            try await self.requestDevDocs()
                             self.signIn = user != nil
                             self.isLoading = false
                         }
@@ -823,7 +829,7 @@ extension FirebaseViewModel {
         }
     }
     
-    func requestDevDocs() async throws -> [DeveloperDoc] {
+    func requestDevDocs() async throws {
         guard let userId = userId else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -843,15 +849,15 @@ extension FirebaseViewModel {
                     let doc = try await DeveloperDoc.fetch(from: url)
                     result.append(doc)
                 }
-                return result
+                self.devDocs = result
             }
-            throw URLError(.badServerResponse)
-            
+            else {
+                throw URLError(.badServerResponse)
+            }
         } catch {
-            print("Error fetching dev docs: \(error.localizedDescription)")
+            print("Error requesting dev docs: \(error.localizedDescription)")
             throw error
         }
-
     }
         
     func upsertDevDocs(_ doc: DeveloperDoc, urlString: String) async throws {

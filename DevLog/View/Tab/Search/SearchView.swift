@@ -14,8 +14,6 @@ struct SearchView: View {
     @State private var isFocused: Bool = false
     @State private var addNewLink: Bool = false
     @State private var newURL: String = "https://"
-    @State private var devDocs: [DeveloperDoc] = []
-    
     
     var body: some View {
         NavigationStack {
@@ -42,7 +40,7 @@ struct SearchView: View {
                                     Text("개발자 문서")
                                         .font(.title2)
                                         .bold()
-                                    ForEach(devDocs, id: \.id) { doc in
+                                    ForEach(firebaseVM.devDocs, id: \.id) { doc in
                                         NavigationLink(destination: WebView(url: URL(string: doc.urlString)!)) {
                                             ZStack(alignment: .bottom) {
                                                 Color.white
@@ -112,7 +110,7 @@ struct SearchView: View {
                                 Task {
                                     let newDoc = try await DeveloperDoc.fetch(from: newURL)
                                     try await firebaseVM.upsertDevDocs(newDoc, urlString: newURL)
-                                    devDocs.append(newDoc)
+                                    firebaseVM.devDocs.append(newDoc)
                                     newURL = "https://"
                                     dismiss()
                                 }
@@ -121,11 +119,6 @@ struct SearchView: View {
                             }
                         }
                     }
-                }
-            }
-            .onAppear {
-                Task {
-                    devDocs = try await firebaseVM.requestDevDocs()
                 }
             }
         }
