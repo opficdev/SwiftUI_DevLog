@@ -725,9 +725,6 @@ extension FirebaseViewModel {
             let infoRef = db.document("users/\(userId)/userData/info")
             let doc = try await infoRef.getDocument()
             if let data = doc.data() {
-                if let provider = data["currentProvider"] as? String {
-                    self.currentProvider = provider
-                }
                 if let statusMsg = data["statusMsg"] as? String {
                     self.statusMsg = statusMsg
                 }
