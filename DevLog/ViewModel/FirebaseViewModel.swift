@@ -26,6 +26,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
     private var userId: String? { Auth.auth().currentUser?.uid }
+    private var didSignedInBySession = true    //  기존 세션에 의해 로그인되었는지 여부
 
     // 뷰에서 직접 변경하지 않는 프로퍼티
     var name: String { Auth.auth().currentUser?.displayName ?? "" }
@@ -47,16 +48,23 @@ final class FirebaseViewModel: NSObject, ObservableObject {
         createAuthStatePublisher()
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
-                // 새 로그인이 아닌 기존 로그인 후 세션 확인하는 조건문을 추가해야할듯
                 guard let self = self else { return }
                 if user != nil {
                     Task {
-                        try await self.fetchUserInfo()
-//                        try await self.requestDevDocs()
+                        if self.didSignedInBySession {
+                            try await self.fetchUserInfo()
+//                            try await self.requestDevDocs()
+                            self.signIn = user != nil
+                            self.isLoading = false
+                        }
+                        // 이 경우에는 새로운 로그인 세션을 생성하므로 upsertUser로 로그인하게 됨
                     }
                 }
-                self.signIn = user != nil
-                self.isLoading = false
+                else {
+                    self.didSignedInBySession = false
+                    self.signIn = user != nil
+                    self.isLoading = false
+                }
             }
             .store(in: &cancellables)
         
@@ -114,6 +122,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
             try await Messaging.messaging().deleteToken()
             
             try Auth.auth().signOut()
+            self.didSignedInBySession = false
         } catch {
             print("Error signing out: \(error.localizedDescription)")
             throw error
@@ -164,6 +173,8 @@ extension FirebaseViewModel {
         let fcmToken = try await Messaging.messaging().token()
 
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "google.com")
+        
+        try await fetchUserInfo()
     }
     
     private func linkWithGoogle() async throws {
@@ -273,7 +284,7 @@ extension FirebaseViewModel {
 
         // FirebaseAuth 사용자 프로필 업데이트
         changeRequest.displayName = displayName ?? ""
-        changeRequest.photoURL = URL(string: "")    //  Apple ID 프로필 사진 URL은 제공되지 않음
+        changeRequest.photoURL = nil    //  Apple ID 프로필 사진 URL은 제공되지 않음
         try await changeRequest.commitChanges()
         
         // FirebaseAuth 계정에 Apple ID 연결
@@ -289,6 +300,8 @@ extension FirebaseViewModel {
         let fcmToken = try await Messaging.messaging().token()
         
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "apple.com")
+        
+        try await fetchUserInfo()
     }
     
     private func linkWithApple() async throws {
@@ -475,6 +488,8 @@ extension FirebaseViewModel {
         let fcmToken = try await Messaging.messaging().token()
         
         try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
+        
+        try await fetchUserInfo()
     }
 
     private func requestGithubAuthorizationCode() async throws -> String {
@@ -652,6 +667,8 @@ extension FirebaseViewModel {
         try await tokensRef.setData(field, merge: true); field.removeAll()
         
         try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic", "appIcon": "automatic"], merge: true)
+        
+        self.signIn = true
     }
     
     func deleteUser() async throws {
@@ -720,6 +737,9 @@ extension FirebaseViewModel {
                 if let uiImage = UIImage(data: data) {
                     self.avatar = Image(uiImage: uiImage)
                 }
+            }
+            else {
+                self.avatar = Image(systemName: "person.crop.circle.fill")
             }
                         
             let infoRef = db.document("users/\(userId)/userData/info")
