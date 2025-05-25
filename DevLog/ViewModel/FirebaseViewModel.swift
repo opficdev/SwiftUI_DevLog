@@ -43,7 +43,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     override init() {
         super.init()
         
-        //  Auth.auth().currentUser가 변경될 때만 감지한다. -> 로그인/로그아웃 될 때
+        // 앱 최초 시작 시 + 로그인/로그아웃 될 때 변화 감지
         createAuthStatePublisher()
             .receive(on: RunLoop.main)
             .sink { [weak self] user in
