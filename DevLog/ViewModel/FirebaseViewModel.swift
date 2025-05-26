@@ -843,16 +843,18 @@ extension FirebaseViewModel {
             let devDocsRef = db.document("users/\(userId)/userData/devDocs")
             let doc = try await devDocsRef.getDocument()
             
-            if doc.exists, let data = doc.data(), let devDocs = data["devDocs"] as? [String] {
-                var result = [DeveloperDoc]()
-                for url in devDocs {
-                    let doc = try await DeveloperDoc.fetch(from: url)
-                    result.append(doc)
+            if doc.exists, let data = doc.data() {
+                if let devDocs = data["devDocs"] as? [String] {
+                    var result = [DeveloperDoc]()
+                    for url in devDocs {
+                        let doc = try await DeveloperDoc.fetch(from: url)
+                        result.append(doc)
+                    }
+                    self.devDocs = result
                 }
-                self.devDocs = result
-            }
-            else {
-                throw URLError(.badServerResponse)
+                else {
+                    throw URLError(.badServerResponse)
+                }
             }
         } catch {
             print("Error requesting dev docs: \(error.localizedDescription)")
