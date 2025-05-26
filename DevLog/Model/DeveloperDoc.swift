@@ -40,7 +40,7 @@ struct DeveloperDoc: Identifiable {
         do {
             let metadata = try await provider.startFetchingMetadata(for: url)
             image = try await convertToImage(metadata)
-            title = metadata.title ?? ""
+            title = metadata.title ?? "웹페이지를 찾을 수 없습니다"
             urlString = metadata.url?.host() ?? url.absoluteString
         } catch {
             print("Error fetching metadata: \(error.localizedDescription)")
