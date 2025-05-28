@@ -862,7 +862,7 @@ extension FirebaseViewModel {
         }
     }
         
-    func upsertDevDocs(_ doc: DeveloperDoc, urlString: String) async throws {
+    func upsertDevDoc(_ doc: DeveloperDoc, urlString: String) async throws {
         guard let userId = userId else {
             throw URLError(.userAuthenticationRequired)
         }

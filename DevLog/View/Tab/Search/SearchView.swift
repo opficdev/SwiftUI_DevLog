@@ -103,7 +103,7 @@ struct SearchView: View {
                     Button(action: {
                         Task {
                             let newDoc = try await DeveloperDoc.fetch(from: newURL)
-                            try await firebaseVM.upsertDevDocs(newDoc, urlString: newURL)
+                            try await firebaseVM.upsertDevDoc(newDoc, urlString: newURL)
                             firebaseVM.devDocs.append(newDoc)
                             newURL = "https://"
                             dismiss()
