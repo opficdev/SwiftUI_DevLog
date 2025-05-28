@@ -14,6 +14,8 @@ struct SearchView: View {
     @State private var isFocused: Bool = false
     @State private var addNewLink: Bool = false
     @State private var newURL: String = "https://"
+    @State private var errorTitle: String = ""
+    @State private var errorMessage: String = ""
     
     var body: some View {
         NavigationStack {
@@ -75,8 +77,13 @@ struct SearchView: View {
                             .swipeActions {
                                 Button(role: .destructive, action: {
                                     Task {
-                                        firebaseVM.devDocs.remove(at: idx)
-                                        try await firebaseVM.deleteDevDoc(doc)
+                                        do {
+                                            try await firebaseVM.deleteDevDoc(doc)
+                                            firebaseVM.devDocs.remove(at: idx)
+                                        } catch {
+                                            errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
+                                            showError = true
+                                        }
                                     }
                                 }) {
                                     Image(systemName: "trash")
@@ -102,6 +109,13 @@ struct SearchView: View {
                         Image(systemName: "plus")
                     }
                 }
+            }
+            .alert("", isPresented: $showError) {
+                Button("확인", role: .cancel) {
+                    errorMessage = ""
+                }
+            } message: {
+                Text(errorMessage)
             }
             .alert("개발자 문서 추가", isPresented: $addNewLink) {
                 TextField("URL", text: $newURL)
