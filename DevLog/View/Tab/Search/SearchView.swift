@@ -60,6 +60,8 @@ struct SearchView: View {
                                                 .foregroundStyle(Color.black)
                                                 .multilineTextAlignment(.leading)
                                             Text(doc.urlString)
+                                                .foregroundStyle(Color.accentColor)
+                                                .underline()
                                         }
                                         .padding()
                                         Spacer()
