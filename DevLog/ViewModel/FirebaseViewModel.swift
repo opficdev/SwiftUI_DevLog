@@ -754,6 +754,9 @@ extension FirebaseViewModel {
                 if let statusMsg = data["statusMsg"] as? String {
                     self.statusMsg = statusMsg
                 }
+                if let currentProvider = data["currentProvider"] as? String {
+                    self.currentProvider = currentProvider
+                }
                 self.providers = user.providerData.compactMap({ $0.providerID })
             }
         } catch {
