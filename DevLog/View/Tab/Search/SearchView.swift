@@ -11,131 +11,138 @@ struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var firebaseVM: FirebaseViewModel
     @State private var searchText: String = ""
-    @State private var isFocused: Bool = false
+    @State private var isSearching: Bool = false
     @State private var addNewLink: Bool = false
     @State private var newURL: String = "https://"
-    @State private var errorTitle: String = ""
     @State private var errorMessage: String = ""
+    @State private var showError: Bool = false
     
     var body: some View {
         NavigationStack {
-            SearchableView(searchText: $searchText, focused: $isFocused)
+            SearchableView(searchText: $searchText, focused: $isSearching)
                 .searchable(text: $searchText, prompt: "DevLog 검색")
-            List {
-                if isFocused {
-                    if searchText.isEmpty {
-                        Text("앱 내 컨텐츠나 개발자 문서를 검색할 수 있어요.")
+            GeometryReader { geometry in
+                List {
+                    if isSearching {
+                        if searchText.isEmpty {
+                            VStack {
+                                Spacer()
+                                Text("앱 내 컨텐츠를 검색할 수 있어요.")
+                                Spacer()
+                            }
+                            .frame(height: geometry.size.height)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                        }
+                        else {
+                            Text("검색 내용이 보여지는 곳")
+                        }
                     }
                     else {
-                        Text("검색 내용이 보여지는 곳")
-                    }
-                }
-                else {
-                    Section(header: Text("개발자 문서").foregroundStyle(Color.primary).font(.title2).bold()) {
-                        ForEach(Array(zip(firebaseVM.devDocs.indices, firebaseVM.devDocs)), id: \.1.id) { idx, doc in
-                            NavigationLink(destination: WebView(url: doc.url)) {
-                                ZStack(alignment: .bottom) {
-                                    Color.white
-                                    if let uiImage = doc.image {
-                                        GeometryReader { geo in
-                                            Image(uiImage: uiImage)
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: geo.size.width, height: geo.size.height)
-                                                .clipped()
+                        Section {
+                            ForEach(Array(zip(firebaseVM.devDocs.indices, firebaseVM.devDocs)), id: \.1.id) { idx, doc in
+                                NavigationLink(destination: WebView(url: doc.url)) {
+                                    ZStack(alignment: .bottom) {
+                                        Color.white
+                                        if let uiImage = doc.image {
+                                            GeometryReader { geo in
+                                                Image(uiImage: uiImage)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: geo.size.width, height: geo.size.height)
+                                                    .clipped()
+                                            }
                                         }
-                                    }
-                                    else {
-                                        VStack {
-                                            Image(systemName: "globe")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(height: UIScreen.main.bounds.height / 5)
-                                                .foregroundStyle(Color.gray)
-                                                .padding()
+                                        else {
+                                            VStack {
+                                                Image(systemName: "globe")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(height: UIScreen.main.bounds.height / 5)
+                                                    .foregroundStyle(Color.gray)
+                                                    .padding()
+                                                Spacer()
+                                            }
+                                        }
+                                        HStack {
+                                            VStack(alignment: .leading) {
+                                                Text(doc.title)
+                                                    .foregroundStyle(Color.black)
+                                                    .multilineTextAlignment(.leading)
+                                                Text(doc.urlString)
+                                                    .foregroundStyle(Color.accentColor)
+                                                    .underline()
+                                            }
+                                            .padding()
                                             Spacer()
                                         }
+                                        .background(Color.white)
+                                        
                                     }
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text(doc.title)
-                                                .foregroundStyle(Color.black)
-                                                .multilineTextAlignment(.leading)
-                                            Text(doc.urlString)
-                                                .foregroundStyle(Color.accentColor)
-                                                .underline()
-                                        }
-                                        .padding()
-                                        Spacer()
-                                    }
-                                    .background(Color.white)
-                                    
+                                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                                    .frame(height: UIScreen.main.bounds.height / 4)
                                 }
-                                .clipShape(RoundedRectangle(cornerRadius: 15))
-                                .frame(height: UIScreen.main.bounds.height / 4)
-                            }
-                            .swipeActions {
-                                Button(role: .destructive, action: {
-                                    Task {
-                                        do {
-                                            try await firebaseVM.deleteDevDoc(doc)
-                                            firebaseVM.devDocs.remove(at: idx)
-                                        } catch {
-                                            errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
-                                            showError = true
+                                .swipeActions {
+                                    Button(role: .destructive, action: {
+                                        Task {
+                                            do {
+                                                firebaseVM.devDocs.remove(at: idx)
+                                                try await firebaseVM.deleteDevDoc(doc)
+                                            } catch {
+                                                errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
+                                                showError = true
+                                            }
                                         }
+                                    }) {
+                                        Image(systemName: "trash")
                                     }
-                                }) {
-                                    Image(systemName: "trash")
                                 }
                             }
                         }
-                    }
-                    .listRowSeparator(.hidden)  //  섹션 내 요소의 구분선 숨김
-                    .listSectionSeparator(.hidden)  //  섹션의 구분선 숨김
-                    .listRowBackground(Color.clear)
-                }
-            }
-            .listStyle(.plain)
-            .navigationTitle("검색")
-            .onSubmit(of: .search) {
-                isFocused = true
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        addNewLink = true
-                    }) {
-                        Image(systemName: "plus")
+                        .listRowSeparator(.hidden)  //  섹션 내 요소의 구분선 숨김
+                        .listSectionSeparator(.hidden)  //  섹션의 구분선 숨김
+                        .listRowBackground(Color.clear)
                     }
                 }
-            }
-            .alert("", isPresented: $showError) {
-                Button("확인", role: .cancel) {
-                    errorMessage = ""
-                }
-            } message: {
-                Text(errorMessage)
-            }
-            .alert("개발자 문서 추가", isPresented: $addNewLink) {
-                TextField("URL", text: $newURL)
-                HStack {
-                    Button(action: {
-                        newURL = "https://"
-                        dismiss()
-                    }) {
-                        Text("취소")
+                .listStyle(.plain)
+                .navigationTitle("검색")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            addNewLink = true
+                        }) {
+                            Image(systemName: "plus")
+                        }
                     }
-                    Button(action: {
-                        Task {
-                            let newDoc = try await DeveloperDoc.fetch(from: newURL)
-                            try await firebaseVM.upsertDevDoc(newDoc, urlString: newURL)
-                            firebaseVM.devDocs.append(newDoc)
+                }
+                .alert("", isPresented: $showError) {
+                    Button("확인", role: .cancel) {
+                        errorMessage = ""
+                    }
+                } message: {
+                    Text(errorMessage)
+                }
+                .alert("개발자 문서 추가", isPresented: $addNewLink) {
+                    TextField("URL", text: $newURL)
+                    HStack {
+                        Button(action: {
                             newURL = "https://"
                             dismiss()
+                        }) {
+                            Text("취소")
                         }
-                    }) {
-                        Text("추가")
+                        Button(action: {
+                            Task {
+                                let newDoc = try await DeveloperDoc.fetch(from: newURL)
+                                try await firebaseVM.upsertDevDoc(newDoc, urlString: newURL)
+                                firebaseVM.devDocs.append(newDoc)
+                                newURL = "https://"
+                                dismiss()
+                            }
+                        }) {
+                            Text("추가")
+                        }
                     }
                 }
             }
