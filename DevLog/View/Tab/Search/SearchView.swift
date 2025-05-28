@@ -30,7 +30,7 @@ struct SearchView: View {
                 }
                 else {
                     Section(header: Text("개발자 문서").foregroundStyle(Color.primary).font(.title2).bold()) {
-                        ForEach(firebaseVM.devDocs, id: \.id) { doc in
+                        ForEach(Array(zip(firebaseVM.devDocs.indices, firebaseVM.devDocs)), id: \.1.id) { idx, doc in
                             NavigationLink(destination: WebView(url: doc.url)) {
                                 ZStack(alignment: .bottom) {
                                     Color.white
@@ -69,6 +69,16 @@ struct SearchView: View {
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 15))
                                 .frame(height: UIScreen.main.bounds.height / 4)
+                            }
+                            .swipeActions {
+                                Button(role: .destructive, action: {
+                                    Task {
+                                        firebaseVM.devDocs.remove(at: idx)
+                                        try await firebaseVM.deleteDevDoc(doc)
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                }
                             }
                         }
                     }

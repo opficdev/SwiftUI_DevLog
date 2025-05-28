@@ -881,6 +881,26 @@ extension FirebaseViewModel {
             throw error
         }
     }
+    
+    func deleteDevDoc(_ doc: DeveloperDoc) async throws {
+        guard let userId = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            let devDocsRef = db.document("users/\(userId)/userData/devDocs")
+            let urlString = doc.url.absoluteString
+            try await devDocsRef.updateData(["devDocs": FieldValue.arrayRemove([urlString])])
+        } catch {
+            print("Error deleting dev docs: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 
