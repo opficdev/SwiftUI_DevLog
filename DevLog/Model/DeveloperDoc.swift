@@ -9,7 +9,7 @@ import SwiftUI
 import LinkPresentation
 import UniformTypeIdentifiers
 
-struct DeveloperDoc: Identifiable {
+struct DeveloperDoc: Identifiable, Hashable {
     let id = UUID()
     var image: UIImage?
     var title: String

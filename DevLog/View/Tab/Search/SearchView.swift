@@ -16,11 +16,20 @@ struct SearchView: View {
     @State private var newURL: String = "https://"
     @State private var errorMessage: String = ""
     @State private var showError: Bool = false
+    @State private var selectedDoc: DeveloperDoc? = nil
     
     var body: some View {
         NavigationStack {
             SearchableView(searchText: $searchText, focused: $isSearching)
                 .searchable(text: $searchText, prompt: "DevLog 검색")
+                .navigationDestination(isPresented: Binding(
+                    get: { selectedDoc != nil },
+                    set: { if !$0 { selectedDoc = nil } }
+                )) {
+                    if let url = selectedDoc?.url {
+                        WebView(url: url)
+                    }
+                }
             GeometryReader { geometry in
                 List {
                     if isSearching {
@@ -42,7 +51,9 @@ struct SearchView: View {
                     else {
                         Section {
                             ForEach(Array(zip(firebaseVM.devDocs.indices, firebaseVM.devDocs)), id: \.1.id) { idx, doc in
-                                NavigationLink(destination: WebView(url: doc.url)) {
+                                Button(action: {
+                                    selectedDoc = doc
+                                }) {
                                     ZStack(alignment: .bottom) {
                                         Color.white
                                         if let uiImage = doc.image {
@@ -82,20 +93,20 @@ struct SearchView: View {
                                     }
                                     .clipShape(RoundedRectangle(cornerRadius: 15))
                                     .frame(height: UIScreen.main.bounds.height / 4)
-                                }
-                                .swipeActions {
-                                    Button(role: .destructive, action: {
-                                        Task {
-                                            do {
-                                                firebaseVM.devDocs.remove(at: idx)
-                                                try await firebaseVM.deleteDevDoc(doc)
-                                            } catch {
-                                                errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
-                                                showError = true
+                                    .swipeActions {
+                                        Button(role: .destructive, action: {
+                                            Task {
+                                                do {
+                                                    firebaseVM.devDocs.remove(at: idx)
+                                                    try await firebaseVM.deleteDevDoc(doc)
+                                                } catch {
+                                                    errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
+                                                    showError = true
+                                                }
                                             }
+                                        }) {
+                                            Image(systemName: "trash")
                                         }
-                                    }) {
-                                        Image(systemName: "trash")
                                     }
                                 }
                             }
