@@ -17,7 +17,7 @@ struct SearchView: View {
     
     var body: some View {
         NavigationStack {
-            SearchedView(searchText: $searchText, focused: $isFocused)
+            SearchableView(searchText: $searchText, focused: $isFocused)
                 .searchable(text: $searchText, prompt: "DevLog 검색")
             List {
                 if isFocused {
