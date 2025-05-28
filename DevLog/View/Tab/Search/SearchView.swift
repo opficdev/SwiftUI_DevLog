@@ -82,8 +82,8 @@ struct SearchView: View {
                             }
                         }
                     }
-                    .listRowSeparator(.hidden)  //  개발자 문서 섹션의 구분선 숨김
-                    .listSectionSeparator(.hidden)  //  개발자 문서 섹션의 구분선 숨김
+                    .listRowSeparator(.hidden)  //  섹션 내 요소의 구분선 숨김
+                    .listSectionSeparator(.hidden)  //  섹션의 구분선 숨김
                     .listRowBackground(Color.clear)
                 }
             }
