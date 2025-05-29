@@ -25,9 +25,10 @@ struct HomeView: View {
                         Section(content: {
                             ForEach(taskKinds.sorted(by: { $0.localizedName < $1.localizedName }), id: \.self) { kind in
                                 HStack {
+                                    let width = UIScreen.main.bounds.width * 0.08
                                     RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.cyan)
-                                        .frame(width: UIScreen.main.bounds.width * 0.1, height: UIScreen.main.bounds.width * 0.1)
+                                        .fill(kind.color)
+                                        .frame(width: width, height: width)
                                         .overlay {
                                             Image(systemName: kind.symbolName)
                                                 .foregroundStyle(Color.white)
@@ -36,12 +37,13 @@ struct HomeView: View {
                                     Text(kind.localizedName)
                                         .foregroundStyle(Color.primary)
                                 }
+                                .padding(.vertical, 2)
                             }
                         }, header: {
                             HStack {
                                 Text("TODO")
                                     .foregroundStyle(Color.primary)
-                                    .font(.headline)
+                                    .font(.title2)
                                     .bold()
                                 Spacer()
                                 Image(systemName: "ellipsis")

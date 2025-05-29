@@ -5,7 +5,7 @@
 //  Created by opfic on 5/29/25.
 //
 
-import Foundation
+import SwiftUI
 
 enum TaskKind: String, Identifiable, CaseIterable {
     case bug = "bug"                // 버그
@@ -43,5 +43,18 @@ enum TaskKind: String, Identifiable, CaseIterable {
        case .research: return NSLocalizedString("task_kind_research", comment: "Task kind: Research")
        case .etc: return NSLocalizedString("task_kind_etc", comment: "Task kind: Etc")
        }
-   }
+    }
+    
+    var color: Color {
+        switch self {
+            case .bug: return Color.red
+            case .feature: return Color.green
+            case .improvement: return Color.cyan
+            case .review: return Color.orange
+            case .test: return Color.purple
+            case .doc: return Color.yellow
+            case .research: return Color.teal
+            case .etc: return Color.gray
+        }
+    }
 }
