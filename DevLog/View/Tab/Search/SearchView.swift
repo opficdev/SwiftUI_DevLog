@@ -29,6 +29,12 @@ struct SearchView: View {
                     if let url = selectedDoc?.url {
                         WebView(url: url)
                             .navigationBarTitleDisplayMode(.inline) //  이렇게 명시해주지 않으면 iOS 18 미만에서는 Large 크기만큼의 상단의 영역을 어느정도 먹고있음
+                            .toolbar {
+                                ToolbarItem(placement: .principal) {
+                                    Text(selectedDoc!.title)
+                                        .bold()
+                                }
+                            }
                     }
                 }
             GeometryReader { geometry in
