@@ -100,20 +100,20 @@ struct SearchView: View {
                                     }
                                     .clipShape(RoundedRectangle(cornerRadius: 15))
                                     .frame(height: UIScreen.main.bounds.height / 4)
-                                    .swipeActions {
-                                        Button(role: .destructive, action: {
-                                            Task {
-                                                do {
-                                                    firebaseVM.devDocs.remove(at: idx)
-                                                    try await firebaseVM.deleteDevDoc(doc)
-                                                } catch {
-                                                    errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
-                                                    showError = true
-                                                }
+                                }
+                                .swipeActions {
+                                    Button(role: .destructive, action: {
+                                        Task {
+                                            do {
+                                                firebaseVM.devDocs.remove(at: idx)
+                                                try await firebaseVM.deleteDevDoc(doc)
+                                            } catch {
+                                                errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
+                                                showError = true
                                             }
-                                        }) {
-                                            Image(systemName: "trash")
                                         }
+                                    }) {
+                                        Image(systemName: "trash")
                                     }
                                 }
                             }
