@@ -1,6 +1,18 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
+    "" : {
+
+    },
+    "DevLog 검색" : {
+
+    },
+    "Go to LinkView" : {
+
+    },
+    "Hello, World!" : {
+
+    },
     "lime_green" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -121,6 +133,286 @@
           }
         }
       }
+    },
+    "task_kind_bug" : {
+      "comment" : "Task kind: Bug",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버그 수정"
+          }
+        }
+      }
+    },
+    "task_kind_chore" : {
+      "comment" : "Task kind: Chore",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빌드 및 의존성"
+          }
+        }
+      }
+    },
+    "task_kind_deploy" : {
+      "comment" : "Task kind: Deploy/Release",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "배포"
+          }
+        }
+      }
+    },
+    "task_kind_design" : {
+      "comment" : "Task kind: Design",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "디자인"
+          }
+        }
+      }
+    },
+    "task_kind_discussion" : {
+      "comment" : "Task kind: Discussion",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "회의"
+          }
+        }
+      }
+    },
+    "task_kind_doc" : {
+      "comment" : "Task kind: Documentation",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문서화"
+          }
+        }
+      }
+    },
+    "task_kind_etc" : {
+      "comment" : "Task kind: Etc",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기타"
+          }
+        }
+      }
+    },
+    "task_kind_feature" : {
+      "comment" : "Task kind: Feature",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신규 기능"
+          }
+        }
+      }
+    },
+    "task_kind_hotfix" : {
+      "comment" : "Task kind: Hotfix",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "긴급 패치"
+          }
+        }
+      }
+    },
+    "task_kind_improvement" : {
+      "comment" : "Task kind: Improvement",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개선"
+          }
+        }
+      }
+    },
+    "task_kind_learning" : {
+      "comment" : "Task kind: Learning/Retrospective",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "학습"
+          }
+        }
+      }
+    },
+    "task_kind_research" : {
+      "comment" : "Task kind: Research",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "조사"
+          }
+        }
+      }
+    },
+    "task_kind_review" : {
+      "comment" : "Task kind: Review",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리뷰"
+          }
+        }
+      }
+    },
+    "task_kind_test" : {
+      "comment" : "Task kind: Test",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "테스트"
+          }
+        }
+      }
+    },
+    "Test View" : {
+
+    },
+    "This is LinkView" : {
+
+    },
+    "TODO" : {
+
+    },
+    "URL" : {
+
+    },
+    "개인정보 처리방침" : {
+
+    },
+    "검색" : {
+
+    },
+    "검색 내용이 보여지는 곳" : {
+
+    },
+    "계정 삭제" : {
+
+    },
+    "계정 연동" : {
+
+    },
+    "네트워크 문제" : {
+
+    },
+    "네트워크 연결을 확인해주세요" : {
+
+    },
+    "로고 변경" : {
+
+    },
+    "로고 변경에 실패했습니다." : {
+
+    },
+    "로그아웃" : {
+
+    },
+    "로그아웃하시겠습니까?" : {
+
+    },
+    "로그인하면 사용 약관 및 개인 정보 취급 방침에 동의하게 됩니다." : {
+
+    },
+    "버전 정보" : {
+
+    },
+    "베타 테스트 참여" : {
+
+    },
+    "상태 설정" : {
+
+    },
+    "새 계정 연동" : {
+
+    },
+    "설정" : {
+
+    },
+    "신규 기능을 빠르게 만나볼 수 있습니다" : {
+
+    },
+    "알림" : {
+
+    },
+    "앱 내 컨텐츠를 검색할 수 있어요." : {
+
+    },
+    "앱 아이콘" : {
+
+    },
+    "연동된 계정" : {
+
+    },
+    "완료" : {
+
+    },
+    "웹페이지 추가" : {
+
+    },
+    "저장된 웹페이지가 없습니다.\n우측 '+' 버튼을 눌러 웹페이지를 추가해보세요." : {
+
+    },
+    "정말 탈퇴하시겠습니까?" : {
+
+    },
+    "추가" : {
+
+    },
+    "취소" : {
+
+    },
+    "탈퇴" : {
+
+    },
+    "테마" : {
+
+    },
+    "프로필" : {
+
+    },
+    "현재 계정" : {
+
+    },
+    "홈" : {
+
+    },
+    "확인" : {
+
+    },
+    "회원 탈퇴" : {
+
+    },
+    "회원 탈퇴가 진행되면 모든 데이터가 지워지고 복구할 수 없습니다." : {
+
     }
   },
   "version" : "1.0"
