@@ -57,63 +57,72 @@ struct SearchView: View {
                     }
                     else {
                         Section {
-                            ForEach(Array(zip(firebaseVM.WebPageInfos.indices, firebaseVM.WebPageInfos)), id: \.1.id) { idx, page in
-                                Button(action: {
-                                    selectedWebPage = page
-                                }) {
-                                    ZStack(alignment: .bottom) {
-                                        Color.white
-                                        if let uiImage = page.image {
-                                            GeometryReader { geo in
-                                                Image(uiImage: uiImage)
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: geo.size.width, height: geo.size.height)
-                                                    .clipped()
+                            if firebaseVM.WebPageInfos.isEmpty {
+                                Text("저장된 웹페이지가 없습니다.\n우측 '+' 버튼을 눌러 웹페이지를 추가해보세요.")
+                                    .foregroundStyle(Color.gray)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: geometry.size.height)
+                                    .multilineTextAlignment(.center)
+                            }
+                            else {
+                                ForEach(Array(zip(firebaseVM.WebPageInfos.indices, firebaseVM.WebPageInfos)), id: \.1.id) { idx, page in
+                                    Button(action: {
+                                        selectedWebPage = page
+                                    }) {
+                                        ZStack(alignment: .bottom) {
+                                            Color.white
+                                            if let uiImage = page.image {
+                                                GeometryReader { geo in
+                                                    Image(uiImage: uiImage)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: geo.size.width, height: geo.size.height)
+                                                        .clipped()
+                                                }
                                             }
-                                        }
-                                        else {
-                                            VStack {
-                                                Image(systemName: "globe")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(height: UIScreen.main.bounds.height / 5)
-                                                    .foregroundStyle(Color.gray)
-                                                    .padding()
+                                            else {
+                                                VStack {
+                                                    Image(systemName: "globe")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(height: UIScreen.main.bounds.height / 5)
+                                                        .foregroundStyle(Color.gray)
+                                                        .padding()
+                                                    Spacer()
+                                                }
+                                            }
+                                            HStack {
+                                                VStack(alignment: .leading) {
+                                                    Text(page.title)
+                                                        .foregroundStyle(Color.black)
+                                                        .multilineTextAlignment(.leading)
+                                                    Text(page.urlString)
+                                                        .foregroundStyle(Color.accentColor)
+                                                        .underline()
+                                                }
+                                                .padding()
                                                 Spacer()
                                             }
+                                            .background(Color.white)
+                                            
                                         }
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text(page.title)
-                                                    .foregroundStyle(Color.black)
-                                                    .multilineTextAlignment(.leading)
-                                                Text(page.urlString)
-                                                    .foregroundStyle(Color.accentColor)
-                                                    .underline()
-                                            }
-                                            .padding()
-                                            Spacer()
-                                        }
-                                        .background(Color.white)
-                                        
+                                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                                        .frame(height: UIScreen.main.bounds.height / 4)
                                     }
-                                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                                    .frame(height: UIScreen.main.bounds.height / 4)
-                                }
-                                .swipeActions {
-                                    Button(role: .destructive, action: {
-                                        Task {
-                                            do {
-                                                firebaseVM.WebPageInfos.remove(at: idx)
-                                                try await firebaseVM.deleteWebPageInfo(page)
-                                            } catch {
-                                                errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
-                                                showError = true
+                                    .swipeActions {
+                                        Button(role: .destructive, action: {
+                                            Task {
+                                                do {
+                                                    firebaseVM.WebPageInfos.remove(at: idx)
+                                                    try await firebaseVM.deleteWebPageInfo(page)
+                                                } catch {
+                                                    errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
+                                                    showError = true
+                                                }
                                             }
+                                        }) {
+                                            Image(systemName: "trash")
                                         }
-                                    }) {
-                                        Image(systemName: "trash")
                                     }
                                 }
                             }
