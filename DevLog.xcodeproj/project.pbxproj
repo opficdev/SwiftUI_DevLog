@@ -24,6 +24,7 @@
 		DFEA638A2DCAE47A00616AEC /* Exceptions for "DevLog" folder in "DevLog" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Config.xcconfig,
 				Info.plist,
 			);
 			target = DFD48AFF2DC4D6E2005905C5 /* DevLog */;
@@ -123,7 +124,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					DFD48AFF2DC4D6E2005905C5 = {
 						CreatedOnToolsVersion = 16.3;
