@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct SearchableView: View {
-    @Environment(\.isSearching) private var isSearching
+    @Environment(\.isSearching) private var is_searching
     @Binding var searchText: String
-    @Binding var focused: Bool
+    @Binding var isSearching: Bool
     
     var body: some View {
         EmptyView()
-        .onChange(of: isSearching) { newValue in
-            focused = newValue
+        .onChange(of: is_searching) { newValue in
+            isSearching = newValue
         }
     }
 }
