@@ -1,5 +1,5 @@
 //
-//  DeveloperDoc.swift
+//  WebPageInfo.swift
 //  DevLog
 //
 //  Created by opfic on 5/23/25.
@@ -9,7 +9,7 @@ import SwiftUI
 import LinkPresentation
 import UniformTypeIdentifiers
 
-struct DeveloperDoc: Identifiable, Hashable {
+struct WebPageInfo: Identifiable, Hashable {
     let id = UUID()
     var image: UIImage?
     var title: String
@@ -23,7 +23,7 @@ struct DeveloperDoc: Identifiable, Hashable {
         self.urlString = urlString
     }
 
-    static func fetch(from urlString: String) async throws -> DeveloperDoc {
+    static func fetch(from urlString: String) async throws -> WebPageInfo {
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
@@ -31,7 +31,7 @@ struct DeveloperDoc: Identifiable, Hashable {
         return await fetch(from: url)
     }
 
-    static func fetch(from url: URL) async -> DeveloperDoc {
+    static func fetch(from url: URL) async -> WebPageInfo {
         let provider = LPMetadataProvider()
         var image: UIImage? = nil
         var title: String = ""
@@ -46,7 +46,7 @@ struct DeveloperDoc: Identifiable, Hashable {
             print("Error fetching metadata: \(error.localizedDescription)")
         }
 
-        return DeveloperDoc(image: image, title: title, url: url, urlString: urlString)
+        return WebPageInfo(image: image, title: title, url: url, urlString: urlString)
     }
 
     static func convertToImage(_ metaData: LPLinkMetadata) async throws -> UIImage? {

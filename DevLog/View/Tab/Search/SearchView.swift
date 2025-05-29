@@ -16,22 +16,22 @@ struct SearchView: View {
     @State private var newURL: String = "https://"
     @State private var errorMessage: String = ""
     @State private var showError: Bool = false
-    @State private var selectedDoc: DeveloperDoc? = nil
+    @State private var selectedWebPage: WebPageInfo? = nil
     
     var body: some View {
         NavigationStack {
             SearchableView(searchText: $searchText, isSearching: $isSearching)
                 .searchable(text: $searchText, prompt: "DevLog 검색")
                 .navigationDestination(isPresented: Binding(
-                    get: { selectedDoc != nil },
-                    set: { if !$0 { selectedDoc = nil } }
+                    get: { selectedWebPage != nil },
+                    set: { if !$0 { selectedWebPage = nil } }
                 )) {
-                    if let url = selectedDoc?.url {
+                    if let url = selectedWebPage?.url {
                         WebView(url: url)
                             .navigationBarTitleDisplayMode(.inline) //  이렇게 명시해주지 않으면 iOS 18 미만에서는 Large 크기만큼의 상단의 영역을 어느정도 먹고있음
                             .toolbar {
                                 ToolbarItem(placement: .principal) {
-                                    Text(selectedDoc!.title)
+                                    Text(selectedWebPage!.title)
                                         .bold()
                                 }
                             }
@@ -57,13 +57,13 @@ struct SearchView: View {
                     }
                     else {
                         Section {
-                            ForEach(Array(zip(firebaseVM.devDocs.indices, firebaseVM.devDocs)), id: \.1.id) { idx, doc in
+                            ForEach(Array(zip(firebaseVM.WebPageInfos.indices, firebaseVM.WebPageInfos)), id: \.1.id) { idx, page in
                                 Button(action: {
-                                    selectedDoc = doc
+                                    selectedWebPage = page
                                 }) {
                                     ZStack(alignment: .bottom) {
                                         Color.white
-                                        if let uiImage = doc.image {
+                                        if let uiImage = page.image {
                                             GeometryReader { geo in
                                                 Image(uiImage: uiImage)
                                                     .resizable()
@@ -85,10 +85,10 @@ struct SearchView: View {
                                         }
                                         HStack {
                                             VStack(alignment: .leading) {
-                                                Text(doc.title)
+                                                Text(page.title)
                                                     .foregroundStyle(Color.black)
                                                     .multilineTextAlignment(.leading)
-                                                Text(doc.urlString)
+                                                Text(page.urlString)
                                                     .foregroundStyle(Color.accentColor)
                                                     .underline()
                                             }
@@ -105,8 +105,8 @@ struct SearchView: View {
                                     Button(role: .destructive, action: {
                                         Task {
                                             do {
-                                                firebaseVM.devDocs.remove(at: idx)
-                                                try await firebaseVM.deleteDevDoc(doc)
+                                                firebaseVM.WebPageInfos.remove(at: idx)
+                                                try await firebaseVM.deleteWebPageInfo(page)
                                             } catch {
                                                 errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
                                                 showError = true
@@ -141,7 +141,7 @@ struct SearchView: View {
                 } message: {
                     Text(errorMessage)
                 }
-                .alert("개발자 문서 추가", isPresented: $addNewLink) {
+                .alert("웹페이지 추가", isPresented: $addNewLink) {
                     TextField("URL", text: $newURL)
                     HStack {
                         Button(action: {
@@ -152,9 +152,9 @@ struct SearchView: View {
                         }
                         Button(action: {
                             Task {
-                                let newDoc = try await DeveloperDoc.fetch(from: newURL)
-                                try await firebaseVM.upsertDevDoc(newDoc, urlString: newURL)
-                                firebaseVM.devDocs.append(newDoc)
+                                let newPage = try await WebPageInfo.fetch(from: newURL)
+                                try await firebaseVM.upsertWebPageInfo(newPage, urlString: newURL)
+                                firebaseVM.WebPageInfos.append(newPage)
                                 newURL = "https://"
                                 dismiss()
                             }

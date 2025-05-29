@@ -40,7 +40,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     @Published var signIn: Bool? = nil
     
     // SearchView
-    @Published var devDocs: [DeveloperDoc] = [] // 개발자 문서 목록
+    @Published var WebPageInfos: [WebPageInfo] = [] // 개발자 문서 목록
     
     // ProfileView
     @Published var avatar = Image(systemName: "person.crop.circle.fill")
@@ -57,7 +57,7 @@ final class FirebaseViewModel: NSObject, ObservableObject {
                 guard let self = self else { return }
                 if user != nil {
                     Task {
-                        try await self.requestDevDocs()
+                        try await self.requestWebPageInfos()
                         if self.didSignedInBySession {
                             try await self.fetchUserInfo()
                             self.signIn = user != nil
@@ -832,7 +832,7 @@ extension FirebaseViewModel {
         }
     }
     
-    func requestDevDocs() async throws {
+    func requestWebPageInfos() async throws {
         guard let userId = userId else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -843,29 +843,29 @@ extension FirebaseViewModel {
                 self.isLoading = false
             }
             
-            let devDocsRef = db.document("users/\(userId)/userData/devDocs")
-            let doc = try await devDocsRef.getDocument()
+            let WebPageInfoRef = db.document("users/\(userId)/userData/webPageInfos")
+            let doc = try await WebPageInfoRef.getDocument()
             
             if doc.exists, let data = doc.data() {
-                if let devDocs = data["devDocs"] as? [String] {
-                    var result = [DeveloperDoc]()
-                    for url in devDocs {
-                        let doc = try await DeveloperDoc.fetch(from: url)
+                if let WebPageInfos = data["WebPageInfos"] as? [String] {
+                    var result = [WebPageInfo]()
+                    for url in WebPageInfos {
+                        let doc = try await WebPageInfo.fetch(from: url)
                         result.append(doc)
                     }
-                    self.devDocs = result
+                    self.WebPageInfos = result
                 }
                 else {
                     throw URLError(.badServerResponse)
                 }
             }
         } catch {
-            print("Error requesting dev docs: \(error.localizedDescription)")
+            print("Error requesting WebPageInfos: \(error.localizedDescription)")
             throw error
         }
     }
         
-    func upsertDevDoc(_ doc: DeveloperDoc, urlString: String) async throws {
+    func upsertWebPageInfo(_ info: WebPageInfo, urlString: String) async throws {
         guard let userId = userId else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -876,16 +876,16 @@ extension FirebaseViewModel {
                 self.isLoading = false
             }
             
-            let devDocsRef = db.document("users/\(userId)/userData/devDocs")
-            try await devDocsRef.setData(["devDocs": FieldValue.arrayUnion([urlString])], merge: true)
+            let WebPageInfosRef = db.document("users/\(userId)/userData/webPageInfos")
+            try await WebPageInfosRef.setData(["WebPageInfos": FieldValue.arrayUnion([urlString])], merge: true)
             
         } catch {
-            print("Error upserting dev docs: \(error.localizedDescription)")
+            print("Error upserting WebPageInfos: \(error.localizedDescription)")
             throw error
         }
     }
     
-    func deleteDevDoc(_ doc: DeveloperDoc) async throws {
+    func deleteWebPageInfo(_ info: WebPageInfo) async throws {
         guard let userId = userId else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -896,11 +896,11 @@ extension FirebaseViewModel {
                 self.isLoading = false
             }
             
-            let devDocsRef = db.document("users/\(userId)/userData/devDocs")
-            let urlString = doc.url.absoluteString
-            try await devDocsRef.updateData(["devDocs": FieldValue.arrayRemove([urlString])])
+            let WebPageInfosRef = db.document("users/\(userId)/userData/webPageInfos")
+            let urlString = info.url.absoluteString
+            try await WebPageInfosRef.updateData(["WebPageInfos": FieldValue.arrayRemove([urlString])])
         } catch {
-            print("Error deleting dev docs: \(error.localizedDescription)")
+            print("Error deleting WebPageInfos: \(error.localizedDescription)")
             throw error
         }
     }
