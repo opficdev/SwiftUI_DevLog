@@ -24,20 +24,22 @@ struct HomeView: View {
                     List {
                         Section(content: {
                             ForEach(taskKinds.sorted(by: { $0.localizedName < $1.localizedName }), id: \.self) { kind in
-                                HStack {
-                                    let width = UIScreen.main.bounds.width * 0.08
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(kind.color)
-                                        .frame(width: width, height: width)
-                                        .overlay {
-                                            Image(systemName: kind.symbolName)
-                                                .foregroundStyle(Color.white)
-                                                .font(.title3)
-                                        }
-                                    Text(kind.localizedName)
-                                        .foregroundStyle(Color.primary)
+                                NavigationLink(destination: TodoView(kind)) {
+                                    HStack {
+                                        let width = UIScreen.main.bounds.width * 0.08
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(kind.color)
+                                            .frame(width: width, height: width)
+                                            .overlay {
+                                                Image(systemName: kind.symbolName)
+                                                    .foregroundStyle(Color.white)
+                                                    .font(.title3)
+                                            }
+                                        Text(kind.localizedName)
+                                            .foregroundStyle(Color.primary)
+                                    }
+                                    .padding(.vertical, 2)
                                 }
-                                .padding(.vertical, 2)
                             }
                         }, header: {
                             HStack {
