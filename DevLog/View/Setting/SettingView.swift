@@ -15,7 +15,7 @@ struct SettingView: View {
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     
     var body: some View {
-        List {
+        Form {
             Section {
                 NavigationLink(destination: ThemeView().environmentObject(settingVM)) {
                     HStack {
