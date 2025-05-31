@@ -44,6 +44,7 @@ struct SearchView: View {
                             VStack {
                                 Spacer()
                                 Text("앱 내 컨텐츠를 검색할 수 있어요.")
+                                    .foregroundStyle(Color.gray)
                                 Spacer()
                             }
                             .frame(height: geometry.size.height)
