@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum TaskKind: String, Identifiable, CaseIterable {
-    case bug = "bug"                // 버그
+    case issue = "issue"              // 이슈
     case feature = "feature"        // 신규 기능
     case improvement = "improvement"// 개선/리팩터링
     case review = "review"          // 코드/문서 리뷰
@@ -21,7 +21,7 @@ enum TaskKind: String, Identifiable, CaseIterable {
 
     var symbolName: String {
         switch self {
-        case .bug: return "exclamationmark.triangle"
+        case .issue: return "exclamationmark.triangle"
         case .feature: return "sparkles"
         case .improvement: return "arrow.triangle.2.circlepath"
         case .review: return "eye"
@@ -34,7 +34,7 @@ enum TaskKind: String, Identifiable, CaseIterable {
     
     var localizedName: String {
        switch self {
-       case .bug: return NSLocalizedString("task_kind_bug", comment: "Task kind: Bug")
+       case .issue: return NSLocalizedString("task_kind_issue", comment: "Task kind: Issue")
        case .feature: return NSLocalizedString("task_kind_feature", comment: "Task kind: Feature")
        case .improvement: return NSLocalizedString("task_kind_improvement", comment: "Task kind: Improvement")
        case .review: return NSLocalizedString("task_kind_review", comment: "Task kind: Review")
@@ -47,7 +47,7 @@ enum TaskKind: String, Identifiable, CaseIterable {
     
     var color: Color {
         switch self {
-            case .bug: return Color.red
+            case .issue: return Color.red
             case .feature: return Color.green
             case .improvement: return Color.cyan
             case .review: return Color.orange

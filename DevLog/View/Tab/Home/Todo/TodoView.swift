@@ -18,7 +18,7 @@ struct TodoView: View {
         NavigationStack {
             VStack {
                 switch kind {
-                case .bug: BugView()
+                case .issue: IssueView()
                 case .feature: FeatureView()
                 case .improvement: ImprovementView()
                 case .review: ReviewView()
