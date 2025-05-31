@@ -53,7 +53,46 @@ struct SearchView: View {
                             .listRowBackground(Color.clear)
                         }
                         else {
-                            Text("검색 내용이 보여지는 곳")
+                            let webPages = firebaseVM.WebPageInfos.filter {
+                                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                                $0.urlString.localizedCaseInsensitiveContains(searchText)
+                            }
+                            if !webPages.isEmpty {
+                                ForEach(webPages, id: \.id) { page in
+                                    Button(action: {
+                                        selectedWebPage = page
+                                    }) {
+                                        HStack {
+                                            Group {
+                                                if let uiImage = page.image {
+                                                    Image(uiImage: uiImage)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                }
+                                                else {
+                                                    Image(systemName: "globe")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                }
+                                            }
+                                            .frame(
+                                                width: UIScreen.main.bounds.width / 5,
+                                                height: UIScreen.main.bounds.width / 5
+                                            )
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            
+                                            VStack(alignment: .leading) {
+                                                Text(page.title)
+                                                    .foregroundStyle(Color.primary)
+                                                    .bold()
+                                                Text(page.urlString)
+                                                    .foregroundStyle(Color.accentColor)
+                                                    .underline()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     else {
@@ -105,7 +144,6 @@ struct SearchView: View {
                                                 Spacer()
                                             }
                                             .background(Color.white)
-                                            
                                         }
                                         .clipShape(RoundedRectangle(cornerRadius: 15))
                                         .frame(height: UIScreen.main.bounds.height / 4)
