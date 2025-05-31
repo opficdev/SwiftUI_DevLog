@@ -19,7 +19,7 @@ struct HomeView: View {
             ZStack {
                 Color(.systemGroupedBackground).ignoresSafeArea()
                 VStack {
-                    SearchableView(isSearching: $isSearching)
+                    Searchable(isSearching: $isSearching)
                         .searchable(text: $searchText, prompt: "DevLog 검색")
                     List {
                         Section(content: {

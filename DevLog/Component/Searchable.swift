@@ -1,5 +1,5 @@
 //
-//  SearchableView.swift
+//  Searchable.swift
 //  DevLog
 //
 //  Created by opfic on 5/22/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SearchableView: View {
+struct Searchable: View {
     @Environment(\.isSearching) private var is_searching
     @Binding var isSearching: Bool
     

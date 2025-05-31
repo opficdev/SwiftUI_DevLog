@@ -20,7 +20,7 @@ struct SearchView: View {
     
     var body: some View {
         NavigationStack {
-            SearchableView(isSearching: $isSearching)
+            Searchable(isSearching: $isSearching)
                 .searchable(text: $searchText, prompt: "DevLog 검색")
                 .navigationDestination(isPresented: Binding(
                     get: { selectedWebPage != nil },
