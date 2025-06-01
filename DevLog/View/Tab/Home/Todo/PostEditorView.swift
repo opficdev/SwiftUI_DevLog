@@ -46,10 +46,8 @@ struct PostEditorView: View {
                     Button(action: {
                         dismiss()
                     }) {
-                        Image(systemName: "xmark")
-                            .font(.caption)
-                            .foregroundStyle(Color.accentColor)
-                    }
+                        Image(systemName: "xmark")}
+                    .bold()
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
@@ -59,7 +57,6 @@ struct PostEditorView: View {
                         }
                     }) {
                         Text("추가")
-                            .foregroundStyle(Color.accentColor)
                     }
                 }
             }
