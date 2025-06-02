@@ -11,7 +11,6 @@ struct TodoView: View {
     @State private var kind: TaskKind
     @State private var tasks: [String] = [] // 예시 데이터
     @State private var searchText: String = ""
-    @State private var isSearching: Bool = false
     @State private var showIssueFullScreen: Bool = false
     
     init(_ kind: TaskKind) {
@@ -45,7 +44,45 @@ struct TodoView: View {
                     PostEditorView("새 \(kind.localizedName)")
                 }
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Menu(content: {
+                            Section {
+                                Button(action: {
+                                    
+                                }) {
+                                    Text("정렬: 최신")
+                                }
+                                Button(action: {
+                                    
+                                }) {
+                                    Text("상위: 전체")
+                                }
+                                Button(action: {
+                                    
+                                }) {
+                                    Text("상위: 어제")
+                                }
+                                Button(action: {
+                                    
+                                }) {
+                                    Text("상위: 지난주")
+                                }
+                                Button(action: {
+                                    
+                                }) {
+                                    Text("상위: 지난달")
+                                }
+                                Button(action: {
+                                    
+                                }) {
+                                    Text("상위: 작년")
+                                }
+                            } header: {
+                                Text("필터 옵션")
+                            }
+                        }, label: {
+                            Image(systemName: "ellipsis")
+                        })
                         Button(action: {
                             showIssueFullScreen = true
                         }) {
@@ -62,4 +99,8 @@ struct TodoView: View {
             }
         }
     }
+}
+
+#Preview {
+    TodoView(.issue)
 }
