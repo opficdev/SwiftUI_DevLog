@@ -17,6 +17,7 @@ struct MainView: View {
                     Image(systemName: "house.fill")
                     Text("홈")
                 }
+                .environmentObject(firebaseVM)
             NotificationView()
                 .tabItem {
                     Image(systemName: "bell.fill")

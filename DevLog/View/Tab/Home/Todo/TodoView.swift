@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct TodoView: View {
+    @EnvironmentObject private var firebaseVM: FirebaseViewModel
     @State private var kind: TodoKind
-    @State private var tasks: [String] = [] // 예시 데이터
+    @State private var tasks: [Todo] = [] // 예시 데이터
     @State private var searchText: String = ""
     @State private var showIssueFullScreen: Bool = false
     
@@ -21,7 +22,7 @@ struct TodoView: View {
         NavigationStack {
             GeometryReader { geometry in
                 ScrollView {
-                    LazyVStack {
+                    LazyVStack(spacing: 0) {
                         if tasks.isEmpty {
                             VStack {
                                 Spacer()
@@ -33,15 +34,20 @@ struct TodoView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                         }
                         else {
-                            ForEach(tasks.filter { $0.contains(searchText) }, id: \.self) { issue in
-                                Text(issue)
+                            ForEach(tasks.filter { searchText.isEmpty ||
+                                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                                $0.content.localizedCaseInsensitiveContains(searchText) }, id: \.id) { task in
+//                                NavigationLink(destination: PostDetailView(task: task).environmentObject(firebaseVM)) {
+//
+//                                }
                             }
                         }
                     }
                 }
                 .navigationTitle(kind.localizedName)
                 .fullScreenCover(isPresented: $showIssueFullScreen) {
-                    PostEditorView("새 \(kind.localizedName)")
+                    PostEditorView(title: "새 \(kind.localizedName)", kind: kind)
+                        .environmentObject(firebaseVM)
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
@@ -98,9 +104,19 @@ struct TodoView: View {
                 )
             }
         }
+        .onAppear {
+            Task {
+                do {
+                    self.tasks = try await firebaseVM.requestTodoList(kind)
+                } catch {
+                    
+                }
+            }
+        }
     }
 }
 
 #Preview {
     TodoView(.issue)
+        .environmentObject(FirebaseViewModel())
 }

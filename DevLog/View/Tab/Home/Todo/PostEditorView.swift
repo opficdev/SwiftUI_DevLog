@@ -8,15 +8,19 @@
 import SwiftUI
 
 struct PostEditorView: View {
+    @EnvironmentObject private var firebaseVM: FirebaseViewModel
     @Environment(\.dismiss) private var dismiss
     private var navigationTitle: String
     @State private var title: String = ""
     @State private var dueDate: Date? = nil
     @State private var content: String = ""
+    @State private var tags: [String] = []
     @State private var isFocused: Bool = false
+    @State private var kind: TodoKind
     
-    init(_ title: String) {
+    init(title: String, kind: TodoKind) {
         self.navigationTitle = title
+        self._kind = State(initialValue: kind)
     }
     
     var body: some View {
@@ -33,6 +37,14 @@ struct PostEditorView: View {
                     ), displayedComponents: .date)
                         .datePickerStyle(.compact)
                         .padding(.horizontal)
+                    Divider()
+                    ScrollView {
+                        HStack {
+                            HStack {
+                                
+                            }
+                        }
+                    }
                     Divider()
                     UIKitTextEditor(text: $content, isFocused: $isFocused, placeholder: "내용을 입력하세요.")
                         .padding(.horizontal)
@@ -52,7 +64,13 @@ struct PostEditorView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         Task {
-                            
+                            let todo = Todo(
+                                title: title,
+                                content: content,
+                                tags: tags,
+                                kind: kind
+                            )
+                            try await firebaseVM.upsertTodoList(todo)
                             dismiss()
                         }
                     }) {
@@ -65,5 +83,6 @@ struct PostEditorView: View {
 }
 
 #Preview {
-    PostEditorView("")
+    PostEditorView(title: "", kind: .issue)
+        .environmentObject(FirebaseViewModel())
 }

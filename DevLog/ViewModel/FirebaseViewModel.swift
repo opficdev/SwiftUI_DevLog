@@ -33,12 +33,12 @@ final class FirebaseViewModel: NSObject, ObservableObject {
     var email: String { Auth.auth().currentUser?.email ?? "" }
     var currentProvider = ""
     
-    // ui
+    // UI
     @Published var isConnected = true   //  셀룰러 또는 와이파이 연결 상태
     @Published var isLoading = true    // 네트워크 작업 중인지 여부
     @Published var showNetworkAlert = false
     @Published var signIn: Bool? = nil
-    
+        
     // SearchView
     @Published var WebPageInfos: [WebPageInfo] = [] // 개발자 문서 목록
     
@@ -906,7 +906,52 @@ extension FirebaseViewModel {
     }
 }
 
-
+extension FirebaseViewModel {
+    func requestTodoList(_ kind: TodoKind) async throws -> [Todo] {
+        guard let userId = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            let collection = db.collection("users/\(userId)/todoLists/")
+            
+            let query = collection.whereField("kind", isEqualTo: kind.rawValue)
+            
+            let snapshot = try await query.getDocuments()
+            
+            return snapshot.documents.compactMap { Todo(from: $0) }
+        } catch {
+            print("Error requesting TodoList: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func upsertTodoList(_ todo: Todo) async throws {
+        guard let userId = userId else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            let collection = db.collection("users/\(userId)/todoLists/")
+            let docRef = collection.document(todo.id.uuidString)
+            
+            try await docRef.setData(todo.toDictionary(), merge: true)
+        } catch {
+            print("Error upserting TodoList: \(error.localizedDescription)")
+            throw error
+        }
+    }
+}
 
 extension FirebaseViewModel: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
