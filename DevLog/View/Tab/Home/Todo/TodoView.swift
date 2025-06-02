@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct TodoView: View {
-    @State private var kind: TaskKind
+    @State private var kind: TodoKind
     @State private var tasks: [String] = [] // 예시 데이터
     @State private var searchText: String = ""
     @State private var showIssueFullScreen: Bool = false
     
-    init(_ kind: TaskKind) {
+    init(_ kind: TodoKind) {
         self._kind = State(initialValue: kind)
     }
     
