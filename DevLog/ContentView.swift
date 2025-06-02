@@ -11,13 +11,14 @@ struct ContentView: View {
     @AppStorage("isFirstLaunch") var isFirstLaunch = true   // 앱을 최초 설치했을 때 기존 로그인 세션이 남아있으면 자동 로그인됨을 막음
     @StateObject private var firebaseVM = FirebaseViewModel()
     @StateObject private var networkVM = NetworkViewModel()
+    @StateObject private var authService = AuthService()
     
     var body: some View {
         ZStack {
             Color(UIColor.systemGroupedBackground).ignoresSafeArea()
             if let signIn = firebaseVM.signIn {
                 if signIn && !isFirstLaunch {
-                    MainView()
+                    MainView(auth: authService)
                         .environmentObject(firebaseVM)
                 }
                 else {

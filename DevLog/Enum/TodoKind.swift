@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum TodoKind: String, Identifiable, CaseIterable {
+enum TodoKind: String, Identifiable, CaseIterable, Codable {
     case issue = "issue"              // 이슈
     case feature = "feature"        // 신규 기능
     case improvement = "improvement"// 개선/리팩터링

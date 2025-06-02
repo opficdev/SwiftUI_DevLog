@@ -8,14 +8,12 @@
 import SwiftUI
 
 struct TodoView: View {
-    @EnvironmentObject private var firebaseVM: FirebaseViewModel
-    @State private var kind: TodoKind
-    @State private var tasks: [Todo] = [] // 예시 데이터
+    @StateObject private var todoVM: TodoViewModel
     @State private var searchText: String = ""
     @State private var showIssueFullScreen: Bool = false
     
-    init(_ kind: TodoKind) {
-        self._kind = State(initialValue: kind)
+    init(auth: AuthService, kind: TodoKind) {
+        self._todoVM = StateObject(wrappedValue: TodoViewModel(auth: auth, kind: kind))
     }
     
     var body: some View {
@@ -23,7 +21,7 @@ struct TodoView: View {
             GeometryReader { geometry in
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        if tasks.isEmpty {
+                        if todoVM.todos.isEmpty {
                             VStack {
                                 Spacer()
                                 Text("작성된 내용이 없습니다.")
@@ -34,7 +32,7 @@ struct TodoView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                         }
                         else {
-                            ForEach(tasks.filter { searchText.isEmpty ||
+                            ForEach(todoVM.todos.filter { searchText.isEmpty ||
                                 $0.title.localizedCaseInsensitiveContains(searchText) ||
                                 $0.content.localizedCaseInsensitiveContains(searchText) }, id: \.id) { task in
 //                                NavigationLink(destination: PostDetailView(task: task).environmentObject(firebaseVM)) {
@@ -44,10 +42,10 @@ struct TodoView: View {
                         }
                     }
                 }
-                .navigationTitle(kind.localizedName)
+                .navigationTitle(todoVM.kind.localizedName)
                 .fullScreenCover(isPresented: $showIssueFullScreen) {
-                    PostEditorView(title: "새 \(kind.localizedName)", kind: kind)
-                        .environmentObject(firebaseVM)
+                    PostEditorView(title: "새 \(todoVM.kind.localizedName)", kind: todoVM.kind)
+                        .environmentObject(todoVM)
                 }
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
@@ -100,23 +98,18 @@ struct TodoView: View {
                 .searchable(
                     text: $searchText,
                     placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: "\(kind.localizedName) 검색"
+                    prompt: "\(todoVM.kind.localizedName) 검색"
                 )
             }
         }
         .onAppear {
             Task {
                 do {
-                    self.tasks = try await firebaseVM.requestTodoList(kind)
+                    try await todoVM.requestTodoList()
                 } catch {
                     
                 }
             }
         }
     }
-}
-
-#Preview {
-    TodoView(.issue)
-        .environmentObject(FirebaseViewModel())
 }

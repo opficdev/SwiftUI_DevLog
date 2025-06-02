@@ -11,9 +11,14 @@ import SwiftUIIntrospect
 
 struct HomeView: View {
     @EnvironmentObject private var firebaseVM: FirebaseViewModel
+    @ObservedObject private var auth: AuthService
     @State private var searchText: String = ""
     @State private var isSearching: Bool = false
     @State private var taskKinds = TodoKind.allCases
+    
+    init(auth: AuthService) {
+        self.auth = auth
+    }
     
     var body: some View {
         NavigationStack {
@@ -25,7 +30,7 @@ struct HomeView: View {
                     List {
                         Section(content: {
                             ForEach(taskKinds.sorted(by: { $0.localizedName < $1.localizedName }), id: \.self) { kind in
-                                NavigationLink(destination: TodoView(kind).environmentObject(firebaseVM)) {
+                                NavigationLink(destination: TodoView(auth: auth, kind: kind).environmentObject(firebaseVM)) {
                                     HStack {
                                         let width = UIScreen.main.bounds.width * 0.08
                                         RoundedRectangle(cornerRadius: 8)
@@ -61,8 +66,4 @@ struct HomeView: View {
             .navigationTitle("홈")
         }
     }
-}
-
-#Preview {
-    HomeView()
 }

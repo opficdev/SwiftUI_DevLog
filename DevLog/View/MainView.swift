@@ -9,10 +9,15 @@ import SwiftUI
 
 struct MainView: View {
     @EnvironmentObject var firebaseVM: FirebaseViewModel
+    @ObservedObject var authService: AuthService
+    
+    init(auth: AuthService) {
+        self.authService = auth
+    }
     
     var body: some View {
         TabView {
-            HomeView()
+            HomeView(auth: authService)
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("홈")
@@ -36,9 +41,4 @@ struct MainView: View {
                 }
         }
     }
-}
-
-#Preview {
-    MainView()
-        .environmentObject(FirebaseViewModel())
 }
