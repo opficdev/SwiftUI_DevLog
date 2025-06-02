@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("isFirstLaunch") var isFirstLaunch = true   // 앱을 최초 설치했을 때 기존 로그인 세션이 남아있으면 자동 로그인됨을 막음
-    @StateObject var firebaseVM = FirebaseViewModel()
+    @StateObject private var firebaseVM = FirebaseViewModel()
+    @StateObject private var networkVM = NetworkViewModel()
     
     var body: some View {
         ZStack {
@@ -47,9 +48,9 @@ struct ContentView: View {
                 }
             }
         }
-        .alert("네트워크 문제", isPresented: $firebaseVM.showNetworkAlert) {
+        .alert("네트워크 문제", isPresented: $networkVM.showNetworkAlert) {
             Button(role: .cancel, action: {
-                firebaseVM.showNetworkAlert = false
+                networkVM.showNetworkAlert = false
             }) {
                 Text("확인")
             }
