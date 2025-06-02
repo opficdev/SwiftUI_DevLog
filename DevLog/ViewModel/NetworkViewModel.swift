@@ -22,8 +22,14 @@ final class NetworkViewModel: ObservableObject {
                 guard let self = self else { return }
                 self.isConnected = path.status == .satisfied
                 
-                if !path.usesInterfaceType(.wifi) && !path.usesInterfaceType(.cellular) && path.status != .satisfied {
+//                if !path.usesInterfaceType(.wifi) && !path.usesInterfaceType(.cellular) && path.status != .satisfied {
+//                    self.showNetworkAlert = true
+//                }
+                if !self.isConnected {
                     self.showNetworkAlert = true
+                }
+                else {
+                    self.showNetworkAlert = false
                 }
             }
         }
