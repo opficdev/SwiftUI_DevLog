@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject private var firebaseVM: FirebaseViewModel
-    @EnvironmentObject private var networkVM: NetworkViewModel
+    @EnvironmentObject private var netActService: NetworkActivityService
     @Environment(\.colorScheme) var colorScheme
     
     let screenWidth = UIScreen.main.bounds.width
@@ -25,7 +25,7 @@ struct LoginView: View {
                 Spacer()
                 VStack(spacing: 20) {
                     LoginButton(logo: Image("Google"), text: "구글 계정으로 로그인") {
-                        if networkVM.isConnected {
+                        if netActService.isConnected {
                             Task {
                                 do {
                                     try await firebaseVM.signInWithGoogle()
@@ -35,13 +35,13 @@ struct LoginView: View {
                             }
                         }
                         else {
-                            networkVM.showNetworkAlert = true
+                            netActService.showNetworkAlert = true
                         }
                     }
                     .frame(width: screenWidth * 3 / 4, height: screenWidth / 10)
                     
                     LoginButton(logo: Image("Github"), text: "깃헙 계정으로 로그인") {
-                        if networkVM.isConnected {
+                        if netActService.isConnected {
                             Task {
                                 do {
                                     try await firebaseVM.signInWithGithub()
@@ -51,13 +51,13 @@ struct LoginView: View {
                             }
                         }
                         else {
-                            networkVM.showNetworkAlert = true
+                            netActService.showNetworkAlert = true
                         }
                     }
                     .frame(width: screenWidth * 3 / 4, height: screenWidth / 10)
                         
                     LoginButton(logo: Image("Apple"), text: "애플 계정으로 로그인") {
-                        if networkVM.isConnected {
+                        if netActService.isConnected {
                             Task {
                                 do {
                                     try await firebaseVM.signInWithApple()
@@ -67,7 +67,7 @@ struct LoginView: View {
                             }
                         }
                         else {
-                            networkVM.showNetworkAlert = true
+                            netActService.showNetworkAlert = true
                         }
                     }
                     .frame(width: screenWidth * 3 / 4, height: screenWidth / 10)
