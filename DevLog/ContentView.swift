@@ -10,8 +10,8 @@ import SwiftUI
 struct ContentView: View {
     @AppStorage("isFirstLaunch") var isFirstLaunch = true   // 앱을 최초 설치했을 때 기존 로그인 세션이 남아있으면 자동 로그인됨을 막음
     @StateObject private var firebaseVM = FirebaseViewModel()
-    @StateObject private var networkVM = NetworkViewModel()
     @StateObject private var authService = AuthService()
+    @StateObject private var netActService = NetworkActivityService()
     
     var body: some View {
         ZStack {
@@ -49,9 +49,9 @@ struct ContentView: View {
                 }
             }
         }
-        .alert("네트워크 문제", isPresented: $networkVM.showNetworkAlert) {
+        .alert("네트워크 문제", isPresented: $netActService.showNetworkAlert) {   //  서비스는 본래 UI 작업에 관여하지 않는것이 원칙이지만, 비즈니스 로직에 의해 변경되는 변수이므로 부득이하게 사용
             Button(role: .cancel, action: {
-                networkVM.showNetworkAlert = false
+                netActService.showNetworkAlert = false
             }) {
                 Text("확인")
             }
