@@ -18,7 +18,7 @@ struct ContentView: View {
             Color(UIColor.systemGroupedBackground).ignoresSafeArea()
             if let signIn = firebaseVM.signIn {
                 if signIn && !isFirstLaunch {
-                    MainView(auth: authService)
+                    MainView(auth: authService, network: netActService)
                         .environmentObject(firebaseVM)
                 }
                 else {
