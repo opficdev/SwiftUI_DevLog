@@ -21,13 +21,7 @@ final class NetworkActivityService: ObservableObject {
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.isConnected = path.status == .satisfied
-            
-                if !self.isConnected {
-                    self.showNetworkAlert = true
-                }
-                else {
-                    self.showNetworkAlert = false
-                }
+                self.showNetworkAlert = !self.isConnected
             }
         }
         monitor.start(queue: queue)
