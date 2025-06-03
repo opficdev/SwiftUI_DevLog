@@ -44,7 +44,7 @@ struct TodoView: View {
                 }
                 .navigationTitle(todoVM.kind.localizedName)
                 .fullScreenCover(isPresented: $showIssueFullScreen) {
-                    PostEditorView(title: "새 \(todoVM.kind.localizedName)", kind: todoVM.kind)
+                    PostEditorView(title: "새 \(todoVM.kind.localizedName)")
                         .environmentObject(todoVM)
                 }
                 .toolbar {

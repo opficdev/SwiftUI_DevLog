@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PostEditorView: View {
-    @EnvironmentObject private var firebaseVM: FirebaseViewModel
+    @EnvironmentObject private var todoVM: TodoViewModel
     @Environment(\.dismiss) private var dismiss
     private var navigationTitle: String
     @State private var title: String = ""
@@ -16,11 +16,9 @@ struct PostEditorView: View {
     @State private var content: String = ""
     @State private var tags: [String] = []
     @State private var isFocused: Bool = false
-    @State private var kind: TodoKind
     
-    init(title: String, kind: TodoKind) {
+    init(title: String) {
         self.navigationTitle = title
-        self._kind = State(initialValue: kind)
     }
     
     var body: some View {
@@ -68,9 +66,9 @@ struct PostEditorView: View {
                                 title: title,
                                 content: content,
                                 tags: tags,
-                                kind: kind
+                                kind: todoVM.kind
                             )
-                            try await firebaseVM.upsertTodoList(todo)
+                            await todoVM.upsertTodoTask(todo)
                             dismiss()
                         }
                     }) {
@@ -80,9 +78,4 @@ struct PostEditorView: View {
             }
         }
     }
-}
-
-#Preview {
-    PostEditorView(title: "", kind: .issue)
-        .environmentObject(FirebaseViewModel())
 }
