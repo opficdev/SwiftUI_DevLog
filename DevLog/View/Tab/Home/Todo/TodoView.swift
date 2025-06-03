@@ -104,11 +104,7 @@ struct TodoView: View {
         }
         .onAppear {
             Task {
-                do {
-                    try await todoVM.requestTodoList()
-                } catch {
-                    
-                }
+                await todoVM.requestTodoList()
             }
         }
     }
