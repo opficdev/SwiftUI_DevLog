@@ -10,9 +10,11 @@ import SwiftUI
 struct MainView: View {
     @EnvironmentObject var firebaseVM: FirebaseViewModel
     @ObservedObject var authService: AuthService
+    @ObservedObject var networkService: NetworkActivityService
     
-    init(auth: AuthService) {
+    init(auth: AuthService, network: NetworkActivityService) {
         self.authService = auth
+        self.networkService = network
     }
     
     var body: some View {
@@ -28,7 +30,7 @@ struct MainView: View {
                     Image(systemName: "bell.fill")
                     Text("알림")
                 }
-            SearchView()
+            SearchView(auth: authService, network: networkService)
                 .environmentObject(firebaseVM)
                 .tabItem {
                     Image(systemName: "magnifyingglass")

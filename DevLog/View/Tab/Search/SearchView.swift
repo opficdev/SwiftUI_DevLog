@@ -9,29 +9,26 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var firebaseVM: FirebaseViewModel
-    @State private var searchText: String = ""
-    @State private var isSearching: Bool = false
-    @State private var addNewLink: Bool = false
-    @State private var newURL: String = "https://"
-    @State private var errorMessage: String = ""
-    @State private var showError: Bool = false
-    @State private var selectedWebPage: WebPageInfo? = nil
+    @StateObject private var searchVM: SearchViewModel
+    
+    init(auth: AuthService, network: NetworkActivityService) {
+        self._searchVM = StateObject(wrappedValue: SearchViewModel(auth: auth, network: network))
+    }
     
     var body: some View {
         NavigationStack {
-            Searchable(isSearching: $isSearching)
-                .searchable(text: $searchText, prompt: "DevLog 검색")
+            Searchable(isSearching: $searchVM.isSearching)
+                .searchable(text: $searchVM.searchText, prompt: "DevLog 검색")
                 .navigationDestination(isPresented: Binding(
-                    get: { selectedWebPage != nil },
-                    set: { if !$0 { selectedWebPage = nil } }
+                    get: { searchVM.selectedWebPage != nil },
+                    set: { if !$0 { searchVM.selectedWebPage = nil } }
                 )) {
-                    if let url = selectedWebPage?.url {
+                    if let url = searchVM.selectedWebPage?.url {
                         WebView(url: url)
                             .navigationBarTitleDisplayMode(.inline) //  이렇게 명시해주지 않으면 iOS 18 미만에서는 Large 크기만큼의 상단의 영역을 어느정도 먹고있음
                             .toolbar {
                                 ToolbarItem(placement: .principal) {
-                                    Text(selectedWebPage!.title)
+                                    Text(searchVM.selectedWebPage!.title)
                                         .bold()
                                 }
                             }
@@ -39,8 +36,8 @@ struct SearchView: View {
                 }
             GeometryReader { geometry in
                 List {
-                    if isSearching {
-                        if searchText.isEmpty {
+                    if searchVM.isSearching {
+                        if searchVM.searchText.isEmpty {
                             VStack {
                                 Spacer()
                                 Text("앱 내 컨텐츠를 검색할 수 있어요.")
@@ -53,14 +50,14 @@ struct SearchView: View {
                             .listRowBackground(Color.clear)
                         }
                         else {
-                            let webPages = firebaseVM.WebPageInfos.filter {
-                                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                                $0.urlString.localizedCaseInsensitiveContains(searchText)
+                            let webPages = searchVM.webPages.filter {
+                                $0.title.localizedCaseInsensitiveContains(searchVM.searchText) ||
+                                $0.urlString.localizedCaseInsensitiveContains(searchVM.searchText)
                             }
                             if !webPages.isEmpty {
                                 ForEach(webPages, id: \.id) { page in
                                     Button(action: {
-                                        selectedWebPage = page
+                                        searchVM.selectedWebPage = page
                                     }) {
                                         HStack {
                                             Group {
@@ -97,7 +94,7 @@ struct SearchView: View {
                     }
                     else {
                         Section {
-                            if firebaseVM.WebPageInfos.isEmpty {
+                            if searchVM.webPages.isEmpty {
                                 Text("저장된 웹페이지가 없습니다.\n우측 '+' 버튼을 눌러 웹페이지를 추가해보세요.")
                                     .foregroundStyle(Color.gray)
                                     .frame(maxWidth: .infinity)
@@ -105,9 +102,9 @@ struct SearchView: View {
                                     .multilineTextAlignment(.center)
                             }
                             else {
-                                ForEach(Array(zip(firebaseVM.WebPageInfos.indices, firebaseVM.WebPageInfos)), id: \.1.id) { idx, page in
+                                ForEach(Array(zip(searchVM.webPages.indices, searchVM.webPages)), id: \.1.id) { idx, page in
                                     Button(action: {
-                                        selectedWebPage = page
+                                        searchVM.selectedWebPage = page
                                     }) {
                                         ZStack(alignment: .bottom) {
                                             Color.white
@@ -151,13 +148,8 @@ struct SearchView: View {
                                     .swipeActions {
                                         Button(role: .destructive, action: {
                                             Task {
-                                                do {
-                                                    firebaseVM.WebPageInfos.remove(at: idx)
-                                                    try await firebaseVM.deleteWebPageInfo(page)
-                                                } catch {
-                                                    errorMessage = "웹페이지를 추가하던 중 오류가 발생했습니다."
-                                                    showError = true
-                                                }
+                                                await searchVM.deleteWebPage(webPage: page)
+                                                searchVM.webPages.remove(at: idx)
                                             }
                                         }) {
                                             Image(systemName: "trash")
@@ -176,34 +168,34 @@ struct SearchView: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
-                            addNewLink = true
+                            searchVM.addNewLink = true
                         }) {
                             Image(systemName: "plus")
                         }
                     }
                 }
-                .alert("", isPresented: $showError) {
+                .alert("", isPresented: $searchVM.showError) {
                     Button("확인", role: .cancel) {
-                        errorMessage = ""
+                        searchVM.errorMessage = ""
                     }
                 } message: {
-                    Text(errorMessage)
+                    Text(searchVM.errorMessage)
                 }
-                .alert("웹페이지 추가", isPresented: $addNewLink) {
-                    TextField("URL", text: $newURL)
+                .alert("웹페이지 추가", isPresented: $searchVM.addNewLink) {
+                    TextField("URL", text: $searchVM.newURL)
                     HStack {
                         Button(action: {
-                            newURL = "https://"
+                            searchVM.newURL = "https://"
                             dismiss()
                         }) {
                             Text("취소")
                         }
                         Button(action: {
                             Task {
-                                let newPage = try await WebPageInfo.fetch(from: newURL)
-                                try await firebaseVM.upsertWebPageInfo(newPage, urlString: newURL)
-                                firebaseVM.WebPageInfos.append(newPage)
-                                newURL = "https://"
+                                let newPage = try await WebPageInfo.fetch(from: searchVM.newURL)
+                                await searchVM.upsertWebPage(webPage: newPage)
+                                searchVM.webPages.append(newPage)
+                                searchVM.newURL = "https://"
                                 dismiss()
                             }
                         }) {
