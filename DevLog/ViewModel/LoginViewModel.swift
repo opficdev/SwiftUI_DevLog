@@ -16,54 +16,89 @@ import GoogleSignIn
 final class LoginViewModel: ObservableObject {
     private var didSignedInBySession = true
     private var cancellables = Set<AnyCancellable>()
-    private let auth: AuthService
     private let db = Firestore.firestore()
-    @Published var signIn: Bool = false
-    @Published var isLoading: Bool = true
     
-    init(auth: AuthService) {
+    @Published var signIn: Bool? = nil
+    @Published var showError: Bool = false
+    @Published var errorMsg: String = ""
+    
+    // NetworkActivityService와 연결되는 Published 프로퍼티
+    @Published var isConnected: Bool = true
+    @Published var isLoading: Bool = false
+    @Published var showNetworkAlert: Bool = false
+    
+    private let auth: AuthService
+    private let network: NetworkActivityService
+    
+    init(auth: AuthService, network: NetworkActivityService) {
         self.auth = auth
+        self.network = network
+    
+        // self.isLoading을 network.isLoading와 단방향 연결
+        self.$isLoading
+            .receive(on: DispatchQueue.main)
+            .assign(to: &self.network.$isLoading)
         
-        createAuthStatePublisher()
-            .receive(on: RunLoop.main)
-            .sink { [weak self] user in
-                guard let self = self else { return }
-                if user != nil {
-                    Task {
-//                        try await self.requestWebPageInfos()
-                        if self.didSignedInBySession {
-//                            try await self.fetchUserInfo()
-                            self.signIn = user != nil
-                            self.isLoading = false
-                        }
-                        // 이 경우에는 새로운 로그인 세션을 생성하므로 upsertUser로 로그인하게 됨
-                    }
-                }
-                else {
-                    self.didSignedInBySession = false
-                    self.signIn = user != nil
-                    self.isLoading = false
-                }
+        // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
+        network.$isConnected
+            .receive(on: DispatchQueue.main)
+            .assign(to: &self.$isConnected)
+        
+        // NetworkActivityService.showNetworkAlert를 self.showNetworkAlert와 단방향 연결
+        network.$showNetworkAlert
+            .receive(on: DispatchQueue.main)
+            .assign(to: &self.$showNetworkAlert)
+    }
+    
+    func signInWithApple() async {
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
             }
-            .store(in: &cancellables)
-    }
-    
-    // Firebase Auth 상태 변경을 Combine Publisher로 래핑
-    private func createAuthStatePublisher() -> AnyPublisher<User?, Never> {
-        let publisher = PassthroughSubject<User?, Never>()
-        
-        let handle = Auth.auth().addStateDidChangeListener { _, user in
-            publisher.send(user)
+            
+            try await auth.signInWithApple()
+            
+        } catch {
+            print("Error signing in with Apple: \(error.localizedDescription)")
+            self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
+            self.showError = true
         }
-        
-        return publisher
-            .handleEvents(receiveCancel: {
-                Auth.auth().removeStateDidChangeListener(handle)
-            })
-            .eraseToAnyPublisher()
     }
     
-    func signOut() async throws {
+    func signInWithGithub() async {
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            try await auth.signInWithGithub()
+            
+        } catch {
+            print("Error signing in with GitHub: \(error.localizedDescription)")
+            self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
+            self.showError = true
+        }
+    }
+    
+    func signInWithGoogle() async {
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            try await auth.signInWithGoogle()
+            
+        } catch {
+            print("Error signing in with Google: \(error.localizedDescription)")
+            self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
+            self.showError = true
+        }
+    }
+    
+    func signOut() async {
         do {
             self.isLoading = true
             defer {
@@ -73,27 +108,11 @@ final class LoginViewModel: ObservableObject {
                 throw URLError(.userAuthenticationRequired)
             }
             
-            self.signIn = false
-        
-            if user.providerData.contains(where: { $0.providerID == "google.com" }) {
-                GIDSignIn.sharedInstance.signOut()
-                try await GIDSignIn.sharedInstance.disconnect()
-            }
-    
-            let infoRef = db.document("users/\(user.uid)/userData/info")
-            let doc = try await infoRef.getDocument()
-            
-            if doc.exists {
-                try await infoRef.updateData(["fcmToken": FieldValue.delete()])
-            }
-            
-            try await Messaging.messaging().deleteToken()
-            
-            try Auth.auth().signOut()
-            self.didSignedInBySession = false
+            try await self.auth.signOut(user: user)
         } catch {
             print("Error signing out: \(error.localizedDescription)")
-            throw error
+            self.errorMsg = "로그아웃에 실패했습니다. 다시 시도해주세요."
+            self.showError = true
         }
     }
 }
