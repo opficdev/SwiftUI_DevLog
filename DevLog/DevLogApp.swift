@@ -11,10 +11,13 @@ import SwiftUI
 struct DevLogApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @AppStorage("theme") var theme: SystemTheme = .automatic
+    @StateObject private var container = AppContainer.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(container)
+                .environmentObject(container.loginVM)
                 .preferredColorScheme(theme.colorScheme)
         }
     }
