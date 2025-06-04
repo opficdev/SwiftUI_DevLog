@@ -9,21 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("isFirstLaunch") var isFirstLaunch = true   // 앱을 최초 설치했을 때 기존 로그인 세션이 남아있으면 자동 로그인됨을 막음
-    @StateObject private var firebaseVM = FirebaseViewModel()
-    @StateObject private var authService = AuthService()
-    @StateObject private var netActService = NetworkActivityService()
+    @EnvironmentObject var loginVM: LoginViewModel
     
     var body: some View {
         ZStack {
             Color(UIColor.systemGroupedBackground).ignoresSafeArea()
-            if let signIn = firebaseVM.signIn {
+            if let signIn = loginVM.signIn {
                 if signIn && !isFirstLaunch {
-                    MainView(auth: authService, network: netActService)
-                        .environmentObject(firebaseVM)
+                    MainView()
                 }
                 else {
                     LoginView()
-                        .environmentObject(firebaseVM)
+                        .environmentObject(loginVM)
                         .onAppear {
                             if isFirstLaunch {
                                 Task {
@@ -32,26 +29,26 @@ struct ContentView: View {
                             }
                         }
                 }
-                if firebaseVM.isLoading {
+                if loginVM.isLoading {
                     LoadingView()
                 }
             }
             else {
                 Color.clear.onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-                        if firebaseVM.signIn == nil {
+                        if loginVM.signIn == nil {
                             Task {
                                 isFirstLaunch = true
-                                try await firebaseVM.signOut()
+                                await loginVM.signOut()
                             }
                         }
                     }
                 }
             }
         }
-        .alert("네트워크 문제", isPresented: $netActService.showNetworkAlert) {   //  서비스는 본래 UI 작업에 관여하지 않는것이 원칙이지만, 비즈니스 로직에 의해 변경되는 변수이므로 부득이하게 사용
+        .alert("네트워크 문제", isPresented: $loginVM.showNetworkAlert) {
             Button(role: .cancel, action: {
-                netActService.showNetworkAlert = false
+                loginVM.showNetworkAlert = false
             }) {
                 Text("확인")
             }
@@ -62,7 +59,7 @@ struct ContentView: View {
             if isFirstLaunch {
                 Task {
                     isFirstLaunch = false
-                    try await firebaseVM.signOut()
+                    await loginVM.signOut()
                 }
             }
         }
