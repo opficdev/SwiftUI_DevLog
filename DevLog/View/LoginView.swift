@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject private var firebaseVM: FirebaseViewModel
-    @EnvironmentObject private var netActService: NetworkActivityService
+    @EnvironmentObject private var loginVM: LoginViewModel
     @Environment(\.colorScheme) var colorScheme
     
     let screenWidth = UIScreen.main.bounds.width
@@ -20,54 +19,33 @@ struct LoginView: View {
                 Spacer()
                 Image("Primary")
                     .resizable()
-                .scaledToFit()
-                .frame(width: screenWidth / 5)
+                    .scaledToFit()
+                    .frame(width: screenWidth / 5)
                 Spacer()
                 VStack(spacing: 20) {
                     LoginButton(logo: Image("Google"), text: "구글 계정으로 로그인") {
-                        if netActService.isConnected {
+                        if loginVM.isConnected {
                             Task {
-                                do {
-                                    try await firebaseVM.signInWithGoogle()
-                                } catch {
-                                    
-                                }
+                                await loginVM.signInWithGoogle()
                             }
-                        }
-                        else {
-                            netActService.showNetworkAlert = true
                         }
                     }
                     .frame(width: screenWidth * 3 / 4, height: screenWidth / 10)
                     
                     LoginButton(logo: Image("Github"), text: "깃헙 계정으로 로그인") {
-                        if netActService.isConnected {
+                        if loginVM.isConnected {
                             Task {
-                                do {
-                                    try await firebaseVM.signInWithGithub()
-                                } catch {
-                                    
-                                }
+                                await loginVM.signInWithGithub()
                             }
-                        }
-                        else {
-                            netActService.showNetworkAlert = true
                         }
                     }
                     .frame(width: screenWidth * 3 / 4, height: screenWidth / 10)
                         
                     LoginButton(logo: Image("Apple"), text: "애플 계정으로 로그인") {
-                        if netActService.isConnected {
+                        if loginVM.isConnected {
                             Task {
-                                do {
-                                    try await firebaseVM.signInWithApple()
-                                } catch {
-                                    
-                                }
+                                await loginVM.signInWithApple()
                             }
-                        }
-                        else {
-                            netActService.showNetworkAlert = true
                         }
                     }
                     .frame(width: screenWidth * 3 / 4, height: screenWidth / 10)
