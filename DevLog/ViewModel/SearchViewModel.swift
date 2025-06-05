@@ -21,10 +21,10 @@ final class SearchViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var selectedWebPage: WebPageInfo? = nil
     
-    init(auth: AuthService, network: NetworkActivityService, webPageService: WebPageService = WebPageService()) {
+    init(auth: AuthService, network: NetworkActivityService, webPage: WebPageService) {
         self.authService = auth
         self.networkService = network
-        self.webPageService = webPageService
+        self.webPageService = webPage
     }
     
     func requestWebPages() async {

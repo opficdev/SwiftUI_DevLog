@@ -15,6 +15,7 @@ class AppContainer: ObservableObject {
     private let apple = AppleSignInService()
     private let github = GithubSignInService()
     private let google = GoogleSignInService()
+    private let webPage = WebPageService()
     
     // 의존 서비스
     lazy var auth = AuthService(apple: apple, github: github, google: google, user: user)
@@ -27,7 +28,7 @@ class AppContainer: ObservableObject {
     }()
 
     lazy var searchVM: SearchViewModel = {
-        SearchViewModel(auth: auth, network: network)
+        SearchViewModel(auth: auth, network: network, webPage: webPage)
     }()
     
     lazy var settingVM: SettingViewModel = {
