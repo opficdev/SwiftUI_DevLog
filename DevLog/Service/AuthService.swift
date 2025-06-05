@@ -64,7 +64,7 @@ final class AuthService: ObservableObject {
         
         try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: "apple.com")
         
-        try await fetchUsrInfo(user: user)
+        try await fetchUserInfo(user: user)
     }
     
     func signInWithGithub() async throws {
@@ -74,7 +74,7 @@ final class AuthService: ObservableObject {
         
         try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
         
-        try await fetchUsrInfo(user: user)
+        try await fetchUserInfo(user: user)
     }
     
     func signInWithGoogle() async throws {
@@ -84,7 +84,7 @@ final class AuthService: ObservableObject {
         
         try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: "google.com")
         
-        try await fetchUsrInfo(user: user)
+        try await fetchUserInfo(user: user)
     }
     
     func signOut(user: User) async throws {
@@ -117,7 +117,7 @@ final class AuthService: ObservableObject {
         }
     }
     
-    private func fetchUsrInfo(user: User) async throws {
+    private func fetchUserInfo(user: User) async throws {
         let (avatar, statusMsg, currentProvider, providers) = try await userService.fetchUserInfo(user: user)
         
         self.avatar = avatar
