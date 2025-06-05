@@ -7,16 +7,11 @@
 
 import Foundation
 import Combine
-import FirebaseAuth
-import FirebaseFirestore
-import FirebaseMessaging
-import GoogleSignIn
 
 @MainActor
 final class LoginViewModel: ObservableObject {
     private var didSignedInBySession = true
     private var cancellables = Set<AnyCancellable>()
-    private let db = Firestore.firestore()
     
     @Published var signIn: Bool? = nil
     @Published var showError: Bool = false
@@ -27,6 +22,7 @@ final class LoginViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showNetworkAlert: Bool = false
     
+    // AuthService와 NetworkActivityService의 인스턴스
     private let auth: AuthService
     private let network: NetworkActivityService
     
@@ -49,12 +45,12 @@ final class LoginViewModel: ObservableObject {
             .assign(to: &self.network.$isLoading)
         
         // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
-        network.$isConnected
+        self.network.$isConnected
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$isConnected)
         
         // NetworkActivityService.showNetworkAlert를 self.showNetworkAlert와 단방향 연결
-        network.$showNetworkAlert
+        self.network.$showNetworkAlert
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$showNetworkAlert)
     }
@@ -66,7 +62,7 @@ final class LoginViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            try await auth.signInWithApple()
+            try await self.auth.signInWithApple()
             
         } catch {
             print("Error signing in with Apple: \(error.localizedDescription)")
@@ -113,9 +109,8 @@ final class LoginViewModel: ObservableObject {
             defer {
                 self.isLoading = false
             }
-            guard let user = Auth.auth().currentUser else {
-                throw URLError(.userAuthenticationRequired)
-            }
+            
+            guard let user = self.auth.user else { throw URLError(.userAuthenticationRequired) }
             
             try await self.auth.signOut(user: user)
         } catch {
