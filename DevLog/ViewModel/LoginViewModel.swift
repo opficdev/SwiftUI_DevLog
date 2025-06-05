@@ -33,6 +33,15 @@ final class LoginViewModel: ObservableObject {
     init(auth: AuthService, network: NetworkActivityService) {
         self.auth = auth
         self.network = network
+        
+        // auth.user가 nil이면 signIn을 false로 설정
+        self.auth.$user
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] user in
+                guard let self = self else { return }
+                self.signIn = user != nil
+            }
+            .store(in: &self.cancellables)
     
         // self.isLoading을 network.isLoading와 단방향 연결
         self.$isLoading
