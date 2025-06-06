@@ -10,9 +10,12 @@ import SwiftUI
 struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
     @AppStorage("appIcon") var appIcon: AppIcon = .primary
-    @StateObject private var settingVM = SettingViewModel()
-    @EnvironmentObject private var firebaseVM: FirebaseViewModel
+    @StateObject private var settingVM: SettingViewModel
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+    
+    init(settingVM: SettingViewModel) {
+        self._settingVM = StateObject(wrappedValue: settingVM)
+    }
     
     var body: some View {
         Form {
@@ -85,7 +88,7 @@ struct SettingView: View {
             }
             
             Section {
-                NavigationLink(destination: AccountView().environmentObject(firebaseVM)) {
+                NavigationLink(destination: AccountView()) {
                     Text("계정 연동")
                 }
                 Button(role: .destructive, action: {
@@ -115,9 +118,7 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
-                    // AppStorage 전체를 삭제하는 코드
-                    UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-                    try await firebaseVM.signOut()
+                    await settingVM.signOut()
                 }
             }) {
                 Text("확인")
@@ -133,9 +134,7 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
-                    // AppStorage 전체를 삭제하는 코드
-                    UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-                    try await firebaseVM.deleteUser()
+                    await settingVM.deleteUser()
                 }
             }) {
                 Text("탈퇴")
@@ -144,8 +143,4 @@ struct SettingView: View {
             Text("회원 탈퇴가 진행되면 모든 데이터가 지워지고 복구할 수 없습니다.")
         }
     }
-}
-
-#Preview {
-    SettingView()
 }
