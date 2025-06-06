@@ -12,8 +12,8 @@ struct TodoView: View {
     @State private var searchText: String = ""
     @State private var showIssueFullScreen: Bool = false
     
-    init(auth: AuthService, kind: TodoKind) {
-        self._todoVM = StateObject(wrappedValue: TodoViewModel(auth: auth, kind: kind))
+    init(todoVM: TodoViewModel) {
+        self._todoVM = StateObject(wrappedValue: todoVM)
     }
     
     var body: some View {
