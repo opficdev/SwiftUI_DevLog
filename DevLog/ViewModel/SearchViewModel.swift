@@ -18,7 +18,7 @@ final class SearchViewModel: ObservableObject {
     @Published var isSearching: Bool = false
     @Published var addNewLink: Bool = false
     @Published var newURL: String = "https://"
-    @Published var errorMessage: String = ""
+    @Published var errorMsg: String = ""
     @Published var selectedWebPage: WebPageInfo? = nil
     
     init(auth: AuthService, network: NetworkActivityService, webPage: WebPageService) {
@@ -40,7 +40,7 @@ final class SearchViewModel: ObservableObject {
             
         } catch {
             print("Error requesting web pages: \(error.localizedDescription)")
-            self.errorMessage = "웹 페이지를 불러오는 중 오류가 발생했습니다."
+            self.errorMsg = "웹 페이지를 불러오는 중 오류가 발생했습니다."
             self.showError = true
         }
     }
@@ -57,7 +57,7 @@ final class SearchViewModel: ObservableObject {
             
         } catch {
             print("Error upserting web page: \(error.localizedDescription)")
-            self.errorMessage = "웹 페이지를 저장하는 중 오류가 발생했습니다."
+            self.errorMsg = "웹 페이지를 저장하는 중 오류가 발생했습니다."
             self.showError = true
         }
     }
@@ -74,7 +74,7 @@ final class SearchViewModel: ObservableObject {
             
         } catch {
             print("Error deleting web page: \(error.localizedDescription)")
-            self.errorMessage = "웹 페이지를 삭제하는 중 오류가 발생했습니다."
+            self.errorMsg = "웹 페이지를 삭제하는 중 오류가 발생했습니다."
             self.showError = true
         }
     }

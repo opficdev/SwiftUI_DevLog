@@ -8,30 +8,23 @@
 import SwiftUI
 
 struct MainView: View {
-    @EnvironmentObject var firebaseVM: FirebaseViewModel
-    @ObservedObject var authService: AuthService
-    @ObservedObject var networkService: NetworkActivityService
-    
-    init(auth: AuthService, network: NetworkActivityService) {
-        self.authService = auth
-        self.networkService = network
-    }
+    @EnvironmentObject var container: AppContainer
     
     var body: some View {
         TabView {
-            HomeView(auth: authService)
+            HomeView()
+                .environmentObject(container.authSvc)
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("홈")
                 }
-                .environmentObject(firebaseVM)
             NotificationView()
                 .tabItem {
                     Image(systemName: "bell.fill")
                     Text("알림")
                 }
-            SearchView(auth: authService, network: networkService)
-                .environmentObject(firebaseVM)
+            SearchView()
+                .environmentObject(container.searchVM)
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                     Text("검색")
