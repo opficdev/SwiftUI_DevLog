@@ -13,7 +13,6 @@ struct MainView: View {
     var body: some View {
         TabView {
             HomeView()
-                .environmentObject(container.authSvc)
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("홈")
