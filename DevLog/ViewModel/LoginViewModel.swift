@@ -23,15 +23,15 @@ final class LoginViewModel: ObservableObject {
     @Published var showNetworkAlert: Bool = false
     
     // AuthService와 NetworkActivityService의 인스턴스
-    private let auth: AuthService
-    private let network: NetworkActivityService
+    private let authSvc: AuthService
+    private let networkSvc: NetworkActivityService
     
-    init(auth: AuthService, network: NetworkActivityService) {
-        self.auth = auth
-        self.network = network
+    init(authSvc: AuthService, networkSvc: NetworkActivityService) {
+        self.authSvc = authSvc
+        self.networkSvc = networkSvc
         
         // auth.user가 nil이면 signIn을 false로 설정
-        self.auth.$user
+        self.authSvc.$user
             .receive(on: DispatchQueue.main)
             .sink { [weak self] user in
                 guard let self = self else { return }
@@ -42,15 +42,15 @@ final class LoginViewModel: ObservableObject {
         // self.isLoading을 network.isLoading와 단방향 연결
         self.$isLoading
             .receive(on: DispatchQueue.main)
-            .assign(to: &self.network.$isLoading)
+            .assign(to: &self.networkSvc.$isLoading)
         
         // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
-        self.network.$isConnected
+        self.networkSvc.$isConnected
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$isConnected)
         
         // NetworkActivityService.showNetworkAlert를 self.showNetworkAlert와 단방향 연결
-        self.network.$showNetworkAlert
+        self.networkSvc.$showNetworkAlert
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$showNetworkAlert)
     }
@@ -62,7 +62,7 @@ final class LoginViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            try await self.auth.signInWithApple()
+            try await self.authSvc.signInWithApple()
             
         } catch {
             print("Error signing in with Apple: \(error.localizedDescription)")
@@ -78,7 +78,7 @@ final class LoginViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            try await auth.signInWithGithub()
+            try await self.authSvc.signInWithGithub()
             
         } catch {
             print("Error signing in with GitHub: \(error.localizedDescription)")
@@ -94,7 +94,7 @@ final class LoginViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            try await auth.signInWithGoogle()
+            try await self.authSvc.signInWithGoogle()
             
         } catch {
             print("Error signing in with Google: \(error.localizedDescription)")
@@ -110,9 +110,9 @@ final class LoginViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            guard let user = self.auth.user else { throw URLError(.userAuthenticationRequired) }
+            guard let user = self.authSvc.user else { throw URLError(.userAuthenticationRequired) }
             
-            try await self.auth.signOut(user: user)
+            try await self.authSvc.signOut(user: user)
         } catch {
             print("Error signing out: \(error.localizedDescription)")
             self.errorMsg = "로그아웃에 실패했습니다. 다시 시도해주세요."

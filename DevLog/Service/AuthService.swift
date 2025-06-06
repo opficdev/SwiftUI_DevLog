@@ -36,11 +36,11 @@ final class AuthService: ObservableObject {
     @Published var currentProvider: String = ""
     @Published var providers: [String] = []
     
-    init(apple: AppleSignInService, github: GithubSignInService, google: GoogleSignInService, user: UserService) {
-        self.appleService = apple
-        self.githubService = github
-        self.googleService = google
-        self.userService = user
+    init(appleSvc: AppleSignInService, githubSvc: GithubSignInService, googleSvc: GoogleSignInService, userSvc: UserService) {
+        self.appleService = appleSvc
+        self.githubService = githubSvc
+        self.googleService = googleSvc
+        self.userService = userSvc
         self.user = Auth.auth().currentUser
         
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, user in

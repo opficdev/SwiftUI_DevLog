@@ -12,27 +12,28 @@ class AppContainer: ObservableObject {
     static let shared = AppContainer()
     
     // 코어 서비스
-    private let apple = AppleSignInService()
-    private let github = GithubSignInService()
-    private let google = GoogleSignInService()
-    private let webPage = WebPageService()
+    private let appleSvc = AppleSignInService()
+    private let githubSvc = GithubSignInService()
+    private let googleSvc = GoogleSignInService()
+    private let webPageSvc = WebPageService()
+    private let todoSvc = TodoService()
     
     // 의존 서비스
-    lazy var auth = AuthService(apple: apple, github: github, google: google, user: user)
-    lazy var network = NetworkActivityService()
-    lazy var user = UserService(apple: apple, github: github)
+    lazy var authSvc = AuthService(appleSvc: appleSvc, githubSvc: githubSvc, googleSvc: googleSvc, userSvc: userSvc)
+    lazy var networkSvc = NetworkActivityService()
+    lazy var userSvc = UserService(appleSvc: appleSvc, githubSvc: githubSvc)
     
     // 캐싱된 뷰모델
     lazy var loginVM: LoginViewModel = {
-        LoginViewModel(auth: auth, network: network)
+        LoginViewModel(authSvc: authSvc, networkSvc: networkSvc)
     }()
 
     lazy var searchVM: SearchViewModel = {
-        SearchViewModel(auth: auth, network: network, webPage: webPage)
+        SearchViewModel(authSvc: authSvc, networkSvc: networkSvc, webPageSvc: webPageSvc)
     }()
     
     lazy var settingVM: SettingViewModel = {
-        SettingViewModel(auth: auth, network: network, user: user)
+        SettingViewModel(authSvc: authSvc, networkSvc: networkSvc, userSvc: userSvc)
     }()
     
     private init() {}

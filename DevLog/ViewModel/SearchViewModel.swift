@@ -9,9 +9,9 @@ import Foundation
 
 @MainActor
 final class SearchViewModel: ObservableObject {
-    private let authService: AuthService
-    private let networkService: NetworkActivityService
-    private let webPageService: WebPageService
+    private let authSvc: AuthService
+    private let networkSvc: NetworkActivityService
+    private let webPageSvc: WebPageService
     @Published var searchText: String = ""
     @Published var webPages: [WebPageInfo] = []
     @Published var showError: Bool = false
@@ -21,22 +21,22 @@ final class SearchViewModel: ObservableObject {
     @Published var errorMsg: String = ""
     @Published var selectedWebPage: WebPageInfo? = nil
     
-    init(auth: AuthService, network: NetworkActivityService, webPage: WebPageService) {
-        self.authService = auth
-        self.networkService = network
-        self.webPageService = webPage
+    init(authSvc: AuthService, networkSvc: NetworkActivityService, webPageSvc: WebPageService) {
+        self.authSvc = authSvc
+        self.networkSvc = networkSvc
+        self.webPageSvc = webPageSvc
     }
     
     func requestWebPages() async {
         do {
-            guard let userId = authService.userId else { throw URLError(.userAuthenticationRequired) }
+            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             
-            networkService.isLoading = true
+            self.networkSvc.isLoading = true
             defer {
-                networkService.isLoading = false
+                self.networkSvc.isLoading = false
             }
             
-            self.webPages = try await webPageService.requestWebPages(userId: userId)
+            self.webPages = try await self.webPageSvc.requestWebPages(userId: userId)
             
         } catch {
             print("Error requesting web pages: \(error.localizedDescription)")
@@ -47,13 +47,13 @@ final class SearchViewModel: ObservableObject {
     
     func upsertWebPage(webPage: WebPageInfo) async {
         do {
-            guard let userId = authService.userId else { throw URLError(.userAuthenticationRequired) }
-            networkService.isLoading = true
+            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            self.networkSvc.isLoading = true
             defer {
-                networkService.isLoading = false
+                self.networkSvc.isLoading = false
             }
             
-            try await webPageService.upsertWebPage(webPageInfo: webPage, userId: userId)
+            try await self.webPageSvc.upsertWebPage(webPageInfo: webPage, userId: userId)
             
         } catch {
             print("Error upserting web page: \(error.localizedDescription)")
@@ -64,13 +64,13 @@ final class SearchViewModel: ObservableObject {
     
     func deleteWebPage(webPage: WebPageInfo) async {
         do {
-            guard let userId = authService.userId else { throw URLError(.userAuthenticationRequired) }
-            networkService.isLoading = true
+            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            self.networkSvc.isLoading = true
             defer {
-                networkService.isLoading = false
+                self.networkSvc.isLoading = false
             }
             
-            try await webPageService.deleteWebPage(webPageInfo: webPage, userId: userId)
+            try await self.webPageSvc.deleteWebPage(webPageInfo: webPage, userId: userId)
             
         } catch {
             print("Error deleting web page: \(error.localizedDescription)")
