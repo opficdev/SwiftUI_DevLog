@@ -36,5 +36,10 @@ class AppContainer: ObservableObject {
         SettingViewModel(authSvc: authSvc, networkSvc: networkSvc, userSvc: userSvc)
     }()
     
+    // kind 라는 변수에 따라 뷰모델이 생성될 필요성에 의해 캐싱을 시도하지 않음
+    func todoVM(kind: TodoKind) -> TodoViewModel {
+        TodoViewModel(authSvc: authSvc, todoSvc: todoSvc, kind: kind)
+    }
+    
     private init() {}
 }
