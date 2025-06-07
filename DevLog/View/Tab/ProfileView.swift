@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject private var firebaseVM: FirebaseViewModel
+    @EnvironmentObject var container: AppContainer
+
     @FocusState private var focusedOnStatusMsg: Bool
     @State private var showDoneBtn: Bool = false
     
@@ -83,7 +85,7 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 0) {
-                        NavigationLink(destination: SettingView()) {
+                        NavigationLink(destination: SettingView(settingVM: container.settingVM)) {
                             Image(systemName: "gearshape")
                         }
                         Button(action: {
