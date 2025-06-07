@@ -13,12 +13,12 @@ import SwiftUI
 class UserService {
     private let db = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
-    private let appleService: AppleSignInService
-    private let githubService: GithubSignInService
+    private let apppleSvc: AppleSignInService
+    private let githubSvc: GithubSignInService
     
-    init(apple: AppleSignInService, github: GithubSignInService) {
-        self.appleService = apple
-        self.githubService = github
+    init(appleSvc: AppleSignInService, githubSvc: GithubSignInService) {
+        self.apppleSvc = appleSvc
+        self.githubSvc = githubSvc
     }
     
     // 유저를 Firestore에 저장 및 업데이트
@@ -63,11 +63,11 @@ class UserService {
     
     func deleteUser(user: User) async throws {
         if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
-            let appleToken = try await appleService.refreshAppleAccessToken()
-            try await appleService.revokeAppleAccessToken(token: appleToken)
+            let appleToken = try await self.apppleSvc.refreshAppleAccessToken()
+            try await self.apppleSvc.revokeAppleAccessToken(token: appleToken)
         }
         if user.providerData.contains(where: { $0.providerID == "github.com" }) {
-            try await githubService.revokeGitHubAccessToken()
+            try await self.githubSvc.revokeGitHubAccessToken()
         }
   
         let cleanUpFunction = functions.httpsCallable("userCleanup")
