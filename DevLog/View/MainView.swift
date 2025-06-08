@@ -22,8 +22,7 @@ struct MainView: View {
                     Image(systemName: "bell.fill")
                     Text("알림")
                 }
-            SearchView()
-                .environmentObject(container.searchVM)
+            SearchView(searchVM: container.searchVM)
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                     Text("검색")

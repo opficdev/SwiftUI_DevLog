@@ -11,8 +11,8 @@ struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var searchVM: SearchViewModel
     
-    init(auth: AuthService, network: NetworkActivityService) {
-        self._searchVM = StateObject(wrappedValue: SearchViewModel(auth: auth, network: network))
+    init(searchVM: SearchViewModel) {
+        self._searchVM = StateObject(wrappedValue: searchVM)
     }
     
     var body: some View {
