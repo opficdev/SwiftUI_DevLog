@@ -41,5 +41,9 @@ class AppContainer: ObservableObject {
         TodoViewModel(authSvc: authSvc, todoSvc: todoSvc, kind: kind)
     }
     
+    lazy var profileVM: ProfileViewModel = {
+        ProfileViewModel(authSvc: authSvc, userSvc: userSvc)
+    }()
+    
     private init() {}
 }

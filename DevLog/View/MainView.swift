@@ -27,7 +27,7 @@ struct MainView: View {
                     Image(systemName: "magnifyingglass")
                     Text("검색")
                 }
-            ProfileView()
+            ProfileView(container: self.container)
                 .tabItem {
                     Image(systemName: "person.crop.circle.fill")
                     Text("프로필")

@@ -8,18 +8,21 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject private var firebaseVM: FirebaseViewModel
-    @EnvironmentObject var container: AppContainer
-
+    @EnvironmentObject var container: AppContainer  //  settingVM을 주입하기 위함
+    @StateObject private var profileVM: ProfileViewModel
     @FocusState private var focusedOnStatusMsg: Bool
     @State private var showDoneBtn: Bool = false
+
+    init(container: AppContainer) {
+        self._profileVM = StateObject(wrappedValue: container.profileVM)
+    }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        firebaseVM.avatar
+                        profileVM.avatar
                             .resizable()
                             .scaledToFill()
                             .frame(width: 60, height: 60)
@@ -27,10 +30,10 @@ struct ProfileView: View {
                             .foregroundStyle(Color.gray)
                         
                         VStack(alignment: .leading) {
-                            Text(firebaseVM.name)
+                            Text(profileVM.name)
                                 .font(.title2)
                                 .bold()
-                            Text(firebaseVM.email)
+                            Text(profileVM.email)
                                 .font(.caption2)
                                 .foregroundStyle(Color.gray)
                         }
@@ -39,16 +42,16 @@ struct ProfileView: View {
                     HStack {
                         HStack {
                             Image(systemName: "face.smiling")
-                            TextField(text: $firebaseVM.statusMsg) {
+                            TextField(text: $profileVM.statusMsg) {
                                 HStack {
                                     Text("상태 설정")
                                 }
                             }
                             .focused($focusedOnStatusMsg)
                             
-                            if !firebaseVM.statusMsg.isEmpty && showDoneBtn {
+                            if !profileVM.statusMsg.isEmpty && showDoneBtn {
                                 Button(action: {
-                                    firebaseVM.statusMsg = ""
+                                    profileVM.statusMsg = ""
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
                                 }
@@ -65,11 +68,7 @@ struct ProfileView: View {
                             Button(action: {
                                 focusedOnStatusMsg = false
                                 Task {
-                                    do {
-                                        try await firebaseVM.upsertStatusMsg()
-                                    } catch {
-                                        
-                                    }
+                                    await profileVM.upsertStatusMsg()
                                 }
                             }) {
                                 Text("완료")
@@ -100,6 +99,13 @@ struct ProfileView: View {
                 withAnimation {
                     showDoneBtn = newValue
                 }
+            }
+            .alert("", isPresented: $profileVM.showAlert) {
+                Button("확인") {
+                    profileVM.showAlert = false
+                }
+            } message: {
+                Text(profileVM.alertMsg)
             }
         }
     }
