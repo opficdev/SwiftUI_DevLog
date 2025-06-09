@@ -11,6 +11,8 @@ struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
     @AppStorage("appIcon") var appIcon: AppIcon = .primary
     @StateObject private var settingVM: SettingViewModel
+    @State private var signOutAlert = false
+    @State private var deleteUserAlert = false
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     
     init(settingVM: SettingViewModel) {
@@ -92,7 +94,7 @@ struct SettingView: View {
                     Text("계정 연동")
                 }
                 Button(role: .destructive, action: {
-                    settingVM.signOutAlert = true
+                    signOutAlert = true
                 }) {
                     Text("로그아웃")
                 }
@@ -101,7 +103,7 @@ struct SettingView: View {
             HStack {
                 Spacer()
                 Button(role: .destructive, action: {
-                    settingVM.deleteUserAlert = true
+                    deleteUserAlert = true
                 }) {
                     Text("회원 탈퇴")
                         .font(.headline)
@@ -110,9 +112,9 @@ struct SettingView: View {
             }
         }
         .navigationTitle("설정")
-        .alert("로그아웃", isPresented: $settingVM.signOutAlert) {
+        .alert("로그아웃", isPresented: $signOutAlert) {
             Button(role: .cancel, action: {
-                settingVM.signOutAlert = false
+                signOutAlert = false
             }) {
                 Text("취소")
             }
@@ -126,9 +128,9 @@ struct SettingView: View {
         } message: {
             Text("로그아웃하시겠습니까?")
         }
-        .alert("정말 탈퇴하시겠습니까?", isPresented: $settingVM.deleteUserAlert) {
+        .alert("정말 탈퇴하시겠습니까?", isPresented: $deleteUserAlert) {
             Button(role: .cancel, action: {
-                settingVM.deleteUserAlert = false
+                deleteUserAlert = false
             }) {
                 Text("취소")
             }
@@ -141,6 +143,15 @@ struct SettingView: View {
             }
         } message: {
             Text("회원 탈퇴가 진행되면 모든 데이터가 지워지고 복구할 수 없습니다.")
+        }
+        .alert("", isPresented: $settingVM.showAlert) {
+            Button(role: .cancel, action: {
+                settingVM.showAlert = false
+            }) {
+                Text("확인")
+            }
+        } message: {
+            Text(settingVM.alertMsg)
         }
     }
 }

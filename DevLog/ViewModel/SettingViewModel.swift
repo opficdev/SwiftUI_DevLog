@@ -16,9 +16,8 @@ class SettingViewModel: ObservableObject {
     @Published var theme: String = ""
     @Published var appIcon: String = ""
     
-    @Published var signIn: Bool? = nil
-    @Published var deleteUserAlert: Bool = false
-    @Published var signOutAlert: Bool = false
+    @Published var showAlert: Bool = false
+    @Published var alertMsg: String = ""
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
@@ -74,7 +73,8 @@ class SettingViewModel: ObservableObject {
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
         } catch {
             print("Error signing out: \(error.localizedDescription)")
-            self.signOutAlert = true
+            self.alertMsg = "로그아웃 중 오류가 발생했습니다."
+            self.showAlert = true
         }
     }
     
@@ -92,7 +92,8 @@ class SettingViewModel: ObservableObject {
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
         } catch {
             print("Error deleting user: \(error.localizedDescription)")
-            self.deleteUserAlert = true
+            self.alertMsg = "회원탈퇴 중 오류가 발생했습니다."
+            self.showAlert = true
         }
     }
 }
