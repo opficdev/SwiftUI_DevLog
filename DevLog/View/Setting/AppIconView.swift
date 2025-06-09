@@ -85,5 +85,5 @@ struct AppIconView: View {
 
 #Preview {
     AppIconView()
-        .environmentObject(SettingViewModel())
+        .environmentObject(AppContainer.shared.settingVM)
 }
