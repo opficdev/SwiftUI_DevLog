@@ -1,7 +1,8 @@
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 
-export const userCleanup = onCall(
+
+export const deleteAllUserFirestoreData = onCall(
   {
     cors: true,
     maxInstances: 10,
