@@ -105,24 +105,66 @@ final class AuthService: ObservableObject {
         try Auth.auth().signOut()
     }
     
-    func linkWithProviders(provider: String) async throws {
+    func deleteAuth() async throws {
+        guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
+        
+        if user.providerData.contains(where: { $0.providerID == "github.com" }) {
+            try await self.githubSvc.revokeGitHubAccessToken()
+        }
+        if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
+            let appleToken = try await self.appleSvc.refreshAppleAccessToken()
+            try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
+        }
+        
+        let deleteFunction = functions.httpsCallable("deleteAllUserFirestoreData")
+        
+        let _ = try await deleteFunction.call(["userId": user.uid])
+        
+        try await signOut()
+        try await user.delete()
+    }
+    
+    func linkWithProvider(provider: String) async throws {
         if provider == "apple.com" {
-            try await appleService.linkWithApple()
+            try await self.appleSvc.linkWithApple()
         }
         else if provider == "github.com" {
-            try await githubService.linkWithGithub()
+            try await self.githubSvc.linkWithGithub()
         }
         else if provider == "google.com" {
-            try await googleService.linkWithGoogle()
+            try await self.googleSvc.linkWithGoogle()
         }
     }
     
-    private func fetchUserInfo(user: User) async throws {
-        let (avatar, statusMsg, currentProvider, providers) = try await userService.fetchUserInfo(user: user)
+    func unlinkFromProvider(provider: String) async throws {
+        guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
         
-        self.avatar = avatar
-        self.statusMsg = statusMsg
-        self.currentProvider = currentProvider
-        self.providers = providers
+        if let index = self.providers.firstIndex(of: provider) {
+            self.providers.remove(at: index)
+        }
+        
+        if provider == "google.com" {
+            if user.providerData.contains(where: { $0.providerID == provider }) {
+                GIDSignIn.sharedInstance.signOut()
+                try await GIDSignIn.sharedInstance.disconnect()
+            }
+        }
+        else if provider == "github.com" {
+            if user.providerData.contains(where: { $0.providerID == provider }) {
+                try await self.githubSvc.revokeGitHubAccessToken()
+            }
+        }
+        else if provider == "apple.com" {
+            if user.providerData.contains(where: { $0.providerID == provider }) {
+                let appleToken = try await self.appleSvc.refreshAppleAccessToken()
+                try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
+                let tokensRef = db.document("users/\(user.uid)/userData/tokens")
+                let doc = try await tokensRef.getDocument()
+                if doc.exists {
+                    try await tokensRef.updateData(["appleRefreshToken": FieldValue.delete()])
+                }
+            }
+        }
+        _ = try await user.unlink(fromProvider: provider)
     }
 }

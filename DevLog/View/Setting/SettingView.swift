@@ -136,7 +136,7 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
-                    await settingVM.deleteUser()
+                    await settingVM.deleteAuth()
                 }
             }) {
                 Text("탈퇴")

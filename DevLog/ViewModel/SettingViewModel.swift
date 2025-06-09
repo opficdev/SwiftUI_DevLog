@@ -65,9 +65,8 @@ class SettingViewModel: ObservableObject {
             defer {
                 self.isLoading = false
             }
-            guard let user = self.authSvc.user else { throw URLError(.userAuthenticationRequired) }
             
-            try await self.authSvc.signOut(user: user)
+            try await self.authSvc.signOut()
             
             // AppStorage 전체를 삭제하는 코드
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
@@ -78,16 +77,14 @@ class SettingViewModel: ObservableObject {
         }
     }
     
-    func deleteUser() async {
+    func deleteAuth() async {
         do {
             self.isLoading = true
             defer {
                 self.isLoading = false
             }
             
-            guard let user = self.authSvc.user else { throw URLError(.userAuthenticationRequired) }
-            
-            try await self.userSvc.deleteUser(user: user)
+            try await self.authSvc.deleteAuth()
             
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
         } catch {
