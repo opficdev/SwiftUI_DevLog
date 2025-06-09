@@ -17,15 +17,15 @@ class AppContainer: ObservableObject {
     private let googleSvc = GoogleSignInService()
     private let webPageSvc = WebPageService()
     private let todoSvc = TodoService()
+    private let userSvc = UserService()
+    lazy var networkSvc = NetworkActivityService()
     
     // 의존 서비스
-    lazy var authSvc = AuthService(appleSvc: appleSvc, githubSvc: githubSvc, googleSvc: googleSvc, userSvc: userSvc)
-    lazy var networkSvc = NetworkActivityService()
-    lazy var userSvc = UserService(appleSvc: appleSvc, githubSvc: githubSvc)
+    lazy var authSvc = AuthService(appleSvc: appleSvc, githubSvc: githubSvc, googleSvc: googleSvc)
     
     // 캐싱된 뷰모델
     lazy var loginVM: LoginViewModel = {
-        LoginViewModel(authSvc: authSvc, networkSvc: networkSvc)
+        LoginViewModel(authSvc: authSvc, networkSvc: networkSvc, userSvc: userSvc)
     }()
 
     lazy var searchVM: SearchViewModel = {

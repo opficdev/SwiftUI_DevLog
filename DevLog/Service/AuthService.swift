@@ -21,33 +21,31 @@ final class AuthService: ObservableObject {
     private let functions = Functions.functions(region: "asia-northeast3")
     private var appleSignInDelegate: AppleSignInDelegate?
     
-    private let appleService: AppleSignInService
-    private let githubService: GithubSignInService
-    private let googleService: GoogleSignInService
-    private let userService: UserService
+    private let appleSvc: AppleSignInService
+    private let githubSvc: GithubSignInService
+    private let googleSvc: GoogleSignInService
     private var authStateHandler: AuthStateDidChangeListenerHandle?
     
     @Published var user: User? = nil
     @Published var userId: String? = nil
-    @Published var userEmail: String? = nil
     
-    @Published var avatar: Image = Image(systemName: "person.crop.circle.fill")
-    @Published var statusMsg: String = ""
     @Published var currentProvider: String = ""
+    @Published var email: String = ""
     @Published var providers: [String] = []
     
-    init(appleSvc: AppleSignInService, githubSvc: GithubSignInService, googleSvc: GoogleSignInService, userSvc: UserService) {
-        self.appleService = appleSvc
-        self.githubService = githubSvc
-        self.googleService = googleSvc
-        self.userService = userSvc
+    init(appleSvc: AppleSignInService, githubSvc: GithubSignInService, googleSvc: GoogleSignInService) {
+        self.appleSvc = appleSvc
+        self.githubSvc = githubSvc
+        self.googleSvc = googleSvc
         self.user = Auth.auth().currentUser
         
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self = self else { return }
             self.user = user
             self.userId = user == nil ? nil : user!.uid
-            self.userEmail = user?.email
+            
+            self.email = user?.email ?? ""
+            self.providers = user?.providerData.map { $0.providerID } ?? []
         }
     }
     
@@ -57,37 +55,40 @@ final class AuthService: ObservableObject {
         }
     }
     
-    func signInWithApple() async throws {
-        let user = try await appleService.signInWithApple()
+    func signInWithApple() async throws -> (User, String) {
+        
+        let user = try await self.appleSvc.signInWithApple()
+        
+        self.currentProvider = "apple.com"
         
         let fcmToken = try await Messaging.messaging().token()
         
-        try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: "apple.com")
-        
-        try await fetchUserInfo(user: user)
+        return (user, fcmToken)
     }
     
-    func signInWithGithub() async throws {
-        let (user, accessToken) = try await githubService.signInWithGithub()
+    func signInWithGithub() async throws -> (User, String, String) {
+        let (user, accessToken) = try await self.githubSvc.signInWithGithub()
         
         let fcmToken = try await Messaging.messaging().token()
         
-        try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
+        self.currentProvider = "github.com"
         
-        try await fetchUserInfo(user: user)
+        return (user, fcmToken, accessToken)
     }
     
-    func signInWithGoogle() async throws {
-        let user = try await googleService.signInWithGoogle()
+    func signInWithGoogle() async throws -> (User, String) {
+        let user = try await self.googleSvc.signInWithGoogle()
+        
+        self.currentProvider = "google.com"
         
         let fcmToken = try await Messaging.messaging().token()
         
-        try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: "google.com")
-        
-        try await fetchUserInfo(user: user)
+        return (user, fcmToken)
     }
     
-    func signOut(user: User) async throws {
+    func signOut() async throws {
+        guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
+        
         if user.providerData.contains(where: { $0.providerID == "google.com" }) {
             GIDSignIn.sharedInstance.signOut()
             try await GIDSignIn.sharedInstance.disconnect()

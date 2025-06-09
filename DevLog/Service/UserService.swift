@@ -13,13 +13,10 @@ import SwiftUI
 class UserService {
     private let db = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
-    private let apppleSvc: AppleSignInService
-    private let githubSvc: GithubSignInService
     
-    init(appleSvc: AppleSignInService, githubSvc: GithubSignInService) {
-        self.apppleSvc = appleSvc
-        self.githubSvc = githubSvc
-    }
+    @Published var name: String = ""
+    @Published var avatar: Image = Image(systemName: "person.crop.circle.fill")
+    @Published var statusMsg: String = ""
     
     // 유저를 Firestore에 저장 및 업데이트
     func upsertUser(user: User, fcmToken: String, provider: String, accessToken: String? = nil) async throws {
@@ -61,23 +58,8 @@ class UserService {
         try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic", "appIcon": "automatic"], merge: true)
     }
     
-    func deleteUser(user: User) async throws {
-        if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
-            let appleToken = try await self.apppleSvc.refreshAppleAccessToken()
-            try await self.apppleSvc.revokeAppleAccessToken(token: appleToken)
-        }
-        if user.providerData.contains(where: { $0.providerID == "github.com" }) {
-            try await self.githubSvc.revokeGitHubAccessToken()
-        }
-  
-        let cleanUpFunction = functions.httpsCallable("userCleanup")
-        
-        let _ = try await cleanUpFunction.call(["userId": user.uid])
-    }
-    
-    func fetchUserInfo(user: User) async throws -> (Image, String, String, [String]) {
+    func fetchUserInfo(user: User) async throws {
         var avatar = Image(systemName: "person.crop.circle.fill")
-        var statusMsg = "", currentProvider = "", providers: [String] = []
         
         if let url = user.photoURL {
             let (data, _) = try await URLSession.shared.data(from: url)
@@ -85,15 +67,15 @@ class UserService {
                 avatar = Image(uiImage: uiImage)
             }
         }
-                    
-        let infoRef = db.document("users/\(user.uid)/userData/info")
-        let doc = try await infoRef.getDocument()
-        if let data = doc.data() {
-            statusMsg = data["statusMsg"] as? String ?? ""
-            currentProvider = data["currentProvider"] as? String ?? ""
-            providers = user.providerData.compactMap({ $0.providerID })
-        }
+                
+        self.avatar = avatar
+        self.name = user.displayName ?? String(user.email?.split(separator: "@").first ?? "")
+        self.statusMsg = statusMsg
+    }
+    
+    func upsertStatusMsg(userId: String, statusMsg: String) async throws {
+        let infoRef = db.document("users/\(userId)/userData/info")
         
-        return (avatar, statusMsg, currentProvider, providers)
+        try await infoRef.setData(["statusMsg": statusMsg], merge: true)
     }
 }
