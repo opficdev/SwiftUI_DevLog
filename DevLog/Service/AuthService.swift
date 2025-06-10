@@ -150,35 +150,40 @@ final class AuthService: ObservableObject {
     }
     
     func unlinkFromProvider(provider: String) async throws {
-        guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
-        
-        if let index = self.providers.firstIndex(of: provider) {
-            self.providers.remove(at: index)
-        }
-        
-        if provider == "google.com" {
-            if user.providerData.contains(where: { $0.providerID == provider }) {
-                GIDSignIn.sharedInstance.signOut()
-                try await GIDSignIn.sharedInstance.disconnect()
+        do {
+            guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
+            
+            if let index = self.providers.firstIndex(of: provider) {
+                self.providers.remove(at: index)
             }
-        }
-        else if provider == "github.com" {
-            if user.providerData.contains(where: { $0.providerID == provider }) {
-                try await self.githubSvc.revokeGitHubAccessToken()
-            }
-        }
-        else if provider == "apple.com" {
-            if user.providerData.contains(where: { $0.providerID == provider }) {
-                let appleToken = try await self.appleSvc.refreshAppleAccessToken()
-                try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
-                let tokensRef = db.document("users/\(user.uid)/userData/tokens")
-                let doc = try await tokensRef.getDocument()
-                if doc.exists {
-                    try await tokensRef.updateData(["appleRefreshToken": FieldValue.delete()])
+            
+            if provider == "google.com" {
+                if user.providerData.contains(where: { $0.providerID == provider }) {
+                    GIDSignIn.sharedInstance.signOut()
+                    try await GIDSignIn.sharedInstance.disconnect()
                 }
             }
+            else if provider == "github.com" {
+                if user.providerData.contains(where: { $0.providerID == provider }) {
+                    try await self.githubSvc.revokeGitHubAccessToken()
+                }
+            }
+            else if provider == "apple.com" {
+                if user.providerData.contains(where: { $0.providerID == provider }) {
+                    let appleToken = try await self.appleSvc.refreshAppleAccessToken()
+                    try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
+                    let tokensRef = db.document("users/\(user.uid)/userData/tokens")
+                    let doc = try await tokensRef.getDocument()
+                    if doc.exists {
+                        try await tokensRef.updateData(["appleRefreshToken": FieldValue.delete()])
+                    }
+                }
+            }
+            _ = try await user.unlink(fromProvider: provider)
+        } catch {
+            self.providers.append(provider)
+            throw error
         }
-        _ = try await user.unlink(fromProvider: provider)
     }
     
     private func fetchAuth() async {
