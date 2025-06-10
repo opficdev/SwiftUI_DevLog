@@ -100,9 +100,9 @@ struct ProfileView: View {
                     showDoneBtn = newValue
                 }
             }
-            .alert("", isPresented: $profileVM.showProfileAlert) {
+            .alert("", isPresented: $profileVM.showAlert) {
                 Button("확인") {
-                    profileVM.showProfileAlert = false
+                    profileVM.showAlert = false
                 }
             } message: {
                 Text(profileVM.alertMsg)

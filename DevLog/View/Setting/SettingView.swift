@@ -90,7 +90,7 @@ struct SettingView: View {
             }
             
             Section {
-                NavigationLink(destination: AccountView()) {
+                NavigationLink(destination: AccountView().environmentObject(settingVM)) {
                     Text("계정 연동")
                 }
                 Button(role: .destructive, action: {

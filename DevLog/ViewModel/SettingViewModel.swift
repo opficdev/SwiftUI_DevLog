@@ -19,6 +19,10 @@ class SettingViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
     
+    // AuthInfo
+    @Published var currentProvider = ""
+    @Published var providers: [String] = []
+    
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
@@ -29,6 +33,15 @@ class SettingViewModel: ObservableObject {
         self.authSvc = authSvc
         self.networkSvc = networkSvc
         self.userSvc = userSvc
+        
+        // 현재 로그인된 사용자의 인증 정보를 가져옴
+        self.authSvc.$currentProvider
+            .receive(on: DispatchQueue.main)
+            .assign(to: &self.$currentProvider)
+        
+        self.authSvc.$providers
+            .receive(on: DispatchQueue.main)
+            .assign(to: &self.$providers)
     
         // self.isLoading을 network.isLoading와 단방향 연결
         self.$isLoading
@@ -90,6 +103,37 @@ class SettingViewModel: ObservableObject {
         } catch {
             print("Error deleting user: \(error.localizedDescription)")
             self.alertMsg = "회원탈퇴 중 오류가 발생했습니다."
+            self.showAlert = true
+        }
+    }
+    
+    func linkWithProvider(provider: String) async {
+        do {
+            try await self.authSvc.linkWithProvider(provider: provider)
+
+        } catch {
+            print("Error linking with provider: \(error.localizedDescription)")
+            if let emailError = error as? EmailFetchError, emailError == .emailNotFound {
+                alertMsg = "연동하려는 계정의 이메일을 확인할 수 없습니다."
+            }
+            else if let emailError = error as? EmailFetchError, emailError == .emailMismatch {
+                alertMsg = "동일한 이메일을 가진 계정과 연동을 시도해주세요."
+            }
+            else {
+                alertMsg = "알 수 없는 오류가 발생했습니다."
+            }
+            
+            self.showAlert = true
+        }
+    }
+    
+    func unlinkFromProvider(provider: String) async {
+        do {
+            try await self.authSvc.unlinkFromProvider(provider: provider)
+            
+        } catch {
+            print("Error unlinking with provider: \(error.localizedDescription)")
+            
             self.showAlert = true
         }
     }
