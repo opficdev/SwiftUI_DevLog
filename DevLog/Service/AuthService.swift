@@ -41,11 +41,20 @@ final class AuthService: ObservableObject {
         
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self = self else { return }
-            self.user = user
-            self.userId = user == nil ? nil : user!.uid
-            
-            self.email = user?.email ?? ""
-            self.providers = user?.providerData.map { $0.providerID } ?? []
+            Task {
+                self.user = user
+                if let user = user {
+                    self.userId = user.uid
+                    self.email = user.email ?? ""
+                    self.providers = user.providerData.map { $0.providerID }
+                    await self.fetchAuth()
+                }
+                else {
+                    self.currentProvider = ""
+                    self.email = ""
+                    self.providers.removeAll()
+                }
+            }
         }
     }
     
@@ -93,7 +102,7 @@ final class AuthService: ObservableObject {
             GIDSignIn.sharedInstance.signOut()
             try await GIDSignIn.sharedInstance.disconnect()
         }
-
+        
         let infoRef = db.document("users/\(user.uid)/userData/info")
         let doc = try await infoRef.getDocument()
         
@@ -167,5 +176,18 @@ final class AuthService: ObservableObject {
             }
         }
         _ = try await user.unlink(fromProvider: provider)
+    }
+    
+    private func fetchAuth() async {
+        do {
+            guard let userId = self.userId else { throw URLError(.userAuthenticationRequired) }
+            let infoRef = db.document("users/\(userId)/userData/info")
+            let doc = try await infoRef.getDocument()
+            if doc.exists {
+                self.currentProvider = doc.get("currentProvider") as? String ?? ""
+            }
+        } catch {
+            print("Error fetching auth: \(error.localizedDescription)")
+        }
     }
 }
