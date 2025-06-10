@@ -12,6 +12,7 @@ import FirebaseFirestore
 import FirebaseFunctions
 import Foundation
 
+@MainActor
 class GithubSignInService: NSObject {
     private let db = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
