@@ -38,11 +38,16 @@ final class LoginViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] user in
                 guard let self = self else { return }
-                self.signIn = user != nil
-                if self.signIn! {
-                    Task {
-                        try await userSvc.fetchUserInfo(user: user!)
+                if let user = user {
+                    if self.signIn == nil { // 기존 세션을 통해 로그인이 된 경우
+                        Task {
+                            try await self.userSvc.fetchUserInfo(user: user)
+                            self.signIn = true
+                        }
                     }
+                }
+                else {
+                    self.signIn = false
                 }
             }
             .store(in: &self.cancellables)
@@ -76,6 +81,8 @@ final class LoginViewModel: ObservableObject {
             
             try await self.userSvc.fetchUserInfo(user: self.authSvc.user!)
             
+            self.signIn = true
+            
         } catch {
             print("Error signing in with Apple: \(error.localizedDescription)")
             self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
@@ -96,6 +103,8 @@ final class LoginViewModel: ObservableObject {
             
             try await self.userSvc.fetchUserInfo(user: self.authSvc.user!)
             
+            self.signIn = true
+            
         } catch {
             print("Error signing in with GitHub: \(error.localizedDescription)")
             self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
@@ -113,6 +122,8 @@ final class LoginViewModel: ObservableObject {
             let (user, fcmToken) = try await self.authSvc.signInWithGoogle()
             
             try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken, provider: "google.com")
+            
+            self.signIn = true
             
         } catch {
             print("Error signing in with Google: \(error.localizedDescription)")
