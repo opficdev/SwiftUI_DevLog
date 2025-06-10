@@ -109,6 +109,11 @@ class SettingViewModel: ObservableObject {
     
     func linkWithProvider(provider: String) async {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
             try await self.authSvc.linkWithProvider(provider: provider)
 
         } catch {
@@ -129,6 +134,11 @@ class SettingViewModel: ObservableObject {
     
     func unlinkFromProvider(provider: String) async {
         do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
             try await self.authSvc.unlinkFromProvider(provider: provider)
             
         } catch {
