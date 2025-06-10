@@ -135,14 +135,17 @@ final class AuthService: ObservableObject {
     }
     
     func linkWithProvider(provider: String) async throws {
-        if provider == "apple.com" {
-            try await self.appleSvc.linkWithApple()
-        }
-        else if provider == "github.com" {
-            try await self.githubSvc.linkWithGithub()
-        }
-        else if provider == "google.com" {
-            try await self.googleSvc.linkWithGoogle()
+        do {
+            if provider == "apple.com" {
+                try await self.appleSvc.linkWithApple()
+            }
+            else if provider == "github.com" {
+                try await self.githubSvc.linkWithGithub()
+            }
+            else if provider == "google.com" {
+                try await self.googleSvc.linkWithGoogle()
+            }
+            self.providers.append(provider)
         }
     }
     
