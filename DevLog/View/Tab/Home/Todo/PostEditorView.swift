@@ -71,6 +71,12 @@ struct PostEditorView: View {
                                             focusOnTagField = false
                                         }
                                     }
+                                    .onChange(of: focusOnTagField) { newValue in
+                                        if !newValue && !tagText.isEmpty {
+                                            tags.append(tagText)
+                                            tagText = ""
+                                        }
+                                    }
                             }
                         }
                         Divider()
