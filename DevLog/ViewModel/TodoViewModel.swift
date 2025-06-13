@@ -6,20 +6,42 @@
 //
 
 import SwiftUI
+import Combine
 
 @MainActor
 final class TodoViewModel: ObservableObject {
     private let todoSvc: TodoService
     private let authSvc: AuthService
+    private var cancellables: Set<AnyCancellable> = []
     @Published var todos: [Todo] = []
+    @Published var searchText: String = ""
     @Published var kind: TodoKind
     @Published var showError: Bool = false
     @Published var errorMsg: String = ""
+    @Published var scope: TodoScope = .title
     
     init(authSvc: AuthService, todoSvc: TodoService, kind: TodoKind) {
         self.authSvc = authSvc
         self.todoSvc = todoSvc
         self.kind = kind
+        
+        $searchText
+            .combineLatest($scope)
+            .map { searchText, scope in
+                if searchText.isEmpty {
+                    return self.todos
+                } else {
+                    return self.todos.filter { todo in
+                        switch scope {
+                        case .title:
+                            return todo.title.localizedCaseInsensitiveContains(searchText)
+                        case .content:
+                            return todo.content.localizedCaseInsensitiveContains(searchText)
+                        }
+                    }
+                }
+            }
+            .assign(to: &$todos)
     }
 
     func requestTodoList() async {
