@@ -18,6 +18,7 @@ struct PostEditorView: View {
     @State private var focusOnEditor: Bool = false
     @FocusState private var focusOnTagField: Bool
     @State private var tagText: String = ""
+    @State private var hasDueDate: Bool = true
     
     init(title: String) {
         self.navigationTitle = title
@@ -31,12 +32,31 @@ struct PostEditorView: View {
                         .font(.title3)
                         .padding(.horizontal)
                     Divider()
-                    DatePicker("마감일", selection: Binding<Date>(
-                        get: { dueDate ?? Date() },
-                        set: { dueDate = $0 }
-                    ), displayedComponents: .date)
+                    HStack {
+                        DatePicker("마감일", selection: Binding<Date>(
+                            get: { dueDate ?? Date() },
+                            set: { dueDate = $0 }
+                        ), displayedComponents: .date)
                         .datePickerStyle(.compact)
-                        .padding(.horizontal)
+                        .disabled(!hasDueDate)
+                        .foregroundStyle(hasDueDate ? Color.primary : Color.gray)
+                        Divider()
+                        Button(action: {
+                            hasDueDate.toggle()
+                            dueDate = hasDueDate ? Date() : nil
+                        }) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 5)
+                                    .stroke(Color.gray, lineWidth: 1)
+                                    .frame(width: 15, height: 15)
+                                if hasDueDate {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(Color.accentColor)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
                     Divider()
                     HStack {
                         Text("태그")
