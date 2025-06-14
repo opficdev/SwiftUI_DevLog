@@ -23,11 +23,16 @@ struct PostDetailView: View {
                     .padding(.horizontal)
                 if let date = todo.dueDate {
                     Divider()
-                    Text(date.formatted(date: .long, time: .omitted))
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.2))
-                        )
+                    HStack {
+                        Text("마감일")
+                        Spacer()
+                        Text(date.formatted(date: .long, time: .omitted))
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.gray.opacity(0.2))
+                            )
+                    }
+                    .padding(.horizontal)
                 }
                 Divider()
                 HStack {
