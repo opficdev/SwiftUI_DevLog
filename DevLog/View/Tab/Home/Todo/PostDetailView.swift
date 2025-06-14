@@ -41,9 +41,7 @@ struct PostDetailView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(todo.tags, id: \.self) { tag in
-                                HStack {
-                                    Text(tag)
-                                }
+                                Text(tag)
                                 .padding(.horizontal, 8)
                                 .background(
                                     Capsule()
