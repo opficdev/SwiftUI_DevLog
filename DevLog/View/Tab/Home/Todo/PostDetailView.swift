@@ -57,5 +57,15 @@ struct PostDetailView: View {
                     .padding(.horizontal)
             }
         }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    
+                }) {
+                    Text("수정")
+                        .foregroundColor(.accentColor)
+                }
+            }
+        }
     }
 }
