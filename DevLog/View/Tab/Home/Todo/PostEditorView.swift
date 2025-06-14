@@ -12,7 +12,7 @@ struct PostEditorView: View {
     @Environment(\.dismiss) private var dismiss
     private var navigationTitle: String
     @State private var title: String = ""
-    @State private var dueDate: Date? = nil
+    @State private var dueDate: Date = Date()
     @State private var content: String = ""
     @State private var tags: [String] = []
     @State private var focusOnEditor: Bool = false
@@ -33,17 +33,14 @@ struct PostEditorView: View {
                         .padding(.horizontal)
                     Divider()
                     HStack {
-                        DatePicker("마감일", selection: Binding<Date>(
-                            get: { dueDate ?? Date() },
-                            set: { dueDate = $0 }
-                        ), displayedComponents: .date)
+                        DatePicker("마감일", selection: $dueDate, displayedComponents: .date)
                         .datePickerStyle(.compact)
                         .disabled(!hasDueDate)
                         .foregroundStyle(hasDueDate ? Color.primary : Color.gray)
                         Divider()
                         Button(action: {
                             hasDueDate.toggle()
-                            dueDate = hasDueDate ? Date() : nil
+                            dueDate = Date()
                         }) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 5)
@@ -130,6 +127,7 @@ struct PostEditorView: View {
                                 title: title,
                                 content: content,
                                 tags: tags,
+                                dueDate: hasDueDate ? dueDate : nil,
                                 kind: todoVM.kind
                             )
                             await todoVM.upsertTodoTask(todo)

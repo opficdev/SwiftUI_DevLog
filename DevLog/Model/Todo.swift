@@ -21,7 +21,7 @@ struct Todo: Identifiable, Codable {
     var tags: [String]      //  할 일에 연결된 태그들
     var kind: TodoKind      //  할 일의 종류
 
-    init(title: String, isPinned: Bool = false, content: String, tags: [String], dueDate: Date? = nil, kind: TodoKind) {
+    init(title: String, isPinned: Bool = false, content: String, tags: [String], dueDate: Date?, kind: TodoKind) {
         self.id = UUID()
         self.isPinned = isPinned
         self.isCompleted = false
