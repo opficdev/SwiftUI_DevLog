@@ -10,6 +10,7 @@ import SwiftUI
 struct PostDetailView: View {
     @EnvironmentObject private var todoVM: TodoViewModel
     @State private var todo: Todo
+    @State private var showEditor: Bool = false
     
     init(todo: Todo) {
         self._todo = State(initialValue: todo)
@@ -57,10 +58,14 @@ struct PostDetailView: View {
                     .padding(.horizontal)
             }
         }
+        .fullScreenCover(isPresented: $showEditor) {
+            PostEditorView(title: "새 \(todoVM.kind.localizedName)")
+                .environmentObject(todoVM)
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    
+                    showEditor = true
                 }) {
                     Text("수정")
                         .foregroundColor(.accentColor)

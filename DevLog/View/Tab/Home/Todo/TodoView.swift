@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TodoView: View {
     @StateObject private var todoVM: TodoViewModel
-    @State private var showIssueFullScreen: Bool = false
+    @State private var showEditor: Bool = false
     
     init(todoVM: TodoViewModel) {
         self._todoVM = StateObject(wrappedValue: todoVM)
@@ -53,7 +53,7 @@ struct TodoView: View {
                 }
             }
             .navigationTitle(todoVM.kind.localizedName)
-            .fullScreenCover(isPresented: $showIssueFullScreen) {
+            .fullScreenCover(isPresented: $showEditor) {
                 PostEditorView(title: "새 \(todoVM.kind.localizedName)")
                     .environmentObject(todoVM)
             }
@@ -98,7 +98,7 @@ struct TodoView: View {
                         Image(systemName: "ellipsis")
                     })
                     Button(action: {
-                        showIssueFullScreen = true
+                        showEditor = true
                     }) {
                         Image(systemName: "plus")
                     }
