@@ -59,7 +59,7 @@ struct PostDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $showEditor) {
-            PostEditorView(title: "새 \(todoVM.kind.localizedName)")
+            PostEditorView(title: "수정", todo: todo)
                 .environmentObject(todoVM)
         }
         .toolbar {

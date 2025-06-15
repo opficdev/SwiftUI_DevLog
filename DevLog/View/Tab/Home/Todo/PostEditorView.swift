@@ -20,8 +20,15 @@ struct PostEditorView: View {
     @State private var tagText: String = ""
     @State private var hasDueDate: Bool = true
     
-    init(title: String) {
+    init(title: String, todo: Todo? = nil) {
         self.navigationTitle = title
+        if let todo = todo {
+            self._title = State(initialValue: todo.title)
+            self._dueDate = State(initialValue: todo.dueDate ?? Date())
+            self._content = State(initialValue: todo.content)
+            self._tags = State(initialValue: todo.tags)
+            self._hasDueDate = State(initialValue: todo.dueDate != nil)
+        }
     }
     
     var body: some View {
