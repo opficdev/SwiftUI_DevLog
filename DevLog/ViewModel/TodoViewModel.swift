@@ -13,7 +13,8 @@ final class TodoViewModel: ObservableObject {
     private let todoSvc: TodoService
     private let authSvc: AuthService
     private var cancellables: Set<AnyCancellable> = []
-    @Published var todos: [Todo] = []
+    @Published private var todos: [Todo] = []
+    @Published var filteredTodos: [Todo] = []
     @Published var searchText: String = ""
     @Published var kind: TodoKind
     @Published var showError: Bool = false
@@ -25,13 +26,16 @@ final class TodoViewModel: ObservableObject {
         self.todoSvc = todoSvc
         self.kind = kind
         
-        $searchText
-            .combineLatest($scope)
-            .map { searchText, scope in
+        self.$searchText
+            .combineLatest(self.$scope, self.$todos) // <--- self.$todos 추가!
+            .map { [weak self] searchText, scope, currentTodos -> [Todo] in // currentTodos 파라미터로 받기
+                guard let _ = self else { return [] }
+
                 if searchText.isEmpty {
-                    return self.todos
-                } else {
-                    return self.todos.filter { todo in
+                    return currentTodos // 스트림에서 온 최신 todos (데이터 로드 후의 값)
+                }
+                else {
+                    return currentTodos.filter { todo in // 여기서도 currentTodos 사용
                         switch scope {
                         case .title:
                             return todo.title.localizedCaseInsensitiveContains(searchText)
@@ -41,7 +45,8 @@ final class TodoViewModel: ObservableObject {
                     }
                 }
             }
-            .assign(to: &$todos)
+            .receive(on: DispatchQueue.main) // UI 업데이트는 메인 스레드
+            .assign(to: &$filteredTodos)
     }
 
     func requestTodoList() async {

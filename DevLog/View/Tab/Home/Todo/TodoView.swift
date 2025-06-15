@@ -18,7 +18,7 @@ struct TodoView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if todoVM.todos.isEmpty {
+                if todoVM.filteredTodos.isEmpty {
                     VStack {
                         Spacer()
                         Text("작성된 내용이 없습니다.")
@@ -28,7 +28,7 @@ struct TodoView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                 }
                 else {
-                    List(todoVM.todos) { todo in
+                    List(todoVM.filteredTodos) { todo in
                         NavigationLink(destination: PostDetailView(todo: todo).environmentObject(todoVM)) {
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(todo.title)
@@ -43,7 +43,7 @@ struct TodoView: View {
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive, action: {
-                                todoVM.todos.removeAll { $0.id == todo.id }
+                                todoVM.filteredTodos.removeAll { $0.id == todo.id }
                             }) {
                                 Image(systemName: "trash")
                             }
