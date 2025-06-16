@@ -58,6 +58,17 @@ struct HomeView: View {
                             }
                             .listRowInsets(EdgeInsets())    //  헤더의 padding 제거
                         })
+                        Section(content: {}, header: {
+                            HStack {
+                                Text("즐겨찾기")
+                                    .foregroundStyle(Color.primary)
+                                    .font(.title2)
+                                    .bold()
+                                Spacer()
+                                
+                            }
+                            .listRowInsets(EdgeInsets())
+                        })
                     }
                 }
             }
