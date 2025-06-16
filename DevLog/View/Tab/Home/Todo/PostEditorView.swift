@@ -83,7 +83,7 @@ struct PostEditorView: View {
                                     .padding(.horizontal, 8)
                                     .background(
                                         Capsule()
-                                            .stroke(Color.gray, lineWidth: 1)
+                                            .fill(Color(UIColor.systemFill))
                                     )
                                 }
                                 TextField("", text: $tagText)
