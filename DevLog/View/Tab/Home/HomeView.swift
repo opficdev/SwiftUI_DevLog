@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var searchText: String = ""
     @State private var isSearching: Bool = false
     @State private var taskKinds = TodoKind.allCases
+    @State private var reorderTodo: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -47,9 +48,13 @@ struct HomeView: View {
                                     .font(.title2)
                                     .bold()
                                 Spacer()
-                                Image(systemName: "ellipsis")
-                                    .font(.title2)
-                                    .foregroundStyle(Color.gray)
+                                Button(action: {
+                                    reorderTodo = true
+                                }) {
+                                    Image(systemName: "ellipsis")
+                                        .font(.title2)
+                                        .foregroundStyle(Color.gray)
+                                }
                             }
                             .listRowInsets(EdgeInsets())    //  헤더의 padding 제거
                         })
@@ -57,6 +62,9 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("홈")
+            .sheet(isPresented: $reorderTodo) {
+                TodoReorderView()
+            }
         }
     }
 }
