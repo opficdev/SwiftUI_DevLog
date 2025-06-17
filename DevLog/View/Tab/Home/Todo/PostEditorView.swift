@@ -58,6 +58,7 @@ struct PostEditorView: View {
                     Divider()
                     HStack {
                         Text("태그")
+                            .foregroundStyle(tags.isEmpty ? Color.gray : Color.primary)
                         Divider()
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
