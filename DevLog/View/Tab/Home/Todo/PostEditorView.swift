@@ -100,10 +100,11 @@ struct PostEditorView: View {
                         }
                         Divider()
                         Button(action: {
-                            focusOnTagField = true
+                            focusOnTagField.toggle()
                         }) {
-                            Image(systemName: "pencil")
+                            Image(systemName: "\(focusOnTagField ? "xmark" : "plus").circle.fill")
                                 .foregroundStyle(Color.gray)
+                                .font(.title2)
                         }
                     }
                     .padding(.horizontal)
