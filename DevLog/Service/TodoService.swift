@@ -11,6 +11,17 @@ import FirebaseFirestore
 
 class TodoService {
     private let db = Firestore.firestore()
+    
+    func requestPinnedTodoList(userId: String) async throws -> [Todo] {
+        let collection = db.collection("users/\(userId)/todoLists/")
+        
+        let query = collection.whereField(("isPinned"), isEqualTo: true)
+            .order(by: "createdAt", descending: true)
+        
+        let snapshot = try await query.getDocuments()
+        
+        return snapshot.documents.compactMap { Todo(from: $0) }
+    }
 
     func requestTodoList(kind: TodoKind, userId: String) async throws -> [Todo] {
         let collection = db.collection("users/\(userId)/todoLists/")
