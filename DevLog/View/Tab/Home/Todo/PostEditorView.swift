@@ -35,9 +35,11 @@ struct PostEditorView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 10) {
-                    TextField("제목", text: $title)
-                        .font(.title3)
-                        .padding(.horizontal)
+                    TextField("", text: $title,
+                        prompt: Text("제목").foregroundColor(Color.gray)
+                    )
+                    .font(.title3)
+                    .padding(.horizontal)
                     Divider()
                     HStack {
                         DatePicker("마감일", selection: $dueDate, displayedComponents: .date)
