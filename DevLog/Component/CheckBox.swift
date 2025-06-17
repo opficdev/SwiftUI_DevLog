@@ -11,15 +11,18 @@ struct CheckBox: View {
     @Binding var isChecked: Bool
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 5)
-                .stroke(Color.gray, lineWidth: 1)
-                .frame(width: 15, height: 15)
+        Group {
             if isChecked {
-                Image(systemName: "checkmark")
-                    .foregroundStyle(Color.accentColor)
+                Image(systemName: "checkmark.circle.fill")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(Color.white, Color.accentColor)
+            }
+            else {
+                Image(systemName: "circle")
+                    .foregroundStyle(Color.gray)
             }
         }
+        .font(.title2)
     }
 }
 
