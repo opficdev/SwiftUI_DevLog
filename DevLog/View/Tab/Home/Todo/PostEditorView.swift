@@ -49,15 +49,7 @@ struct PostEditorView: View {
                             hasDueDate.toggle()
                             dueDate = Date()
                         }) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color.gray, lineWidth: 1)
-                                    .frame(width: 15, height: 15)
-                                if hasDueDate {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(Color.accentColor)
-                                }
-                            }
+                            CheckBox(isChecked: $hasDueDate)
                         }
                     }
                     .padding(.horizontal)
