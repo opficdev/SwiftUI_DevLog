@@ -45,5 +45,9 @@ class AppContainer: ObservableObject {
         ProfileViewModel(authSvc: authSvc, userSvc: userSvc)
     }()
     
+    lazy var homeVM: HomeViewModel = {
+        HomeViewModel(authSvc: authSvc, networkSvc: networkSvc, todoSvc: todoSvc)
+    }()
+    
     private init() {}
 }
