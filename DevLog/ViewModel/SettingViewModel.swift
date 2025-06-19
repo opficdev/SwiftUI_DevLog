@@ -81,8 +81,10 @@ class SettingViewModel: ObservableObject {
             
             try await self.authSvc.signOut()
             
-            // AppStorage 전체를 삭제하는 코드
-            UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+            let keys = UserDefaults.standard.dictionaryRepresentation().keys
+            for key in keys where key != "isFirstLaunch" {
+                UserDefaults.standard.removeObject(forKey: key)
+            }
         } catch {
             print("Error signing out: \(error.localizedDescription)")
             self.alertMsg = "로그아웃 중 오류가 발생했습니다."
@@ -99,7 +101,10 @@ class SettingViewModel: ObservableObject {
             
             try await self.authSvc.deleteAuth()
             
-            UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+            let keys = UserDefaults.standard.dictionaryRepresentation().keys
+            for key in keys where key != "isFirstLaunch" {
+                UserDefaults.standard.removeObject(forKey: key)
+            }
         } catch {
             print("Error deleting user: \(error.localizedDescription)")
             self.alertMsg = "회원탈퇴 중 오류가 발생했습니다."
