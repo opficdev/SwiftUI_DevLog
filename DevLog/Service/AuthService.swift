@@ -103,7 +103,7 @@ final class AuthService: ObservableObject {
             try await GIDSignIn.sharedInstance.disconnect()
         }
         
-        let infoRef = db.document("users/\(user.uid)/userData/info")
+        let infoRef = db.document("users/\(user.uid)/userData/tokens")
         let doc = try await infoRef.getDocument()
         
         if doc.exists {
