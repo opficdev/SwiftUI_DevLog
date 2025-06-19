@@ -131,6 +131,8 @@ final class LoginViewModel: ObservableObject {
             
             try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken, provider: "google.com")
             
+            try await self.userSvc.fetchUserInfo(user: self.authSvc.user!)
+            
             self.signIn = true
             
         } catch {
