@@ -9,6 +9,12 @@ import SwiftUI
 
 struct CheckBox: View {
     @Binding var isChecked: Bool
+    @State private var font: Font
+    
+    init(isChecked: Binding<Bool>, font: Font = .title2) {
+        self._isChecked = isChecked
+        self._font = State(initialValue: font)
+    }
     
     var body: some View {
         Group {
@@ -22,7 +28,7 @@ struct CheckBox: View {
                     .foregroundStyle(Color.gray)
             }
         }
-        .font(.title2)
+        .font(font)
     }
 }
 
