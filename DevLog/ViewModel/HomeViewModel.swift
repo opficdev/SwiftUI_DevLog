@@ -5,7 +5,7 @@
 //  Created by opfic on 6/17/25.
 //
 
-import Foundation
+import SwiftUI
 
 @MainActor
 class HomeViewModel: ObservableObject {
@@ -13,8 +13,26 @@ class HomeViewModel: ObservableObject {
     private let networkSvc: NetworkActivityService
     private let todoSvc: TodoService
     
+    // HomeView
     @Published var pinnedTodos: [Todo] = []
     @Published var showError: Bool = false
+    
+    // TodoManageView
+    @AppStorage("todoKindStrings") var todoKindStrings: [String] = TodoKind.allCases.sorted { $0.localizedName < $1.localizedName }.map { $0.rawValue } {
+        didSet {
+            self.todoKinds = self.todoKindStrings.compactMap { TodoKind(rawValue: $0) }
+            objectWillChange.send()
+        }
+    }
+    @Published var todoKinds: [TodoKind] = []
+    
+    // HomeView, TodoManageView
+    @AppStorage("selectedTodoKindStrings") var selectedTodoKindStrings: [String] = TodoKind.allCases.sorted { $0.localizedName < $1.localizedName }.map { $0.rawValue } {
+        didSet {
+            self.selectedTodoKinds = self.selectedTodoKindStrings.compactMap { TodoKind(rawValue: $0) }
+        }
+    }
+    @Published var selectedTodoKinds: [TodoKind] = []
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
@@ -25,6 +43,9 @@ class HomeViewModel: ObservableObject {
         self.authSvc = authSvc
         self.networkSvc = networkSvc
         self.todoSvc = todoSvc
+        
+        self.todoKinds = self.todoKindStrings.compactMap { TodoKind(rawValue: $0) }                     //  초기값 지정
+        self.selectedTodoKinds = self.selectedTodoKindStrings.compactMap { TodoKind(rawValue: $0) }     //  초기값 지정
         
         // self.isLoading -> network.isLoading 단방향 연결
         self.$isLoading

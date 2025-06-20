@@ -12,7 +12,6 @@ struct HomeView: View {
     @StateObject private var homeVM: HomeViewModel
     @State private var searchText: String = ""
     @State private var isSearching: Bool = false
-    @State private var taskKinds = TodoKind.allCases
     @State private var reorderTodo: Bool = false
     
     init(container: AppContainer) {
@@ -28,7 +27,7 @@ struct HomeView: View {
                         .searchable(text: $searchText, prompt: "DevLog 검색")
                     List {
                         Section(content: {
-                            ForEach(taskKinds.sorted(by: { $0.localizedName < $1.localizedName }), id: \.self) { kind in
+                            ForEach(homeVM.selectedTodoKinds, id: \.self) { kind in
                                 NavigationLink(destination: TodoView(todoVM: container.todoVM(kind: kind))) {
                                     HStack {
                                         let width = UIScreen.main.bounds.width * 0.08
@@ -63,7 +62,9 @@ struct HomeView: View {
                             }
                             .listRowInsets(EdgeInsets())    //  헤더의 padding 제거
                         })
-                        Section(content: {}, header: {
+                        Section(content: {
+                            
+                        }, header: {
                             HStack {
                                 Text("즐겨찾기")
                                     .foregroundStyle(Color.primary)
