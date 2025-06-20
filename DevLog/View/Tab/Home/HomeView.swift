@@ -79,7 +79,7 @@ struct HomeView: View {
             }
             .navigationTitle("홈")
             .sheet(isPresented: $reorderTodo) {
-                TodoReorderView()
+                TodoManageView().environmentObject(container.homeVM)
             }
         }
     }

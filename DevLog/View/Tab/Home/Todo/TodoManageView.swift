@@ -38,5 +38,6 @@ struct TodoManageView: View {
 }
 
 #Preview {
-    TodoManageView(todoKinds: .constant(TodoKind.allCases))
+    TodoManageView()
+        .environmentObject(AppContainer.shared.homeVM)
 }
