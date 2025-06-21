@@ -62,7 +62,7 @@ struct TodoView: View {
                     Menu(content: {
                         Section {
                             Button(action: {
-                                
+                                todoVM.filteredTodos.sort(by: { $0.createdAt > $1.createdAt })
                             }) {
                                 Text("정렬: 최신")
                             }
