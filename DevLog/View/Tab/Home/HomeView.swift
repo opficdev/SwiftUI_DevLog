@@ -62,11 +62,21 @@ struct HomeView: View {
                             }
                             .listRowInsets(EdgeInsets())    //  헤더의 padding 제거
                         })
+                        
                         Section(content: {
-                            
+                            if homeVM.pinnedTodos.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text("최근에 중요 표시를 한 Todo가 여기 표시됩니다.")
+                                    Spacer()
+                                }
+                            }
+                            else {
+                                
+                            }
                         }, header: {
                             HStack {
-                                Text("즐겨찾기")
+                                Text("중요 표시")
                                     .foregroundStyle(Color.primary)
                                     .font(.title2)
                                     .bold()
