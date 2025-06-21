@@ -81,7 +81,7 @@ final class TodoViewModel: ObservableObject {
         }
     }
     
-    func upsertTodoTask(_ todo: Todo) async {
+    func upsertTodo(_ todo: Todo) async {
         do {
             self.isLoading = true
             defer {
@@ -89,7 +89,7 @@ final class TodoViewModel: ObservableObject {
             }
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
         
-            try await self.todoSvc.upsertTodoTask(todo: todo, userId: userId)
+            try await self.todoSvc.upsertTodo(todo: todo, userId: userId)
         } catch {
             print("Error upserting todo: \(error.localizedDescription)")
             errorMsg = "TODO를 저장하는 중 오류가 발생했습니다."
@@ -97,7 +97,7 @@ final class TodoViewModel: ObservableObject {
         }
     }
     
-    func deleteTodoTask(_ todo: Todo) async {
+    func deleteTodo(_ todo: Todo) async {
         do {
             self.isLoading = true
             defer {
@@ -105,7 +105,7 @@ final class TodoViewModel: ObservableObject {
             }
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             
-            try await self.todoSvc.deleteTodoTask(todo: todo, userId: userId)
+            try await self.todoSvc.deleteTodo(todo: todo, userId: userId)
         } catch {
             print("Error deleting todo: \(error.localizedDescription)")
             errorMsg = "TODO를 삭제하는 중 오류가 발생했습니다."

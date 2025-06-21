@@ -33,7 +33,7 @@ class TodoService {
         return snapshot.documents.compactMap { Todo(from: $0) }
     }
     
-    func upsertTodoTask(todo: Todo, userId: String) async throws {
+    func upsertTodo(todo: Todo, userId: String) async throws {
         let collection = db.collection("users/\(userId)/todoLists/")
         
         let docRef = collection.document(todo.id.uuidString)
@@ -41,7 +41,7 @@ class TodoService {
         try await docRef.setData(todo.toDictionary(), merge: true)
     }
     
-    func deleteTodoTask(todo: Todo, userId: String) async throws {
+    func deleteTodo(todo: Todo, userId: String) async throws {
         let collection = db.collection("users/\(userId)/todoLists/")
         
         let docRef = collection.document(todo.id.uuidString)

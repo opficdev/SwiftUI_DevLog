@@ -133,7 +133,7 @@ struct TodoEditorView: View {
                                 dueDate: hasDueDate ? dueDate : nil,
                                 kind: todoVM.kind
                             )
-                            await todoVM.upsertTodoTask(todo)
+                            await todoVM.upsertTodo(todo)
                             dismiss()
                         }
                     }) {
