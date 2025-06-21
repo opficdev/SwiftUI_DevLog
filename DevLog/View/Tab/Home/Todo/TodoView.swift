@@ -69,11 +69,6 @@ struct TodoView: View {
                             Button(action: {
                                 
                             }) {
-                                Text("상위: 전체")
-                            }
-                            Button(action: {
-                                
-                            }) {
                                 Text("상위: 어제")
                             }
                             Button(action: {
