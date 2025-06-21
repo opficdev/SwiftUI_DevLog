@@ -26,6 +26,10 @@ final class TodoViewModel: ObservableObject {
     @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
     
+    enum FilterPeriod {
+        case day, week, month, year
+    }
+    
     init(authSvc: AuthService, networkSvc: NetworkActivityService, todoSvc: TodoService, kind: TodoKind) {
         self.authSvc = authSvc
         self.networkSvc = networkSvc
@@ -110,6 +114,27 @@ final class TodoViewModel: ObservableObject {
             print("Error deleting todo: \(error.localizedDescription)")
             errorMsg = "TODO를 삭제하는 중 오류가 발생했습니다."
             showError = true
+        }
+    }
+    
+    func filterTodoList(by component: FilterPeriod) {
+        self.filteredTodos = self.filteredTodos.filter { todo in
+            var newDate: Date? = nil
+            
+            switch component {
+            case .day:
+                newDate = Calendar.current.date(byAdding: .day, value: -1, to: Date())
+            case .week:
+                newDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())
+            case .month:
+                newDate = Calendar.current.date(byAdding: .month, value: -1, to: Date())
+            case .year:
+                newDate = Calendar.current.date(byAdding: .year, value: -1, to: Date())
+            }
+            
+            guard let newDate = newDate else { return false }
+            
+            return newDate <= todo.createdAt
         }
     }
 }

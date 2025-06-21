@@ -67,22 +67,22 @@ struct TodoView: View {
                                 Text("정렬: 최신")
                             }
                             Button(action: {
-                                
+                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.day)
                             }) {
                                 Text("상위: 어제")
                             }
                             Button(action: {
-                                
+                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.week)
                             }) {
                                 Text("상위: 지난주")
                             }
                             Button(action: {
-                                
+                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.month)
                             }) {
                                 Text("상위: 지난달")
                             }
                             Button(action: {
-                                
+                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.year)
                             }) {
                                 Text("상위: 작년")
                             }
