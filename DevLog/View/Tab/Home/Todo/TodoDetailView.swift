@@ -1,5 +1,5 @@
 //
-//  PostDetailView.swift
+//  TodoDetailView.swift
 //  DevLog
 //
 //  Created by opfic on 6/12/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PostDetailView: View {
+struct TodoDetailView: View {
     @EnvironmentObject private var todoVM: TodoViewModel
     @State private var todo: Todo
     @State private var showEditor: Bool = false
@@ -59,7 +59,7 @@ struct PostDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $showEditor) {
-            PostEditorView(title: "수정", todo: todo)
+            TodoEditorView(title: "수정", todo: todo)
                 .environmentObject(todoVM)
         }
         .toolbar {

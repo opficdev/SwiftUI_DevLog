@@ -1,5 +1,5 @@
 //
-//  PostEditorView.swift
+//  TodoEditorView.swift
 //  DevLog
 //
 //  Created by opfic on 5/31/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PostEditorView: View {
+struct TodoEditorView: View {
     @EnvironmentObject private var todoVM: TodoViewModel
     @Environment(\.dismiss) private var dismiss
     private var navigationTitle: String
@@ -146,6 +146,6 @@ struct PostEditorView: View {
 }
 
 #Preview {
-    PostEditorView(title: "새 Todo")
+    TodoEditorView(title: "새 Todo")
         .environmentObject(AppContainer.shared.todoVM(kind: .etc))
 }

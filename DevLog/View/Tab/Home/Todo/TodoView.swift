@@ -29,7 +29,7 @@ struct TodoView: View {
                 }
                 else {
                     List(todoVM.filteredTodos) { todo in
-                        NavigationLink(destination: PostDetailView(todo: todo).environmentObject(todoVM)) {
+                        NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(todoVM)) {
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(todo.title)
                                     .font(.headline)
@@ -54,7 +54,7 @@ struct TodoView: View {
             }
             .navigationTitle(todoVM.kind.localizedName)
             .fullScreenCover(isPresented: $showEditor) {
-                PostEditorView(title: "새 \(todoVM.kind.localizedName)")
+                TodoEditorView(title: "새 \(todoVM.kind.localizedName)")
                     .environmentObject(todoVM)
             }
             .toolbar {
