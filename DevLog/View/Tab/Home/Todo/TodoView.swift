@@ -52,7 +52,9 @@ struct TodoView: View {
                             }
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive, action: {
-                                    todoVM.filteredTodos.removeAll { $0.id == todo.id }
+                                    Task {
+                                        await todoVM.deleteTodo(todo)
+                                    }
                                 }) {
                                     Image(systemName: "trash")
                                 }
