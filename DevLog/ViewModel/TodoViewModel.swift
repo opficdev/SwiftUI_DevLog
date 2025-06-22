@@ -107,11 +107,17 @@ final class TodoViewModel: ObservableObject {
             defer {
                 self.isLoading = false
             }
+            self.todos.removeAll { $0.id == todo.id }
+            self.filteredTodos.removeAll { $0.id == todo.id }
+            
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             
             try await self.todoSvc.deleteTodo(todo: todo, userId: userId)
         } catch {
             print("Error deleting todo: \(error.localizedDescription)")
+            // 로직 상 하위 2줄의 변수에서 todo가 존재하지 않았을 수 없음
+            self.todos.append(todo) // 삭제 실패 시 원래 목록에 다시 추가
+            self.filteredTodos.append(todo) // 필터링된 목록에도 다시 추가
             errorMsg = "TODO를 삭제하는 중 오류가 발생했습니다."
             showError = true
         }
