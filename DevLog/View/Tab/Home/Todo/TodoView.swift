@@ -28,24 +28,34 @@ struct TodoView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                 }
                 else {
-                    List(todoVM.filteredTodos) { todo in
-                        NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(todoVM)) {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(todo.title)
-                                    .font(.headline)
-                                    .lineLimit(1)
-                                Text(todo.content)
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.gray)
-                                    .lineLimit(2)
+                    List {
+                        let todos = todoVM.filteredTodos
+                        ForEach(Array(zip(todos.indices, todos)), id: \.1.id) { index, todo in
+                            NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(todoVM)) {
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(todo.title)
+                                        .font(.headline)
+                                        .lineLimit(1)
+                                    Text(todo.content)
+                                        .font(.subheadline)
+                                        .foregroundStyle(Color.gray)
+                                        .lineLimit(2)
+                                }
+                                .padding(.vertical, 5)
                             }
-                            .padding(.vertical, 5)
-                        }
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive, action: {
-                                todoVM.filteredTodos.removeAll { $0.id == todo.id }
-                            }) {
-                                Image(systemName: "trash")
+                            .swipeActions(edge: .leading) {
+                                Button(action: {
+                                    todoVM.filteredTodos[index].isPinned.toggle()
+                                }) {
+                                    Image(systemName: "star\(todo.isPinned ? ".fill" : "")")
+                                }
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive, action: {
+                                    todoVM.filteredTodos.removeAll { $0.id == todo.id }
+                                }) {
+                                    Image(systemName: "trash")
+                                }
                             }
                         }
                     }
