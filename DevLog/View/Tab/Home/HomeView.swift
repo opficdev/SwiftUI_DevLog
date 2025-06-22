@@ -72,7 +72,28 @@ struct HomeView: View {
                                 }
                             }
                             else {
-                                
+                                ForEach(homeVM.pinnedTodos, id: \.id) { todo in
+                                    NavigationLink(destination: TodoDetailView(todo: todo)) {
+                                        HStack {
+                                            let width = UIScreen.main.bounds.width * 0.08
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(todo.kind.color)
+                                                .frame(width: width, height: width)
+                                                .overlay {
+                                                    Image(systemName: todo.kind.symbolName)
+                                                        .foregroundStyle(Color.white)
+                                                        .font(.title3)
+                                                }
+                                            VStack {
+                                                Text(todo.title)
+                                                    .bold()
+                                                Text(todo.dueDate?.formatted(date: .abbreviated, time: .omitted) ?? "마감일 없음")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(Color.gray)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }, header: {
                             HStack {
