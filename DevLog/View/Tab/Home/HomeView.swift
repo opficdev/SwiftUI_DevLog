@@ -113,6 +113,21 @@ struct HomeView: View {
             .sheet(isPresented: $reorderTodo) {
                 TodoManageView().environmentObject(container.homeVM)
             }
+
+            .alert("", isPresented: $homeVM.showAlert) {
+                Button(action: {
+                    homeVM.showAlert = false
+                }) {
+                    Text("확인")
+                }
+            } message: {
+                Text(homeVM.alertMsg)
+            }
+            .onAppear {
+                Task {
+                    await homeVM.requestPinnedTodos()
+                }
+            }
         }
     }
 }
