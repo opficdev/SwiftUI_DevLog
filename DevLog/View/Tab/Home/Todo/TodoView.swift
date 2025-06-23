@@ -80,29 +80,64 @@ struct TodoView: View {
                     Menu(content: {
                         Section {
                             Button(action: {
-                                todoVM.filteredTodos.sort(by: { $0.createdAt > $1.createdAt })
+                                todoVM.filterOption = .latest
                             }) {
-                                Text("정렬: 최신")
+                                if todoVM.filterOption == .latest {
+                                    Image(systemName: "checkmark")
+                                        .tint(Color.blue)
+                                }
+                                Text("최신순")
                             }
                             Button(action: {
-                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.day)
+                                todoVM.filterOption = .oldest
                             }) {
-                                Text("상위: 어제")
+                                if todoVM.filterOption == .oldest {
+                                    Image(systemName: "checkmark")
+                                        .tint(Color.blue)
+                                }
+                                Text("오래된순")
+                            }
+                        } header: {
+                            Text("정렬 옵션")
+                        }
+                        
+                        Section {
+                            Button(action: {
+                                todoVM.filterOption = .day
+                            }) {
+                                if todoVM.filterOption == .day {
+                                    Image(systemName: "checkmark")
+                                        .tint(Color.blue)
+                                }
+                                Text("어제")
                             }
                             Button(action: {
-                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.week)
+                                todoVM.filterOption = .week
                             }) {
-                                Text("상위: 지난주")
+                                if todoVM.filterOption == .week {
+                                    Image(systemName: "checkmark")
+                                        .tint(Color.blue)
+                                }
+                                Text("지난주")
                             }
                             Button(action: {
-                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.month)
+                                todoVM.filterOption = .month
                             }) {
-                                Text("상위: 지난달")
+                                if todoVM.filterOption == .month {
+                                    Image(systemName: "checkmark")
+                                        .tint(Color.blue)
+                                }
+                                Text("지난달")
                             }
                             Button(action: {
-                                todoVM.filterTodoList(by: TodoViewModel.FilterPeriod.year)
+                               
+                                todoVM.filterOption = .year
                             }) {
-                                Text("상위: 작년")
+                                if todoVM.filterOption == .year {
+                                    Image(systemName: "checkmark")
+                                        .tint(Color.blue)
+                                }
+                                Text("작년")
                             }
                         } header: {
                             Text("필터 옵션")
