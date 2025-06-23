@@ -68,7 +68,7 @@ class HomeViewModel: ObservableObject {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             
             self.pinnedTodos = try await self.todoSvc.requestPinnedTodoList(userId: userId)
-            print("pinned: \(self.pinnedTodos)")
+            
         } catch {
             print("Error requesting pinned todos: \(error.localizedDescription)")
             self.alertMsg = "중요 표시된 TODO 목록을 불러오는 중 오류가 발생했습니다."
