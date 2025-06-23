@@ -21,13 +21,14 @@ final class TodoViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
     @Published var scope: TodoScope = .title
+    @Published var filterOption: FilterOption = .latest
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
     
-    enum FilterPeriod {
-        case day, week, month, year
+    enum FilterOption {
+        case oldest, latest, day, week, month, year
     }
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, todoSvc: TodoService, kind: TodoKind) {
@@ -37,15 +38,41 @@ final class TodoViewModel: ObservableObject {
         self.kind = kind
         
         self.$searchText
-            .combineLatest(self.$scope, self.$todos) // <--- self.$todos 추가!
-            .map { [weak self] searchText, scope, currentTodos -> [Todo] in // currentTodos 파라미터로 받기
+            .combineLatest(self.$scope, self.$todos, self.$filterOption)
+            .map { [weak self] searchText, scope, currentTodos, option -> [Todo] in
                 guard let _ = self else { return [] }
-
-                if searchText.isEmpty {
-                    return currentTodos // 스트림에서 온 최신 todos (데이터 로드 후의 값)
+                
+                var newTodos = currentTodos
+                
+                switch option {
+                case .latest:
+                    newTodos.sort { $0.createdAt > $1.createdAt }
+                case .oldest:
+                    newTodos.sort { $0.createdAt < $1.createdAt }
+                case .day:
+                    newTodos = newTodos.filter { todo in
+                        let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+                        return oneDayAgo <= todo.createdAt
+                    }
+                case .week:
+                    newTodos = newTodos.filter { todo in
+                        let oneWeekAgo = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())!
+                        return oneWeekAgo <= todo.createdAt
+                    }
+                case .month:
+                    newTodos = newTodos.filter { todo in
+                        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date())!
+                        return oneMonthAgo <= todo.createdAt
+                    }
+                case .year:
+                    newTodos = newTodos.filter { todo in
+                        let oneYearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date())!
+                        return oneYearAgo <= todo.createdAt
+                    }
                 }
-                else {
-                    return currentTodos.filter { todo in // 여기서도 currentTodos 사용
+                
+                if !searchText.isEmpty {
+                    return newTodos.filter { todo in
                         switch scope {
                         case .title:
                             return todo.title.localizedCaseInsensitiveContains(searchText)
@@ -54,6 +81,7 @@ final class TodoViewModel: ObservableObject {
                         }
                     }
                 }
+                return newTodos
             }
             .receive(on: DispatchQueue.main) // UI 업데이트는 메인 스레드
             .assign(to: &$filteredTodos)
@@ -118,29 +146,8 @@ final class TodoViewModel: ObservableObject {
             // 로직 상 하위 2줄의 변수에서 todo가 존재하지 않았을 수 없음
             self.todos.append(todo) // 삭제 실패 시 원래 목록에 다시 추가
             self.filteredTodos.append(todo) // 필터링된 목록에도 다시 추가
-            errorMsg = "TODO를 삭제하는 중 오류가 발생했습니다."
-            showError = true
-        }
-    }
-    
-    func filterTodoList(by component: FilterPeriod) {
-        self.filteredTodos = self.filteredTodos.filter { todo in
-            var newDate: Date? = nil
-            
-            switch component {
-            case .day:
-                newDate = Calendar.current.date(byAdding: .day, value: -1, to: Date())
-            case .week:
-                newDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())
-            case .month:
-                newDate = Calendar.current.date(byAdding: .month, value: -1, to: Date())
-            case .year:
-                newDate = Calendar.current.date(byAdding: .year, value: -1, to: Date())
-            }
-            
-            guard let newDate = newDate else { return false }
-            
-            return newDate <= todo.createdAt
+            alertMsg = "TODO를 삭제하는 중 오류가 발생했습니다."
+            showAlert = true
         }
     }
     
