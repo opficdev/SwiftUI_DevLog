@@ -31,9 +31,16 @@ struct TodoView: View {
                     List(todoVM.filteredTodos) { todo in
                         NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(todoVM)) {
                             VStack(alignment: .leading, spacing: 5) {
-                                Text(todo.title)
-                                    .font(.headline)
-                                    .lineLimit(1)
+                                HStack {
+                                    if todo.isPinned {
+                                        Image(systemName: "star.fill")
+                                            .font(.headline)
+                                            .foregroundStyle(Color.orange)
+                                    }
+                                    Text(todo.title)
+                                        .font(.headline)
+                                        .lineLimit(1)
+                                }
                                 Text(todo.content)
                                     .font(.subheadline)
                                     .foregroundStyle(Color.gray)
