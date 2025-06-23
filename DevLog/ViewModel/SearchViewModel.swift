@@ -14,11 +14,11 @@ final class SearchViewModel: ObservableObject {
     private let webPageSvc: WebPageService
     @Published var searchText: String = ""
     @Published var webPages: [WebPageInfo] = []
-    @Published var showError: Bool = false
+    @Published var showAlert: Bool = false
     @Published var isSearching: Bool = false
     @Published var addNewLink: Bool = false
     @Published var newURL: String = "https://"
-    @Published var errorMsg: String = ""
+    @Published var alertMsg: String = ""
     @Published var selectedWebPage: WebPageInfo? = nil
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, webPageSvc: WebPageService) {
@@ -40,8 +40,8 @@ final class SearchViewModel: ObservableObject {
             
         } catch {
             print("Error requesting web pages: \(error.localizedDescription)")
-            self.errorMsg = "웹 페이지를 불러오는 중 오류가 발생했습니다."
-            self.showError = true
+            self.alertMsg = "웹 페이지를 불러오는 중 오류가 발생했습니다."
+            self.showAlert = true
         }
     }
     
@@ -57,8 +57,8 @@ final class SearchViewModel: ObservableObject {
             
         } catch {
             print("Error upserting web page: \(error.localizedDescription)")
-            self.errorMsg = "웹 페이지를 저장하는 중 오류가 발생했습니다."
-            self.showError = true
+            self.alertMsg = "웹 페이지를 저장하는 중 오류가 발생했습니다."
+            self.showAlert = true
         }
     }
     
@@ -74,8 +74,8 @@ final class SearchViewModel: ObservableObject {
             
         } catch {
             print("Error deleting web page: \(error.localizedDescription)")
-            self.errorMsg = "웹 페이지를 삭제하는 중 오류가 발생했습니다."
-            self.showError = true
+            self.alertMsg = "웹 페이지를 삭제하는 중 오류가 발생했습니다."
+            self.showAlert = true
         }
     }
 }

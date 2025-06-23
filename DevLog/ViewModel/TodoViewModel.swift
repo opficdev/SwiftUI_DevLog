@@ -18,8 +18,8 @@ final class TodoViewModel: ObservableObject {
     @Published var filteredTodos: [Todo] = []
     @Published var searchText: String = ""
     @Published var kind: TodoKind
-    @Published var showError: Bool = false
-    @Published var errorMsg: String = ""
+    @Published var showAlert: Bool = false
+    @Published var alertMsg: String = ""
     @Published var scope: TodoScope = .title
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
@@ -80,8 +80,8 @@ final class TodoViewModel: ObservableObject {
             self.todos = try await self.todoSvc.requestTodoList(kind: self.kind, userId: userId)
         } catch {
             print("Error requesting todos: \(error.localizedDescription)")
-            errorMsg = "TODO 목록을 불러오는 중 오류가 발생했습니다."
-            showError = true
+            alertMsg = "TODO 목록을 불러오는 중 오류가 발생했습니다."
+            showAlert = true
         }
     }
     
@@ -96,8 +96,8 @@ final class TodoViewModel: ObservableObject {
             try await self.todoSvc.upsertTodo(todo: todo, userId: userId)
         } catch {
             print("Error upserting todo: \(error.localizedDescription)")
-            errorMsg = "TODO를 저장하는 중 오류가 발생했습니다."
-            showError = true
+            alertMsg = "TODO를 저장하는 중 오류가 발생했습니다."
+            showAlert = true
         }
     }
     

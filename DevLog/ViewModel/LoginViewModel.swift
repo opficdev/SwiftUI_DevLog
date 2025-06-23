@@ -19,8 +19,8 @@ final class LoginViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     @Published var signIn: Bool? = nil
-    @Published var showError: Bool = false
-    @Published var errorMsg: String = ""
+    @Published var showAlert: Bool = false
+    @Published var alertMsg: String = ""
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
@@ -93,8 +93,8 @@ final class LoginViewModel: ObservableObject {
             
         } catch {
             print("Error signing in with Apple: \(error.localizedDescription)")
-            self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
-            self.showError = true
+            self.alertMsg = "로그인에 실패했습니다. 다시 시도해주세요."
+            self.showAlert = true
         }
     }
     
@@ -115,8 +115,8 @@ final class LoginViewModel: ObservableObject {
             
         } catch {
             print("Error signing in with GitHub: \(error.localizedDescription)")
-            self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
-            self.showError = true
+            self.alertMsg = "로그인에 실패했습니다. 다시 시도해주세요."
+            self.showAlert = true
         }
     }
     
@@ -137,8 +137,8 @@ final class LoginViewModel: ObservableObject {
             
         } catch {
             print("Error signing in with Google: \(error.localizedDescription)")
-            self.errorMsg = "로그인에 실패했습니다. 다시 시도해주세요."
-            self.showError = true
+            self.alertMsg = "로그인에 실패했습니다. 다시 시도해주세요."
+            self.showAlert = true
         }
     }
     
@@ -152,8 +152,8 @@ final class LoginViewModel: ObservableObject {
             try await self.authSvc.signOut()
         } catch {
             print("Error signing out: \(error.localizedDescription)")
-            self.errorMsg = "로그아웃에 실패했습니다. 다시 시도해주세요."
-            self.showError = true
+            self.alertMsg = "로그아웃에 실패했습니다. 다시 시도해주세요."
+            self.showAlert = true
         }
     }
 }

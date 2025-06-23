@@ -15,7 +15,8 @@ class HomeViewModel: ObservableObject {
     
     // HomeView
     @Published var pinnedTodos: [Todo] = []
-    @Published var showError: Bool = false
+    @Published var alertMsg: String = ""
+    @Published var showAlert: Bool = false
     
     // TodoManageView
     @AppStorage("todoKindStrings") var todoKindStrings: [String] = TodoKind.allCases.sorted { $0.localizedName < $1.localizedName }.map { $0.rawValue } {

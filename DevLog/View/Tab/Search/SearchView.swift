@@ -174,12 +174,12 @@ struct SearchView: View {
                         }
                     }
                 }
-                .alert("", isPresented: $searchVM.showError) {
+                .alert("", isPresented: $searchVM.showAlert) {
                     Button("확인", role: .cancel) {
-                        searchVM.errorMsg = ""
+                        searchVM.alertMsg = ""
                     }
                 } message: {
-                    Text(searchVM.errorMsg)
+                    Text(searchVM.alertMsg)
                 }
                 .alert("웹페이지 추가", isPresented: $searchVM.addNewLink) {
                     TextField("URL", text: $searchVM.newURL)
