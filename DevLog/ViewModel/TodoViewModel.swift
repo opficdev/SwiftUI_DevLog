@@ -143,4 +143,33 @@ final class TodoViewModel: ObservableObject {
             return newDate <= todo.createdAt
         }
     }
+    
+    func togglePin(_ todo: Todo) async {
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            
+            var updatedTodo = todo
+            
+            updatedTodo.isPinned.toggle()
+            
+            if let idx = self.todos.firstIndex(where: { $0.id == todo.id }) {
+                self.todos[idx] = updatedTodo
+            }
+            
+            if let filteredIdx = self.filteredTodos.firstIndex(where: { $0.id == todo.id }) {
+                self.filteredTodos[filteredIdx] = updatedTodo
+            }
+            
+            try await self.todoSvc.upsertTodo(todo: updatedTodo, userId: userId)
+        } catch {
+            print("Error toggling pin: \(error.localizedDescription)")
+            errorMsg = "TODO 고정 상태를 변경하는 중 오류가 발생했습니다."
+            showError = true
+        }
+    }
 }
