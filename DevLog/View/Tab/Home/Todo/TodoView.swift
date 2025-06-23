@@ -48,7 +48,15 @@ struct TodoView: View {
                             }
                             .padding(.vertical, 5)
                         }
-                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        .swipeActions(edge: .trailing) {
+                            //  맨 위에 있는 버튼에만 fullSwipe 액션이 적용됨
+                            Button(role: .destructive, action: {
+                                Task {
+                                    await todoVM.deleteTodo(todo)
+                                }
+                            }) {
+                                Image(systemName: "trash")
+                            }
                             Button(action: {
                                 Task {
                                     await todoVM.togglePin(todo)
@@ -57,15 +65,6 @@ struct TodoView: View {
                                 Image(systemName: "star\(todo.isPinned ? ".slash" : ".fill")")
                             }
                             .tint(Color.orange)
-                        }
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive, action: {
-                                Task {
-                                    await todoVM.deleteTodo(todo)
-                                }
-                            }) {
-                                Image(systemName: "trash")
-                            }
                         }
                     }
                     .listStyle(.plain)
