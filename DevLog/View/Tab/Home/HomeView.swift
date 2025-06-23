@@ -84,7 +84,7 @@ struct HomeView: View {
                                                         .foregroundStyle(Color.white)
                                                         .font(.title3)
                                                 }
-                                            VStack {
+                                            VStack(alignment: .leading) {
                                                 Text(todo.title)
                                                     .bold()
                                                 Text(todo.dueDate?.formatted(date: .abbreviated, time: .omitted) ?? "마감일 없음")
@@ -92,6 +92,7 @@ struct HomeView: View {
                                                     .foregroundStyle(Color.gray)
                                             }
                                         }
+                                        .padding(.vertical, 2)
                                     }
                                 }
                             }
