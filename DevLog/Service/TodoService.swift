@@ -27,6 +27,7 @@ class TodoService {
         let collection = db.collection("users/\(userId)/todoLists/")
         
         let query = collection.whereField("kind", isEqualTo: kind.rawValue)
+            .order(by: "createdAt", descending: true)
         
         let snapshot = try await query.getDocuments()
         
