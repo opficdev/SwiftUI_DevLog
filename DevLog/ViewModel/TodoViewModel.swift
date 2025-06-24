@@ -50,22 +50,22 @@ final class TodoViewModel: ObservableObject {
                 case .update:
                     newTodos = currentTodos.sorted { $0.updatedAt > $1.updatedAt }
                 case .day:
-                    newTodos = newTodos.filter { todo in
+                    newTodos = currentTodos.filter { todo in
                         let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
                         return oneDayAgo <= todo.createdAt
                     }
                 case .week:
-                    newTodos = newTodos.filter { todo in
+                    newTodos = currentTodos.filter { todo in
                         let oneWeekAgo = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())!
                         return oneWeekAgo <= todo.createdAt
                     }
                 case .month:
-                    newTodos = newTodos.filter { todo in
+                    newTodos = currentTodos.filter { todo in
                         let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date())!
                         return oneMonthAgo <= todo.createdAt
                     }
                 case .year:
-                    newTodos = newTodos.filter { todo in
+                    newTodos = currentTodos.filter { todo in
                         let oneYearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date())!
                         return oneYearAgo <= todo.createdAt
                     }
