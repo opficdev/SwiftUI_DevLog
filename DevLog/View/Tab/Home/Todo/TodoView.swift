@@ -80,22 +80,22 @@ struct TodoView: View {
                     Menu(content: {
                         Section {
                             Button(action: {
-                                todoVM.filterOption = .latest
+                                todoVM.filterOption = .create
                             }) {
-                                if todoVM.filterOption == .latest {
+                                if todoVM.filterOption == .create {
                                     Image(systemName: "checkmark")
                                         .tint(Color.blue)
                                 }
-                                Text("최신순")
+                                Text("생성")
                             }
                             Button(action: {
-                                todoVM.filterOption = .oldest
+                                todoVM.filterOption = .update
                             }) {
-                                if todoVM.filterOption == .oldest {
+                                if todoVM.filterOption == .update {
                                     Image(systemName: "checkmark")
                                         .tint(Color.blue)
                                 }
-                                Text("오래된순")
+                                Text("수정")
                             }
                         } header: {
                             Text("정렬 옵션")

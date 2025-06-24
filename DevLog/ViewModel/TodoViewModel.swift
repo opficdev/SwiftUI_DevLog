@@ -21,14 +21,14 @@ final class TodoViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
     @Published var scope: TodoScope = .title
-    @Published var filterOption: FilterOption = .latest
+    @Published var filterOption: FilterOption = .create
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
     
     enum FilterOption {
-        case oldest, latest, day, week, month, year
+        case create, update, day, week, month, year
     }
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, todoSvc: TodoService, kind: TodoKind) {
@@ -42,13 +42,13 @@ final class TodoViewModel: ObservableObject {
             .map { [weak self] searchText, scope, currentTodos, option -> [Todo] in
                 guard let _ = self else { return [] }
                 
-                var newTodos = currentTodos
+                var newTodos: [Todo] = []
                 
                 switch option {
-                case .latest:
-                    newTodos.sort { $0.createdAt > $1.createdAt }
-                case .oldest:
-                    newTodos.sort { $0.createdAt < $1.createdAt }
+                case .create:
+                    newTodos = currentTodos
+                case .update:
+                    newTodos = currentTodos.sorted { $0.updatedAt > $1.updatedAt }
                 case .day:
                     newTodos = newTodos.filter { todo in
                         let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
