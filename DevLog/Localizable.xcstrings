@@ -4,10 +4,10 @@
     "" : {
 
     },
-    "DevLog 검색" : {
+    "%@ 검색" : {
 
     },
-    "Go to LinkView" : {
+    "DevLog 검색" : {
 
     },
     "Hello, World!" : {
@@ -134,65 +134,6 @@
         }
       }
     },
-    "task_kind_bug" : {
-      "comment" : "Task kind: Bug",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "버그 수정"
-          }
-        }
-      }
-    },
-    "task_kind_chore" : {
-      "comment" : "Task kind: Chore",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "빌드 및 의존성"
-          }
-        }
-      }
-    },
-    "task_kind_deploy" : {
-      "comment" : "Task kind: Deploy/Release",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "배포"
-          }
-        }
-      }
-    },
-    "task_kind_design" : {
-      "comment" : "Task kind: Design",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "디자인"
-          }
-        }
-      }
-    },
-    "task_kind_discussion" : {
-      "comment" : "Task kind: Discussion",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "회의"
-          }
-        }
-      }
-    },
     "task_kind_doc" : {
       "comment" : "Task kind: Documentation",
       "localizations" : {
@@ -226,18 +167,6 @@
         }
       }
     },
-    "task_kind_hotfix" : {
-      "comment" : "Task kind: Hotfix",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "긴급 패치"
-          }
-        }
-      }
-    },
     "task_kind_improvement" : {
       "comment" : "Task kind: Improvement",
       "localizations" : {
@@ -249,14 +178,13 @@
         }
       }
     },
-    "task_kind_learning" : {
-      "comment" : "Task kind: Learning/Retrospective",
-      "extractionState" : "stale",
+    "task_kind_issue" : {
+      "comment" : "Task kind: Issue",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "학습"
+            "value" : "이슈"
           }
         }
       }
@@ -294,14 +222,31 @@
         }
       }
     },
-    "Test View" : {
-
-    },
-    "This is LinkView" : {
-
-    },
     "TODO" : {
 
+    },
+    "TODO 편집" : {
+
+    },
+    "TodoScope.content" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내용"
+          }
+        }
+      }
+    },
+    "TodoScope.title" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제목"
+          }
+        }
+      }
     },
     "URL" : {
 
@@ -312,13 +257,13 @@
     "검색" : {
 
     },
-    "검색 내용이 보여지는 곳" : {
-
-    },
     "계정 삭제" : {
 
     },
     "계정 연동" : {
+
+    },
+    "계정 연동 실패" : {
 
     },
     "네트워크 문제" : {
@@ -342,6 +287,9 @@
     "로그인하면 사용 약관 및 개인 정보 취급 방침에 동의하게 됩니다." : {
 
     },
+    "마감일" : {
+
+    },
     "버전 정보" : {
 
     },
@@ -354,7 +302,13 @@
     "새 계정 연동" : {
 
     },
+    "생성" : {
+
+    },
     "설정" : {
+
+    },
+    "수정" : {
 
     },
     "신규 기능을 빠르게 만나볼 수 있습니다" : {
@@ -369,6 +323,9 @@
     "앱 아이콘" : {
 
     },
+    "어제" : {
+
+    },
     "연동된 계정" : {
 
     },
@@ -378,10 +335,34 @@
     "웹페이지 추가" : {
 
     },
+    "작년" : {
+
+    },
+    "작성된 내용이 없습니다." : {
+
+    },
     "저장된 웹페이지가 없습니다.\n우측 '+' 버튼을 눌러 웹페이지를 추가해보세요." : {
 
     },
+    "정렬 옵션" : {
+
+    },
     "정말 탈퇴하시겠습니까?" : {
+
+    },
+    "제목" : {
+
+    },
+    "중요 표시" : {
+
+    },
+    "지난달" : {
+
+    },
+    "지난주" : {
+
+    },
+    "최근에 중요 표시를 한 Todo가 여기 표시됩니다." : {
 
     },
     "추가" : {
@@ -393,10 +374,16 @@
     "탈퇴" : {
 
     },
+    "태그" : {
+
+    },
     "테마" : {
 
     },
     "프로필" : {
+
+    },
+    "필터 옵션" : {
 
     },
     "현재 계정" : {
