@@ -20,6 +20,7 @@ final class SearchViewModel: ObservableObject {
     @Published var newURL: String = "https://"
     @Published var alertMsg: String = ""
     @Published var selectedWebPage: WebPageInfo? = nil
+    @Published var isLoading: Bool = false
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, webPageSvc: WebPageService) {
         self.authSvc = authSvc
@@ -31,9 +32,9 @@ final class SearchViewModel: ObservableObject {
         do {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             
-            self.networkSvc.isLoading = true
+            self.isLoading = true
             defer {
-                self.networkSvc.isLoading = false
+                self.isLoading = false
             }
             
             self.webPages = try await self.webPageSvc.requestWebPages(userId: userId)
@@ -48,9 +49,9 @@ final class SearchViewModel: ObservableObject {
     func upsertWebPage(webPage: WebPageInfo) async {
         do {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            self.networkSvc.isLoading = true
+            self.isLoading = true
             defer {
-                self.networkSvc.isLoading = false
+                self.isLoading = false
             }
             
             try await self.webPageSvc.upsertWebPage(webPageInfo: webPage, userId: userId)
@@ -65,9 +66,9 @@ final class SearchViewModel: ObservableObject {
     func deleteWebPage(webPage: WebPageInfo) async {
         do {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            self.networkSvc.isLoading = true
+            self.isLoading = true
             defer {
-                self.networkSvc.isLoading = false
+                self.isLoading = false
             }
             
             try await self.webPageSvc.deleteWebPage(webPageInfo: webPage, userId: userId)

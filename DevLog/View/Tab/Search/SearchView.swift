@@ -203,6 +203,11 @@ struct SearchView: View {
                         }
                     }
                 }
+                .overlay {
+                    if searchVM.isLoading {
+                        LoadingView()
+                    }
+                }
             }
         }
     }
