@@ -86,11 +86,6 @@ final class TodoViewModel: ObservableObject {
             .receive(on: DispatchQueue.main) // UI 업데이트는 메인 스레드
             .assign(to: &$filteredTodos)
         
-        // self.isLoading -> network.isLoading 단방향 연결
-        self.$isLoading
-            .receive(on: DispatchQueue.main)
-            .assign(to: &self.networkSvc.$isLoading)
-        
         // NetworkActivityService.isConnected -> self.isConnected 단방향 연결
         self.networkSvc.$isConnected
             .receive(on: DispatchQueue.main)

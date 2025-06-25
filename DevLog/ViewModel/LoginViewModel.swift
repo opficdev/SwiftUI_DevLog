@@ -52,19 +52,6 @@ final class LoginViewModel: ObservableObject {
             }
             .store(in: &self.cancellables)
         
-         self.$isLoading
-             .removeDuplicates() // 중복 값 전파 방지
-             .receive(on: DispatchQueue.main)
-             .assign(to: \.isLoading, on: self.networkSvc) // networkSvc 객체의 isLoading 프로퍼티에 할당
-             .store(in: &self.cancellables)
-
-         // networkSvc.isLoading -> Service.isLoading 바인딩
-         self.networkSvc.$isLoading
-             .removeDuplicates() // 중복 값 전파 방지
-             .receive(on: DispatchQueue.main)
-             .assign(to: \.isLoading, on: self) // 뷰모델의 isLoading @Published 프로퍼티에 할당
-             .store(in: &self.cancellables)
-        
         // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
         self.networkSvc.$isConnected
             .receive(on: DispatchQueue.main)

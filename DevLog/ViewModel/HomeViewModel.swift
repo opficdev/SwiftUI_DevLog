@@ -48,11 +48,6 @@ class HomeViewModel: ObservableObject {
         self.todoKinds = self.todoKindStrings.compactMap { TodoKind(rawValue: $0) }                     //  초기값 지정
         self.selectedTodoKinds = self.selectedTodoKindStrings.compactMap { TodoKind(rawValue: $0) }     //  초기값 지정
         
-        // self.isLoading -> network.isLoading 단방향 연결
-        self.$isLoading
-            .receive(on: DispatchQueue.main)
-            .assign(to: &self.networkSvc.$isLoading)
-        
         // NetworkActivityService.isConnected -> self.isConnected 단방향 연결
         self.networkSvc.$isConnected
             .receive(on: DispatchQueue.main)

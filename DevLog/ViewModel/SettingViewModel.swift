@@ -42,11 +42,6 @@ class SettingViewModel: ObservableObject {
         self.authSvc.$providers
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$providers)
-    
-        // self.isLoading을 network.isLoading와 단방향 연결
-        self.$isLoading
-            .receive(on: DispatchQueue.main)
-            .assign(to: &self.networkSvc.$isLoading)
         
         // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
         self.networkSvc.$isConnected
