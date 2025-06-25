@@ -153,5 +153,10 @@ struct SettingView: View {
         } message: {
             Text(settingVM.alertMsg)
         }
+        .overlay {
+            if settingVM.isLoading {
+                LoadingView()
+            }
+        }
     }
 }
