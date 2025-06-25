@@ -129,6 +129,11 @@ struct HomeView: View {
                     await homeVM.requestPinnedTodos()
                 }
             }
+            .overlay {
+                if homeVM.isLoading {
+                    LoadingView()
+                }
+            }
         }
     }
 }
