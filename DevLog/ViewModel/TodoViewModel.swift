@@ -134,8 +134,6 @@ final class TodoViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            var a = 1
-            
             self.todos.remove(at: todosIndex)
             self.filteredTodos.remove(at: filteredTodosIndex)
             
