@@ -168,6 +168,11 @@ struct TodoView: View {
                     await todoVM.requestTodoList()
                 }
             }
+            .overlay {
+                if todoVM.isLoading {
+                    LoadingView()
+                }
+            }
         }
     }
 }
