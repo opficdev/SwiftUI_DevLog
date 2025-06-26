@@ -34,9 +34,9 @@ class HomeViewModel: ObservableObject {
         }
     }
     @Published var selectedTodoKinds: [TodoKind] = []
+    @Published var isConnected: Bool = true
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
-    @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
     
     
