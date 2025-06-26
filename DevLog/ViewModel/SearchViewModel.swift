@@ -27,6 +27,11 @@ final class SearchViewModel: ObservableObject {
         self.authSvc = authSvc
         self.networkSvc = networkSvc
         self.webPageSvc = webPageSvc
+        
+        // NetworkActivityService.isConnected를 self.isConnected와 단방향 연결
+        self.networkSvc.$isConnected
+            .receive(on: DispatchQueue.main)
+            .assign(to: &self.$isConnected)
     }
     
     func requestWebPages() async {
