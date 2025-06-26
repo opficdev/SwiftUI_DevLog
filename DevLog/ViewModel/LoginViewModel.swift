@@ -64,6 +64,7 @@ final class LoginViewModel: ObservableObject {
     }
     
     func signInWithApple() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -86,6 +87,7 @@ final class LoginViewModel: ObservableObject {
     }
     
     func signInWithGithub() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -108,6 +110,7 @@ final class LoginViewModel: ObservableObject {
     }
     
     func signInWithGoogle() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -130,6 +133,7 @@ final class LoginViewModel: ObservableObject {
     }
     
     func signOut() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {

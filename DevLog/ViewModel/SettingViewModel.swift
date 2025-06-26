@@ -68,6 +68,7 @@ class SettingViewModel: ObservableObject {
     }
     
     func signOut() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -88,6 +89,7 @@ class SettingViewModel: ObservableObject {
     }
     
     func deleteAuth() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -108,6 +110,7 @@ class SettingViewModel: ObservableObject {
     }
     
     func linkWithProvider(provider: String) async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -133,6 +136,7 @@ class SettingViewModel: ObservableObject {
     }
     
     func unlinkFromProvider(provider: String) async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {

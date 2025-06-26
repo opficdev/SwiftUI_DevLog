@@ -21,6 +21,7 @@ final class SearchViewModel: ObservableObject {
     @Published var alertMsg: String = ""
     @Published var selectedWebPage: WebPageInfo? = nil
     @Published var isLoading: Bool = false
+    @Published var isConnected: Bool = true
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, webPageSvc: WebPageService) {
         self.authSvc = authSvc
@@ -29,6 +30,7 @@ final class SearchViewModel: ObservableObject {
     }
     
     func requestWebPages() async {
+        if !self.isConnected { return }
         do {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             
@@ -47,6 +49,7 @@ final class SearchViewModel: ObservableObject {
     }
     
     func upsertWebPage(webPage: WebPageInfo) async {
+        if !self.isConnected { return }
         do {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             self.isLoading = true
@@ -64,6 +67,7 @@ final class SearchViewModel: ObservableObject {
     }
     
     func deleteWebPage(webPage: WebPageInfo) async {
+        if !self.isConnected { return }
         do {
             guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
             self.isLoading = true

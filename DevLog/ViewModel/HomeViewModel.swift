@@ -55,6 +55,7 @@ class HomeViewModel: ObservableObject {
     }
     
     func requestPinnedTodos() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {

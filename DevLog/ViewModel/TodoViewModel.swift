@@ -93,6 +93,7 @@ final class TodoViewModel: ObservableObject {
     }
 
     func requestTodoList() async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -109,6 +110,7 @@ final class TodoViewModel: ObservableObject {
     }
     
     func upsertTodo(_ todo: Todo) async {
+        if !self.isConnected { return }
         do {
             self.isLoading = true
             defer {
@@ -125,6 +127,8 @@ final class TodoViewModel: ObservableObject {
     }
     
     func deleteTodo(_ todo: Todo) async {
+        if !self.isConnected { return }
+        
         guard let todosIndex = self.todos.firstIndex(where: { $0.id == todo.id }),
               let filteredTodosIndex = self.filteredTodos.firstIndex(where: { $0.id == todo.id }) else { return }
         
@@ -151,6 +155,8 @@ final class TodoViewModel: ObservableObject {
     }
     
     func togglePin(_ todo: Todo) async {
+        if !self.isConnected { return }
+        
         do {
             self.isLoading = true
             defer {
@@ -180,6 +186,8 @@ final class TodoViewModel: ObservableObject {
     }
     
     func toggleComplete(_ todo: Todo) async {
+        if !self.isConnected { return }
+        
         do {
             self.isLoading = true
             defer {
