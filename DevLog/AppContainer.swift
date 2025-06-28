@@ -49,5 +49,9 @@ class AppContainer: ObservableObject {
         HomeViewModel(authSvc: authSvc, networkSvc: networkSvc, todoSvc: todoSvc)
     }()
     
+    lazy var notiVM: NotificationViewModel = {
+        NotificationViewModel(authSvc: authSvc, networkSvc: networkSvc)
+    }()
+    
     private init() {}
 }
