@@ -17,7 +17,7 @@ struct MainView: View {
                     Image(systemName: "house.fill")
                     Text("홈")
                 }
-            NotificationView()
+            NotificationView(notiVM: container.notiVM)
                 .tabItem {
                     Image(systemName: "bell.fill")
                     Text("알림")
