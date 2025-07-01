@@ -1,8 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "Rainbow.png",
-      "idiom" : "universal"
+      "filename" : "Rainbow_light.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "Rainbow_dark.png",
+      "idiom" : "iphone"
     }
   ],
   "info" : {

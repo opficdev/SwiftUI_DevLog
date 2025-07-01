@@ -1,8 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "Pink.png",
-      "idiom" : "universal"
+      "filename" : "Pink_light.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "Pink_dark.png",
+      "idiom" : "iphone"
     }
   ],
   "info" : {

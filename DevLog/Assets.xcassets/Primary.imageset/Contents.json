@@ -1,8 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "Default.png",
-      "idiom" : "universal"
+      "filename" : "Primary_light.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "Primary_dark.png",
+      "idiom" : "iphone"
     }
   ],
   "info" : {

@@ -1,8 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "LimeGreen.png",
-      "idiom" : "universal"
+      "filename" : "LimeGreen_light.png",
+      "idiom" : "iphone"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "LimeGreen_dark.png",
+      "idiom" : "iphone"
     }
   ],
   "info" : {
