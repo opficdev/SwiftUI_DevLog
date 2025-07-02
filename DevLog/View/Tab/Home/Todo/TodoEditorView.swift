@@ -109,7 +109,7 @@ struct TodoEditorView: View {
                     }
                     .padding(.horizontal)
                     Divider()
-                    UIKitTextEditor(text: $content, isFocused: $focusOnEditor, placeholder: "내용을 입력하세요.")
+                    MarkdownEditor(text: $content, isFocused: $focusOnEditor, placeholder: "내용을 입력하세요.")
                         .padding(.horizontal)
                 }
             }
