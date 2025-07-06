@@ -17,4 +17,9 @@ extension String {
             return $0 + String($1)
         }
     }
+    
+    var upperCamelCase: String {
+        guard let first = self.first else { return "" }
+        return first.uppercased() + self.dropFirst()
+    }
 }
