@@ -1,16 +1,6 @@
 {
   "images" : [
     {
-      "filename" : "NightSky_light.png",
-      "idiom" : "iphone"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
       "filename" : "NightSky_dark.png",
       "idiom" : "iphone"
     }

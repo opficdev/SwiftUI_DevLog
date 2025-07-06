@@ -1,16 +1,6 @@
 {
   "images" : [
     {
-      "filename" : "Sky_light.png",
-      "idiom" : "iphone"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
       "filename" : "Sky_dark.png",
       "idiom" : "iphone"
     }

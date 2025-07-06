@@ -1,16 +1,6 @@
 {
   "images" : [
     {
-      "filename" : "Orange_light.png",
-      "idiom" : "iphone"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
       "filename" : "Orange_dark.png",
       "idiom" : "iphone"
     }
