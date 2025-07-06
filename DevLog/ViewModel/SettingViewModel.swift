@@ -54,19 +54,6 @@ class SettingViewModel: ObservableObject {
             .assign(to: &self.$showNetworkAlert)
     }
     
-    func setAppIcon(iconName: String? = nil) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            UIApplication.shared.setAlternateIconName(iconName) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                }
-                else {
-                    continuation.resume()
-                }
-            }
-        }
-    }
-    
     func signOut() async {
         if !self.isConnected { return }
         do {

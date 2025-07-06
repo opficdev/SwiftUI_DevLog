@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
-    @AppStorage("appIcon") var appIcon: AppIcon = .primary
     @StateObject private var settingVM: SettingViewModel
     @State private var signOutAlert = false
     @State private var deleteUserAlert = false
@@ -32,18 +31,6 @@ struct SettingView: View {
                     }
                     .onAppear {
                         settingVM.theme = theme.localizedName
-                    }
-                }
-                NavigationLink(destination: AppIconView().environmentObject(settingVM)) {
-                    HStack {
-                        Text("앱 아이콘")
-                            .foregroundStyle(Color.primary)
-                        Spacer()
-                        Text(settingVM.appIcon)
-                            .foregroundStyle(Color.gray)
-                    }
-                    .onAppear {
-                        settingVM.appIcon = appIcon.localizedName
                     }
                 }
                 NavigationLink(destination: PushNotificationSettingsView()) {
