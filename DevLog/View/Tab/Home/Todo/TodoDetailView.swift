@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TodoDetailView: View {
-    @EnvironmentObject private var todoVM: TodoViewModel
+    @EnvironmentObject var todoVM: TodoViewModel
     @State private var todo: Todo
     @State private var showEditor: Bool = false
     

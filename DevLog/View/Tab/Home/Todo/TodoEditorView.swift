@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TodoEditorView: View {
-    @EnvironmentObject private var todoVM: TodoViewModel
+    @EnvironmentObject var todoVM: TodoViewModel
     @Environment(\.dismiss) private var dismiss
     private var navigationTitle: String
     @State private var title: String = ""
