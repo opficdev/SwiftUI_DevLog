@@ -73,7 +73,7 @@ struct HomeView: View {
                             }
                             else {
                                 ForEach(homeVM.pinnedTodos, id: \.id) { todo in
-                                    NavigationLink(destination: TodoDetailView(todo: todo)) {
+                                    NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(container.todoVM(kind: todo.kind))) {
                                         HStack {
                                             let width = UIScreen.main.bounds.width * 0.08
                                             RoundedRectangle(cornerRadius: 8)
