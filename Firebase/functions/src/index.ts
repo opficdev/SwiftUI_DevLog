@@ -15,9 +15,9 @@ import {
   revokeGithubAccessToken
 } from "./auth/github";
 
-import {
+// import {
 
-} from "./auth/google";
+// } from "./auth/google";
 
 import {
   deleteAllUserFirestoreData
