@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DFABA39A2E1CB55D00FEFBDB /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = DFABA3992E1CB55D00FEFBDB /* MarkdownUI */; };
 		DFE28DA72DCB851700B28FE5 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = DFE28DA62DCB851700B28FE5 /* GoogleSignIn */; };
 		DFE28DA92DCB851700B28FE5 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DFE28DA82DCB851700B28FE5 /* GoogleSignInSwift */; };
 		DFEA656C2DCB5DAC00616AEC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = DFEA656B2DCB5DAC00616AEC /* FirebaseAuth */; };
@@ -50,6 +51,7 @@
 				DFEA656E2DCB5DAC00616AEC /* FirebaseCore in Frameworks */,
 				DFEA656C2DCB5DAC00616AEC /* FirebaseAuth in Frameworks */,
 				DFE28DA92DCB851700B28FE5 /* GoogleSignInSwift in Frameworks */,
+				DFABA39A2E1CB55D00FEFBDB /* MarkdownUI in Frameworks */,
 				DFEA65742DCB5DAC00616AEC /* FirebaseMessaging in Frameworks */,
 				DFEA65702DCB5DAC00616AEC /* FirebaseFirestore in Frameworks */,
 				DFEA65722DCB5DAC00616AEC /* FirebaseFunctions in Frameworks */,
@@ -111,6 +113,7 @@
 				DFEA65732DCB5DAC00616AEC /* FirebaseMessaging */,
 				DFE28DA62DCB851700B28FE5 /* GoogleSignIn */,
 				DFE28DA82DCB851700B28FE5 /* GoogleSignInSwift */,
+				DFABA3992E1CB55D00FEFBDB /* MarkdownUI */,
 			);
 			productName = SwiftUI_DevLog;
 			productReference = DFD48B002DC4D6E2005905C5 /* DevLog.app */;
@@ -142,6 +145,7 @@
 			packageReferences = (
 				DFEA656A2DCB5DAC00616AEC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				DFE28DA52DCB851700B28FE5 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				DFABA3982E1CB55D00FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFD48B012DC4D6E2005905C5 /* Products */;
@@ -415,6 +419,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DFABA3982E1CB55D00FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
 		DFE28DA52DCB851700B28FE5 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -434,6 +446,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DFABA3992E1CB55D00FEFBDB /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DFABA3982E1CB55D00FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
 		DFE28DA62DCB851700B28FE5 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DFE28DA52DCB851700B28FE5 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
