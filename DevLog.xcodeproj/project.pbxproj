@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DF0BB6252E12C062006F8C3B /* Runestone in Frameworks */ = {isa = PBXBuildFile; productRef = DF0BB6242E12C062006F8C3B /* Runestone */; };
 		DFE28DA72DCB851700B28FE5 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = DFE28DA62DCB851700B28FE5 /* GoogleSignIn */; };
 		DFE28DA92DCB851700B28FE5 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DFE28DA82DCB851700B28FE5 /* GoogleSignInSwift */; };
 		DFEA656C2DCB5DAC00616AEC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = DFEA656B2DCB5DAC00616AEC /* FirebaseAuth */; };
@@ -52,7 +51,6 @@
 				DFEA656C2DCB5DAC00616AEC /* FirebaseAuth in Frameworks */,
 				DFE28DA92DCB851700B28FE5 /* GoogleSignInSwift in Frameworks */,
 				DFEA65742DCB5DAC00616AEC /* FirebaseMessaging in Frameworks */,
-				DF0BB6252E12C062006F8C3B /* Runestone in Frameworks */,
 				DFEA65702DCB5DAC00616AEC /* FirebaseFirestore in Frameworks */,
 				DFEA65722DCB5DAC00616AEC /* FirebaseFunctions in Frameworks */,
 				DFE28DA72DCB851700B28FE5 /* GoogleSignIn in Frameworks */,
@@ -113,7 +111,6 @@
 				DFEA65732DCB5DAC00616AEC /* FirebaseMessaging */,
 				DFE28DA62DCB851700B28FE5 /* GoogleSignIn */,
 				DFE28DA82DCB851700B28FE5 /* GoogleSignInSwift */,
-				DF0BB6242E12C062006F8C3B /* Runestone */,
 			);
 			productName = SwiftUI_DevLog;
 			productReference = DFD48B002DC4D6E2005905C5 /* DevLog.app */;
@@ -145,7 +142,6 @@
 			packageReferences = (
 				DFEA656A2DCB5DAC00616AEC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				DFE28DA52DCB851700B28FE5 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
-				DF0BB6232E12C062006F8C3B /* XCRemoteSwiftPackageReference "Runestone" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFD48B012DC4D6E2005905C5 /* Products */;
@@ -419,14 +415,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DF0BB6232E12C062006F8C3B /* XCRemoteSwiftPackageReference "Runestone" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/simonbs/Runestone";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.1;
-			};
-		};
 		DFE28DA52DCB851700B28FE5 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -446,11 +434,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DF0BB6242E12C062006F8C3B /* Runestone */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DF0BB6232E12C062006F8C3B /* XCRemoteSwiftPackageReference "Runestone" */;
-			productName = Runestone;
-		};
 		DFE28DA62DCB851700B28FE5 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DFE28DA52DCB851700B28FE5 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;

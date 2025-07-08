@@ -109,8 +109,9 @@ struct TodoEditorView: View {
                     }
                     .padding(.horizontal)
                     Divider()
-                    MarkdownEditor(text: $content, isFocused: $focusOnEditor, placeholder: "내용을 입력하세요.")
-                        .padding(.horizontal)
+                    TabView {
+                        
+                    }
                 }
             }
             .navigationTitle(navigationTitle)
