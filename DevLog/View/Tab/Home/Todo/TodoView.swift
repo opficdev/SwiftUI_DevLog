@@ -44,7 +44,7 @@ struct TodoView: View {
                                 Text(todo.content)
                                     .font(.subheadline)
                                     .foregroundStyle(Color.gray)
-                                    .lineLimit(2)
+                                    .lineLimit(1)
                             }
                             .padding(.vertical, 5)
                         }
