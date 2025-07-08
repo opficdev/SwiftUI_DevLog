@@ -29,8 +29,8 @@ struct HomeView: View {
                         Section(content: {
                             ForEach(homeVM.selectedTodoKinds, id: \.self) { kind in
                                 NavigationLink(destination: TodoView(todoVM: container.todoVM(kind: kind))) {
+                                    let width = UIScreen.main.bounds.width * 0.08
                                     HStack {
-                                        let width = UIScreen.main.bounds.width * 0.08
                                         RoundedRectangle(cornerRadius: 8)
                                             .fill(kind.color)
                                             .frame(width: width, height: width)
@@ -42,7 +42,7 @@ struct HomeView: View {
                                         Text(kind.localizedName)
                                             .foregroundStyle(Color.primary)
                                     }
-                                    .padding(.vertical, 2)
+                                    .frame(height: width * 1.3)
                                 }
                             }
                         }, header: {
@@ -68,14 +68,15 @@ struct HomeView: View {
                                 HStack {
                                     Spacer()
                                     Text("최근에 중요 표시를 한 Todo가 여기 표시됩니다.")
+                                        .font(.callout)
                                     Spacer()
                                 }
                             }
                             else {
                                 ForEach(homeVM.pinnedTodos, id: \.id) { todo in
                                     NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(container.todoVM(kind: todo.kind))) {
+                                        let width = UIScreen.main.bounds.width * 0.08
                                         HStack {
-                                            let width = UIScreen.main.bounds.width * 0.08
                                             RoundedRectangle(cornerRadius: 8)
                                                 .fill(todo.kind.color)
                                                 .frame(width: width, height: width)
@@ -92,7 +93,7 @@ struct HomeView: View {
                                                     .foregroundStyle(Color.gray)
                                             }
                                         }
-                                        .padding(.vertical, 2)
+                                        .frame(height: width * 1.3)
                                     }
                                 }
                             }
@@ -136,4 +137,10 @@ struct HomeView: View {
             }
         }
     }
+}
+
+
+#Preview {
+    HomeView(container: AppContainer.shared)
+        .environmentObject(AppContainer.shared)
 }
