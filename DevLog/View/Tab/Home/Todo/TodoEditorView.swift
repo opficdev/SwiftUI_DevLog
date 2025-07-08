@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct TodoEditorView: View {
     @EnvironmentObject var todoVM: TodoViewModel
@@ -19,6 +20,7 @@ struct TodoEditorView: View {
     @FocusState private var focusOnTagField: Bool
     @State private var tagText: String = ""
     @State private var hasDueDate: Bool = true
+    @State private var tabViewTag = "editor"
     
     init(title: String, todo: Todo? = nil) {
         self.navigationTitle = title
@@ -108,9 +110,42 @@ struct TodoEditorView: View {
                         }
                     }
                     .padding(.horizontal)
-                    Divider()
-                    TabView {
-                        
+                }
+                LazyVStack(alignment:.leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    Section {
+                        if tabViewTag == "editor" {
+                            UIKitTextEditor(text: $content, isFocused: $focusOnEditor, placeholder: "내용을 입력하세요.")
+                                .padding(.horizontal)
+                        }
+                        else {
+                            Markdown(content)
+                                .markdownTheme(.basic)
+                                .padding(.horizontal)
+                        }
+                    } header: {
+                        VStack(spacing: 0) {
+                            Divider()
+                            HStack(spacing: 0) {
+                                Button(action: {
+                                    tabViewTag = "editor"
+                                }) {
+                                    Text("편집")
+                                        .frame(maxWidth: .infinity)
+                                        .foregroundStyle(tabViewTag == "editor" ? Color.primary : Color.gray)
+                                }
+                                Divider()
+                                Button(action: {
+                                    tabViewTag = "preview"
+                                }) {
+                                    Text("미리보기")
+                                        .frame(maxWidth: .infinity)
+                                        .foregroundStyle(tabViewTag == "preview" ? Color.primary : Color.gray)
+                                }
+                            }
+                            .padding(.vertical, 10)
+                            .background(Color(UIColor.systemBackground))
+                            Divider()
+                        }
                     }
                 }
             }
