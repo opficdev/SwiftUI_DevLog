@@ -170,6 +170,7 @@ struct TodoEditorView: View {
                                 kind: todoVM.kind
                             )
                             await todoVM.upsertTodo(todo)
+                            await todoVM.requestTodoList()
                             dismiss()
                         }
                     }) {
