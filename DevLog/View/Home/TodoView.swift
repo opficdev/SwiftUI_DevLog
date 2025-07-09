@@ -68,6 +68,11 @@ struct TodoView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .refreshable {
+                        Task {
+                            await todoVM.requestTodoList()
+                        }
+                    }
                 }
             }
             .navigationTitle(todoVM.kind.localizedName)
@@ -130,7 +135,6 @@ struct TodoView: View {
                                 Text("지난달")
                             }
                             Button(action: {
-                               
                                 todoVM.filterOption = .year
                             }) {
                                 if todoVM.filterOption == .year {
