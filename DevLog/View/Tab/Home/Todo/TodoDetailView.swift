@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct TodoDetailView: View {
     @EnvironmentObject var todoVM: TodoViewModel
@@ -54,7 +55,7 @@ struct TodoDetailView: View {
                 }
                 .padding(.horizontal)
                 Divider()
-                Text(todo.content)
+                Markdown(todo.content)
                     .padding(.horizontal)
             }
         }
