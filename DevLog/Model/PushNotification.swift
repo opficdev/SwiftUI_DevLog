@@ -15,4 +15,13 @@ struct PushNotification: Codable, Identifiable {
     var kind: NotificationKind
     var receivedDate: Date
     var isRead: Bool
+    
+    init(from: QueryDocumentSnapshot) {
+        self.id = from.documentID
+        self.title = from["title"] as? String ?? ""
+        self.content = from["content"] as? String ?? ""
+        self.kind = NotificationKind(rawValue: from["kind"] as? String ?? "") ?? .info
+        self.receivedDate = (from["receivedDate"] as? Timestamp)?.dateValue() ?? Date()
+        self.isRead = from["isRead"] as? Bool ?? false
+    }
 }
