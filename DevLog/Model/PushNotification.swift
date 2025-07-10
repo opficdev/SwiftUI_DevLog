@@ -14,4 +14,5 @@ struct PushNotification: Codable, Identifiable {
     var content: String
     var kind: NotificationKind
     var receivedDate: Date
+    var isRead: Bool
 }
