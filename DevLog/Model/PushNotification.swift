@@ -25,6 +25,15 @@ struct PushNotification: Codable, Identifiable {
         self.isRead = from["isRead"] as? Bool ?? false
     }
     
+    init(id: String? = nil, title: String, content: String, kind: NotificationKind, receivedDate: Date, isRead: Bool) {
+        self.id = id
+        self.title = title
+        self.content = content
+        self.kind = kind
+        self.receivedDate = receivedDate
+        self.isRead = isRead
+    }
+    
     func toDictionary() -> [String: Any] {
         return [
             "title": title,
