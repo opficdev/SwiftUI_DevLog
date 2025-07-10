@@ -24,4 +24,14 @@ struct PushNotification: Codable, Identifiable {
         self.receivedDate = (from["receivedDate"] as? Timestamp)?.dateValue() ?? Date()
         self.isRead = from["isRead"] as? Bool ?? false
     }
+    
+    func toDictionary() -> [String: Any] {
+        return [
+            "title": title,
+            "content": content,
+            "kind": kind.rawValue,
+            "receivedDate": Timestamp(date: receivedDate),
+            "isRead": isRead
+        ]
+    }
 }
