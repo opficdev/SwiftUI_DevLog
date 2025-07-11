@@ -186,6 +186,12 @@ final class AuthService: ObservableObject {
         }
     }
     
+    func getFCMToken() async throws -> String? {
+        if self.user == nil { return nil }
+        
+        return try await Messaging.messaging().token()
+    }
+        
     private func fetchAuth() async {
         do {
             guard let userId = self.userId else { throw URLError(.userAuthenticationRequired) }
