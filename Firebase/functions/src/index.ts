@@ -23,6 +23,10 @@ import {
   deleteAllUserFirestoreData
 } from "./user/delete";
 
+import {
+  sendDueDateReminders
+} from "./fcm/reminders";
+
 // .env 파일 로드
 dotenv.config();
 
@@ -47,4 +51,9 @@ export {
 
 export {
   deleteAllUserFirestoreData
+};
+
+// FCM 알림 함수 내보내기
+export {
+  sendDueDateReminders
 };
