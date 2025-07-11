@@ -20,12 +20,4 @@ final class NotificationService: ObservableObject {
         
         return snapshot.documents.compactMap { PushNotification(from: $0) }
     }
-    
-    func upsertNotification(notification: PushNotification, userId: String) async throws {
-        let collection = db.collection("users/\(userId)/notifications")
-        
-        let docRef = collection.document(notification.id ?? UUID().uuidString)
-        
-        try await docRef.setData(notification.toDictionary(), merge: true)
-    }
 }
