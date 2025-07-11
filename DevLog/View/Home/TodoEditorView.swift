@@ -176,6 +176,7 @@ struct TodoEditorView: View {
                     }) {
                         Text("추가")
                     }
+                    .disabled(title.isEmpty || content.isEmpty)
                 }
             }
         }
