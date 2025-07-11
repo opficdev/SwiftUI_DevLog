@@ -5,7 +5,7 @@ import * as logger from "firebase-functions/logger";
 // 매일 저녁 9시에 실행되는 스케줄 함수
 export const sendDueDateReminders = onSchedule(
     {
-        schedule: "0 20 * * *", // 매일 21:00 (KST)
+        schedule: "0 21 * * *", // 매일 21:00 (KST)
         timeZone: "Asia/Seoul",  // 한국 시간 기준
         region: "asia-northeast3",
     },
