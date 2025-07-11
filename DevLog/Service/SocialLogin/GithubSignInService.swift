@@ -48,12 +48,6 @@ class GithubSignInService: NSObject {
         }
         
         return (result.user, accessToken)
-        // 6. Firebase Messaging을 통해 FCM 토큰 발급
-//        let fcmToken = try await Messaging.messaging().token()
-        
-//        try await upsertUser(user: result.user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
-//
-//        try await fetchUserInfo()
     }
     
     func requestGithubAuthorizationCode() async throws -> String {
