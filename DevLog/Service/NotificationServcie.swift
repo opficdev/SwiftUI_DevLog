@@ -20,4 +20,10 @@ final class NotificationService: ObservableObject {
         
         return snapshot.documents.compactMap { PushNotification(from: $0) }
     }
+    
+    func deleteNotification(notificationId: String, userId: String) async throws {
+        let docRef = db.collection("users/\(userId)/notifications").document(notificationId)
+        
+        try await docRef.delete()
+    }
 }
