@@ -41,8 +41,12 @@ final class LoginViewModel: ObservableObject {
                 if let user = user {
                     if self.signIn == nil { // 기존 세션을 통해 로그인이 된 경우
                         Task {
-                            try await self.userSvc.fetchUserInfo(user: user)
-                            self.signIn = true
+                            if let fcmToken = try await self.authSvc.getFCMToken() {
+                                try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken)
+                                
+                                try await self.userSvc.fetchUserInfo(user: user)
+                                self.signIn = true
+                            }
                         }
                     }
                 }
