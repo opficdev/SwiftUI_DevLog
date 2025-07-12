@@ -21,11 +21,16 @@ import {
 
 import {
   deleteAllUserFirestoreData
-} from "./user/delete";
+} from "./user/delete"
 
 import {
-  sendDueDateReminders
-} from "./fcm/reminders";
+  sendPushNotification
+} from "./fcm/notification";
+
+import {
+  scheduleTodoReminder
+} from "./fcm/schedule";
+
 
 // .env 파일 로드
 dotenv.config();
@@ -53,7 +58,8 @@ export {
   deleteAllUserFirestoreData
 };
 
-// FCM 알림 함수 내보내기
+// FCM 관련 함수들 내보내기
 export {
-  sendDueDateReminders
+  sendPushNotification,
+  scheduleTodoReminder
 };
