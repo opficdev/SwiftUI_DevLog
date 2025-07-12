@@ -19,7 +19,7 @@ class UserService {
     @Published var statusMsg: String = ""
     
     // 유저를 Firestore에 저장 및 업데이트
-    func upsertUser(user: User, fcmToken: String, provider: String, accessToken: String? = nil) async throws {
+    func upsertUser(user: User, fcmToken: String, provider: String? = nil, accessToken: String? = nil) async throws {
         let infoRef = db.document("users/\(user.uid)/userData/info")
         let tokensRef = db.document("users/\(user.uid)/userData/tokens")
         let settingsRef = db.document("users/\(user.uid)/userData/settings")
@@ -28,8 +28,11 @@ class UserService {
         var field: [String: Any] = [
             "statusMsg": "",
             "lastLogin": FieldValue.serverTimestamp(),
-            "currentProvider": provider,
         ]
+        
+        if let provider = provider {
+            field["currentProvider"] = provider
+        }
         
         // 공급자 이슈로 인한 nil 방지
         if let email = user.email {
