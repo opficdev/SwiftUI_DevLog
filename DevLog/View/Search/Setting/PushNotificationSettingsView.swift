@@ -8,8 +8,21 @@
 import SwiftUI
 
 struct PushNotificationSettingsView: View {
+    @EnvironmentObject var settingVM: SettingViewModel
+    @State private var isNotificationEnabled: Bool = true // 임시
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        List {
+            Section(content: {
+                Toggle(isOn: $isNotificationEnabled, label: {
+                    Text("푸시 알람 활성화")
+                })
+            }, footer: {
+                Text("설정에서의 푸시 알람 설정과 별개입니다.")
+            })
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("푸시 알람 설정")
     }
 }
 
