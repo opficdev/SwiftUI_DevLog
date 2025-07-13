@@ -14,7 +14,6 @@ class SettingViewModel: ObservableObject {
     private let networkSvc: NetworkActivityService
     private let userSvc: UserService
     @Published var theme: String = ""
-    @Published var appIcon: String = ""
     
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
