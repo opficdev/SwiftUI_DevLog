@@ -23,8 +23,8 @@ export const scheduleTodoReminder = onDocumentWritten(
 
         try {
             // 1. 사용자의 알림 설정 시간 가져오기 (기본값: 오전 9시)
-            const tokenDoc = await admin.firestore().doc(`users/${userId}/userData/tokens`).get();
-            const settings = tokenDoc.data();
+            const settingsDoc = await admin.firestore().doc(`users/${userId}/userData/settings`).get();
+            const settings = settingsDoc.data();
             const notificationHour = settings?.notificationHour ?? 9; // 설정 없으면 오전 9시
 
             // 2. 실제 알림 보낼 시간 계산 (마감일 하루 전, 사용자가 설정한 시각)
