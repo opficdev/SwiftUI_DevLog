@@ -89,7 +89,9 @@ class UserService {
         let settingsRef = db.document("users/\(userId)/userData/settings")
         let doc = try await settingsRef.getDocument()
         
-        return doc.data()?["allowPushNotification"] as? Bool ?? true
+        if let allowPush = doc.data()?["allowPushNotification"] as? Bool { return allowPush }
+        
+        throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Push notification settings not found"])
     }
     
     func fetchPushNotificationHour(_ userId: String) async throws -> Int {
