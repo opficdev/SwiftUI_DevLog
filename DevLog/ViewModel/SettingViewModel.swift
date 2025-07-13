@@ -30,9 +30,8 @@ class SettingViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showNetworkAlert: Bool = false
     
-    @Published var notificationEnabled: Bool = true
-    @Published var notificationTime: Int = 9 // 기본값은 오전 9시
-
+    @Published var pushNotificationEnabled: Bool = true
+    @Published var pushNotificationHour: Int = 9 // 기본값은 오전 9시
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, userSvc: UserService) {
         self.authSvc = authSvc
@@ -157,8 +156,8 @@ class SettingViewModel: ObservableObject {
             }
             guard let userId = self.authSvc.user?.uid else { return }
             
-            self.notificationEnabled = try await self.userSvc.fetchAllowPushNotification(userId)
-            self.notificationTime = try await self.userSvc.fetchPushNotificationHour(userId)
+            self.pushNotificationEnabled = try await self.userSvc.fetchAllowPushNotification(userId)
+            self.pushNotificationHour = try await self.userSvc.fetchPushNotificationHour(userId)
         } catch {
             print("푸시 알람 불러오기 실패: \(error.localizedDescription)")
             self.alertMsg = "푸시 알람 설정을 불러오는 중 오류가 발생했습니다."
