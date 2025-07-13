@@ -25,11 +25,11 @@ export const scheduleTodoReminder = onDocumentWritten(
             // 1. 사용자의 알림 설정 시간 가져오기 (기본값: 오전 9시)
             const settingsDoc = await admin.firestore().doc(`users/${userId}/userData/settings`).get();
             const settings = settingsDoc.data();
-            const notificationHour = settings?.notificationHour ?? 9; // 설정 없으면 오전 9시
+            const pushNotificationHour = settings?.pushNotificationHour ?? 9; // 설정 없으면 오전 9시
 
             // 2. 실제 알림 보낼 시간 계산 (마감일 하루 전, 사용자가 설정한 시각)
             const dueDate = todoData.dueDate.toDate(); // Firestore Timestamp를 JS Date로 변환
-            const notificationDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 1, notificationHour, 0, 0);
+            const notificationDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 1, pushNotificationHour, 0, 0);
 
             // 3. Cloud Tasks 큐에 작업 예약
             const queue = getFunctions().taskQueue("sendPushNotification",LOCATION);
