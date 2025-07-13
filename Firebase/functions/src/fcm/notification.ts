@@ -4,7 +4,8 @@ import * as logger from "firebase-functions/logger";
 
 // Cloud Tasks에 의해 트리거되는 함수
 export const sendPushNotification = onTaskDispatched(
-    {
+    {  
+        region: "asia-northeast3",
         retryConfig: { maxAttempts: 3, minBackoffSeconds: 5 },
         rateLimits: { maxDispatchesPerSecond: 500 },
     },
