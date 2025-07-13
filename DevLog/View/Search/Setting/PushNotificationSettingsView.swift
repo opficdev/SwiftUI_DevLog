@@ -20,6 +20,31 @@ struct PushNotificationSettingsView: View {
             }, footer: {
                 Text("설정에서의 푸시 알람 설정과 별개입니다.")
             })
+            HStack {
+                Text("오전 9시")
+                Spacer()
+            }
+            HStack {
+                Text("오후 3시")
+                Spacer()
+            }
+            HStack {
+                Text("오후 6시")
+                Spacer()
+            }
+            HStack {
+                Text("오후 9시")
+                Spacer()
+            }
+            HStack {
+                Text("사용자 설정")
+                Spacer()
+                Text("\(customHour)시")
+                    .foregroundStyle(.secondary)
+                    .onTapGesture {
+                        showTimePicker.toggle()
+                    }
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("푸시 알람 설정")
