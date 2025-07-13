@@ -26,8 +26,19 @@ class NotificationViewModel: ObservableObject {
             .assign(to: &self.$isConnected)
     }
     
-    func requestNotifications() {
-        
+    func requestNotifications() async {
+        if !self.isConnected { return }
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            
+            
+        } catch {
+            self.alertMsg = "푸시 알람 목록을 불러오는 중 오류가 발생했습니다."
+            self.showAlert = true
+        }
     }
-    
 }
