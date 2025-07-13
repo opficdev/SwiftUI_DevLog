@@ -3,10 +3,12 @@ import { getFunctions } from "firebase-admin/functions";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 
+const LOCATION = "asia-northeast3"; 
+
 // 할 일(Todo) 문서가 생성되거나 업데이트될 때마다 실행
 export const scheduleTodoReminder = onDocumentWritten(
     {
-        region: "asia-northeast3",
+        region: LOCATION,
         document: "users/{userId}/todoLists/{todoId}",
     },
     async (event) => {
@@ -30,7 +32,7 @@ export const scheduleTodoReminder = onDocumentWritten(
             const notificationDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 1, notificationHour, 0, 0);
 
             // 3. Cloud Tasks 큐에 작업 예약
-            const queue = getFunctions().taskQueue("sendPushNotification", "asia-northeast3");
+            const queue = getFunctions().taskQueue("sendPushNotification",LOCATION);
             await queue.enqueue(
                 {
                     userId: userId,
