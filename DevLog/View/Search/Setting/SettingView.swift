@@ -33,14 +33,9 @@ struct SettingView: View {
                         settingVM.theme = theme.localizedName
                     }
                 }
-                NavigationLink(destination: PushNotificationSettingsView()) {
-                    HStack {
-                        Text("알림")
-                            .foregroundStyle(Color.primary)
-                        Spacer()
-//                        Text(settingVM.notification)
-//                            .foregroundStyle(Color.gray)
-                    }
+                NavigationLink(destination: PushNotificationSettingsView().environmentObject(settingVM)) {
+                    Text("알림")
+                        .foregroundStyle(Color.primary)
                 }
             }
             
