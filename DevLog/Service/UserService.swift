@@ -58,7 +58,7 @@ class UserService {
         
         try await tokensRef.setData(field, merge: true); field.removeAll()
         
-        try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic"], merge: true)
+        try await settingsRef.setData(["allowPushAlarm": true, "theme": "automatic", "notificationHour": 9], merge: true)
     }
     
     func fetchUserInfo(user: User) async throws {
