@@ -57,6 +57,10 @@ class SettingViewModel: ObservableObject {
         self.networkSvc.$showNetworkAlert
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$showNetworkAlert)
+        
+        Task {
+            await self.fetchPushNotificationSettings()
+        }
     }
     
     func signOut() async {
