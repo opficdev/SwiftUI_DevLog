@@ -84,4 +84,11 @@ class UserService {
         
         try await infoRef.setData(["statusMsg": statusMsg], merge: true)
     }
+    
+    func fetchAllowPushNotification(_ userId: String) async throws -> Bool {
+        let settingsRef = db.document("users/\(userId)/userData/settings")
+        let doc = try await settingsRef.getDocument()
+        
+        return doc.data()?["allowPushNotification"] as? Bool ?? true
+    }
 }
