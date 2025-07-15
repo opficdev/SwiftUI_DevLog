@@ -102,4 +102,10 @@ class UserService {
         
         throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Notification hour not found"])
     }
+    
+    func updatePushNotificationEnabled(_ userId: String, enabled: Bool) async throws {
+        let settingRef = db.document("users/\(userId)/userData/settings")
+        
+        try await settingRef.setData(["allowPushNotification": enabled], merge: true)
+    }
 }
