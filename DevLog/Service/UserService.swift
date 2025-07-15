@@ -61,7 +61,7 @@ class UserService {
         try await settingsRef.setData([
             "allowPushNotification": true,
             "theme": "automatic",
-            "notificationHour": 9], merge: true)
+            "pushNotificationHour": 9], merge: true)
     }
     
     func fetchUserInfo(user: User) async throws {
