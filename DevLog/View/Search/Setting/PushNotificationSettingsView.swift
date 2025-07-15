@@ -10,6 +10,9 @@ import SwiftUI
 struct PushNotificationSettingsView: View {
     @EnvironmentObject var settingVM: SettingViewModel
     @State private var isNotificationEnabled: Bool = true // 임시
+    @State private var customHour = 9 // 임시, 사용자 설정 시간
+    @State private var showTimePicker = false // 시간 선택기 표시 여부
+    @State private var sheetHeight: CGFloat = 0 // 시트 높이 조정용
     
     var body: some View {
         List {
@@ -47,7 +50,28 @@ struct PushNotificationSettingsView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("푸시 알람 설정")
+        .navigationTitle("알람")
+        .sheet(isPresented: $showTimePicker) {
+            Picker("사용자 설정", selection: $customHour) {
+                ForEach(0..<24) { hour in
+                    if hour != 9 && hour != 15 && hour != 18 && hour != 21 {
+                        Text("\(hour)시").tag(hour)
+                    }
+                }
+            }
+            .background(
+                GeometryReader { geometry in
+                    Color.clear.onAppear {
+                        if sheetHeight == 0 {
+                            sheetHeight = geometry.size.height
+                        }
+                    }
+                }
+            )
+            .pickerStyle(.wheel)
+            .presentationDragIndicator(.visible)
+            .presentationDetents([.height(sheetHeight)])
+        }
     }
 }
 
