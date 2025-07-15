@@ -9,7 +9,6 @@ import SwiftUI
 
 struct PushNotificationSettingsView: View {
     @EnvironmentObject var settingVM: SettingViewModel
-    @State private var isNotificationEnabled: Bool = true // 임시
     @State private var customHour = 9 // 임시, 사용자 설정 시간
     @State private var showTimePicker = false // 시간 선택기 표시 여부
     @State private var sheetHeight: CGFloat = 0 // 시트 높이 조정용
@@ -17,7 +16,7 @@ struct PushNotificationSettingsView: View {
     var body: some View {
         List {
             Section(content: {
-                Toggle(isOn: $isNotificationEnabled, label: {
+                Toggle(isOn: $settingVM.pushNotificationEnabled, label: {
                     Text("푸시 알람 활성화")
                 })
             }, footer: {
