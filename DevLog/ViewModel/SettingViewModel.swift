@@ -5,6 +5,7 @@
 //  Created by opfic on 5/7/25.
 //
 
+import Combine
 import SwiftUI
 import UIKit
 import FirebaseFirestore
@@ -175,6 +176,22 @@ class SettingViewModel: ObservableObject {
                 self.alertMsg = "푸시 알람 시간을 불러오는 중 오류가 발생했습니다."
                 self.showAlert = true
             }
+        }
+    }
+    
+    func updatePushNotificationEnabled() async {
+        if !self.isConnected { return }
+        
+        do {
+            self.isLoading = true
+            defer { self.isLoading = false }
+            
+            guard let userId = self.authSvc.user?.uid else { return }
+            try await self.userSvc.updatePushNotificationEnabled(userId, enabled: self.pushNotificationEnabled)
+        } catch {
+            print("푸시 알람 활성화 여부 업데이트 실패: \(error.localizedDescription)")
+            self.alertMsg = "푸시 알람 활성화 여부를 업데이트하는 중 오류가 발생했습니다."
+            self.showAlert = true
         }
     }
 }
