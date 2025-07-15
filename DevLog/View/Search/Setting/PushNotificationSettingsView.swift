@@ -69,7 +69,7 @@ struct PushNotificationSettingsView: View {
                 }
             )
             .pickerStyle(.wheel)
-            .presentationDragIndicator(.visible)
+            .presentationDragIndicator(.hidden)
             .presentationDetents([.height(sheetHeight)])
         }
     }
