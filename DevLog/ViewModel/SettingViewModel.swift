@@ -146,22 +146,35 @@ class SettingViewModel: ObservableObject {
             self.showAlert = true
         }
     }
-    
+
     func fetchPushNotificationSettings() async {
         if !self.isConnected { return }
+        
+        self.isLoading = true
+        defer { self.isLoading = false }
+        
+        guard let userId = self.authSvc.user?.uid else { return }
+        
+        async let enabledTask = self.userSvc.fetchAllowPushNotification(userId)
+        async let hourTask = self.userSvc.fetchPushNotificationHour(userId)
+        
         do {
-            self.isLoading = true
-            defer {
-                self.isLoading = false
-            }
-            guard let userId = self.authSvc.user?.uid else { return }
-            
-            self.pushNotificationEnabled = try await self.userSvc.fetchAllowPushNotification(userId)
-            self.pushNotificationHour = try await self.userSvc.fetchPushNotificationHour(userId)
+            self.pushNotificationEnabled = try await enabledTask
         } catch {
-            print("푸시 알람 불러오기 실패: \(error.localizedDescription)")
+            print("푸시 알람 활성화 여부 불러오기 실패: \(error.localizedDescription)")
             self.alertMsg = "푸시 알람 설정을 불러오는 중 오류가 발생했습니다."
             self.showAlert = true
+        }
+        
+        do {
+            self.pushNotificationHour = try await hourTask
+        } catch {
+            print("푸시 알람 시간 불러오기 실패: \(error.localizedDescription)")
+            // 이미 다른 오류로 알림이 표시될 예정이 아니라면, 알림을 표시합니다.
+            if !self.showAlert {
+                self.alertMsg = "푸시 알람 시간을 불러오는 중 오류가 발생했습니다."
+                self.showAlert = true
+            }
         }
     }
 }
