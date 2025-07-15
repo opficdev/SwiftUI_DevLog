@@ -17,6 +17,7 @@ class SettingViewModel: ObservableObject {
     private let networkSvc: NetworkActivityService
     private let userSvc: UserService
     private let db = Firestore.firestore()
+    private var cancellables = Set<AnyCancellable>()
     @Published var theme: String = ""
     
     @Published var showAlert: Bool = false
@@ -61,6 +62,16 @@ class SettingViewModel: ObservableObject {
         Task {
             await self.fetchPushNotificationSettings()
         }
+        
+        self.$pushNotificationEnabled
+            .dropFirst() // 초기값은 무시
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                Task {
+                    await self.updatePushNotificationEnabled()
+                }
+            }
+            .store(in: &self.cancellables)
     }
     
     func signOut() async {
