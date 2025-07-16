@@ -108,4 +108,10 @@ class UserService {
         
         try await settingRef.setData(["allowPushNotification": enabled], merge: true)
     }
+    
+    func updateAppTheme(_ userId: String, theme: String) async throws {
+        let settingRef = db.document("users/\(userId)/userData/settings")
+        
+        try await settingRef.setData(["theme": theme], merge: true)
+    }
 }
