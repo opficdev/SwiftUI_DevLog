@@ -215,4 +215,20 @@ class SettingViewModel: ObservableObject {
             self.showAlert = true
         }
     }
+    
+    func updateAppTheme() async {
+        if !self.isConnected { return }
+        
+        do {
+            self.isLoading = true
+            defer { self.isLoading = false }
+            
+            guard let userId = self.authSvc.user?.uid else { return }
+            try await self.userSvc.updateAppTheme(userId, theme: self.theme)
+        } catch {
+            print("앱 테마 업데이트 실패: \(error.localizedDescription)")
+            self.alertMsg = "앱 테마를 업데이트하는 중 오류가 발생했습니다."
+            self.showAlert = true
+        }
+    }
 }
