@@ -72,6 +72,16 @@ class SettingViewModel: ObservableObject {
                 }
             }
             .store(in: &self.cancellables)
+        
+        self.$theme
+            .dropFirst() // 초기값은 무시
+            .sink { [weak self] newTheme in
+                guard let self = self else { return }
+                Task {
+                    await self.updateAppTheme()
+                }
+            }
+            .store(in: &self.cancellables)
     }
     
     func signOut() async {
