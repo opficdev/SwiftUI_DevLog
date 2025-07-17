@@ -5,12 +5,18 @@
 //  Created by opfic on 5/7/25.
 //
 
+import Combine
 import UIKit
 import Firebase
 import FirebaseMessaging
 import GoogleSignIn
 
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
+    static var shared: AppDelegate {
+        UIApplication.shared.delegate as! AppDelegate
+    }
+
+    let fcmTokenSubject = CurrentValueSubject<String?, Never>(nil)
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         return GIDSignIn.sharedInstance.handle(url)
@@ -38,7 +44,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         return true
     }
     
+//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+//        if let token = fcmToken {
+//            print("FCM token: \(token)")
+//        }
+//    }
+    
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        fcmTokenSubject.send(fcmToken)
         if let token = fcmToken {
             print("FCM token: \(token)")
         }
