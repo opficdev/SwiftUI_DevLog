@@ -9,7 +9,6 @@ import SwiftUI
 
 struct PushNotificationSettingsView: View {
     @EnvironmentObject var settingVM: SettingViewModel
-    @State private var customHour = 9 // 임시, 사용자 설정 시간
     @State private var showTimePicker = false // 시간 선택기 표시 여부
     @State private var sheetHeight: CGFloat = 0 // 시트 높이 조정용
     
@@ -25,23 +24,56 @@ struct PushNotificationSettingsView: View {
             HStack {
                 Text("오전 9시")
                 Spacer()
+                if settingVM.pushNotificationHour == 9 {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                settingVM.pushNotificationHour = 9
             }
             HStack {
                 Text("오후 3시")
                 Spacer()
+                if settingVM.pushNotificationHour == 15 {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+
+            .onTapGesture {
+                settingVM.pushNotificationHour = 15
             }
             HStack {
                 Text("오후 6시")
                 Spacer()
+                if settingVM.pushNotificationHour == 18 {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                settingVM.pushNotificationHour = 18
             }
             HStack {
                 Text("오후 9시")
                 Spacer()
+                if settingVM.pushNotificationHour == 21 {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                settingVM.pushNotificationHour = 21
             }
             HStack {
                 Text("사용자 설정")
                 Spacer()
-                Text("\(customHour)시")
+                Text("\(settingVM.pushNotificationHour)시")
                     .foregroundStyle(.secondary)
                     .onTapGesture {
                         showTimePicker.toggle()
@@ -51,7 +83,7 @@ struct PushNotificationSettingsView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("알람")
         .sheet(isPresented: $showTimePicker) {
-            Picker("사용자 설정", selection: $customHour) {
+            Picker("사용자 설정", selection: $settingVM.pushNotificationHour) {
                 ForEach(0..<24) { hour in
                     if hour != 9 && hour != 15 && hour != 18 && hour != 21 {
                         Text("\(hour)시").tag(hour)
