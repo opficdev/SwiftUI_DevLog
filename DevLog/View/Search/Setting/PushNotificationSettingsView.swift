@@ -21,64 +21,68 @@ struct PushNotificationSettingsView: View {
             }, footer: {
                 Text("설정에서의 푸시 알람 설정과 별개입니다.")
             })
-            HStack {
-                Text("오전 9시")
-                Spacer()
-                if settingVM.pushNotificationHour == 9 {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                settingVM.pushNotificationHour = 9
-            }
-            HStack {
-                Text("오후 3시")
-                Spacer()
-                if settingVM.pushNotificationHour == 15 {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .contentShape(Rectangle())
-
-            .onTapGesture {
-                settingVM.pushNotificationHour = 15
-            }
-            HStack {
-                Text("오후 6시")
-                Spacer()
-                if settingVM.pushNotificationHour == 18 {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                settingVM.pushNotificationHour = 18
-            }
-            HStack {
-                Text("오후 9시")
-                Spacer()
-                if settingVM.pushNotificationHour == 21 {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                settingVM.pushNotificationHour = 21
-            }
-            HStack {
-                Text("사용자 설정")
-                Spacer()
-                Text("\(settingVM.pushNotificationHour)시")
-                    .foregroundStyle(.secondary)
-                    .onTapGesture {
-                        showTimePicker.toggle()
+            Section {
+                HStack {
+                    Text("오전 9시")
+                    Spacer()
+                    if settingVM.pushNotificationHour == 9 {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.accentColor)
                     }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    settingVM.pushNotificationHour = 9
+                }
+                HStack {
+                    Text("오후 3시")
+                    Spacer()
+                    if settingVM.pushNotificationHour == 15 {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.accentColor)
+                    }
+                }
+                .contentShape(Rectangle())
+                
+                .onTapGesture {
+                    settingVM.pushNotificationHour = 15
+                }
+                HStack {
+                    Text("오후 6시")
+                    Spacer()
+                    if settingVM.pushNotificationHour == 18 {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.accentColor)
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    settingVM.pushNotificationHour = 18
+                }
+                HStack {
+                    Text("오후 9시")
+                    Spacer()
+                    if settingVM.pushNotificationHour == 21 {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.accentColor)
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    settingVM.pushNotificationHour = 21
+                }
+                HStack {
+                    Text("사용자 설정")
+                    Spacer()
+                    Text("\(settingVM.pushNotificationHour)시")
+                        .foregroundStyle(.secondary)
+                        .onTapGesture {
+                            showTimePicker.toggle()
+                        }
+                }
             }
+            .disabled(!settingVM.pushNotificationEnabled)
+            .opacity(settingVM.pushNotificationEnabled ? 1.0 : 0.2)
         }
         .listStyle(.insetGrouped)
         .navigationTitle("알람")
