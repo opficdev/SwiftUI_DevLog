@@ -38,7 +38,7 @@ final class LoginViewModel: ObservableObject {
             .sink { [weak self] fcmToken in
                 guard let self = self, let user = self.authSvc.user else { return }
                 Task {
-                    try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken)
+                    try await self.userSvc.updateFCMToken(user.uid, fcmToken: fcmToken)
                     try await self.userSvc.fetchUserInfo(user: user)
                     self.signIn = true
                 }
