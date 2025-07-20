@@ -120,4 +120,10 @@ class UserService {
         
         try await settingRef.setData(["theme": theme], merge: true)
     }
+    
+    func updateFCMToken(_ userId: String, fcmToken: String) async throws {
+        let tokensRef = db.document("users/\(userId)/userData/tokens")
+        
+        try await tokensRef.setData(["fcmToken": fcmToken], merge: true)
+    }
 }
