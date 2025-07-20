@@ -73,6 +73,16 @@ class SettingViewModel: ObservableObject {
             }
             .store(in: &self.cancellables)
         
+        self.$pushNotificationHour
+            .dropFirst()
+            .sink { [weak self] newHour in
+                guard let self = self else { return }
+                Task {
+                    await self.updatePushNotificationHour()
+                }
+            }
+            .store(in: &self.cancellables)
+        
         self.$theme
             .dropFirst() // 초기값은 무시
             .sink { [weak self] newTheme in
