@@ -12,11 +12,6 @@ import FirebaseMessaging
 import GoogleSignIn
 
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
-    static var shared: AppDelegate {
-        UIApplication.shared.delegate as! AppDelegate
-    }
-
-    let fcmTokenSubject = CurrentValueSubject<String?, Never>(nil)
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         return GIDSignIn.sharedInstance.handle(url)
@@ -24,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
-                    
+        
         // 알림 권한 요청
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
@@ -40,21 +35,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         
         // Firebase Messaging 설정
         Messaging.messaging().delegate = self
-
+        
         return true
-    }
-    
-//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-//        if let token = fcmToken {
-//            print("FCM token: \(token)")
-//        }
-//    }
-    
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        fcmTokenSubject.send(fcmToken)
-        if let token = fcmToken {
-            print("FCM token: \(token)")
-        }
     }
     
     // APNs 등록 성공
@@ -66,6 +48,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
     // APNs 등록 실패
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register APNs Token: \(error)")
+    }
+    
+    // FCMToken 갱신
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        if let fcmToken = fcmToken {
+            print("FCM token: \(fcmToken)")
+            NotificationCenter.default.post(name: .fcmToken, object: nil, userInfo: ["fcmToken": fcmToken])
+        }
     }
 }
 
@@ -85,4 +75,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         print("Tapped notification: \(response.notification.request.content.userInfo)")
         completionHandler()
     }
+}
+
+extension Notification.Name {
+    static let fcmToken = Notification.Name("fcmToken")
 }

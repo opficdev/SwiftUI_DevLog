@@ -33,14 +33,10 @@ final class LoginViewModel: ObservableObject {
         self.networkSvc = networkSvc
         self.userSvc = userSvc
         
-        let userPublisher = self.authSvc.$user
-        let fcmTokenPublisher = AppDelegate.shared.fcmTokenSubject
-        
-        userPublisher
-            .combineLatest(fcmTokenPublisher)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] user, fcmToken in
-                guard let self = self, let user = user, let fcmToken = fcmToken else { return }
+        NotificationCenter.default.publisher(for: .fcmToken)
+            .compactMap { $0.userInfo?["fcmToken"] as? String }
+            .sink { [weak self] fcmToken in
+                guard let self = self, let user = self.authSvc.user else { return }
                 Task {
                     try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken)
                     try await self.userSvc.fetchUserInfo(user: user)
@@ -48,29 +44,6 @@ final class LoginViewModel: ObservableObject {
                 }
             }
             .store(in: &self.cancellables)
-
-        
-        // auth.user가 nil이면 signIn을 false로 설정
-//        self.authSvc.$user
-//            .receive(on: DispatchQueue.main)
-//            .sink { [weak self] user in
-//                guard let self = self else { return }
-//                if let user = user {
-//                    if self.signIn == nil { // 기존 세션을 통해 로그인이 된 경우
-//                        Task {
-//                            if let fcmToken = try await self.authSvc.getFCMToken() {
-//                                try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken)
-//                                try await self.userSvc.fetchUserInfo(user: user)
-//                                self.signIn = true
-//                            }
-//                        }
-//                    }
-//                }
-//                else {
-//                    self.signIn = false
-//                }
-//            }
-//            .store(in: &self.cancellables)
         
         // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
         self.networkSvc.$isConnected
@@ -81,13 +54,6 @@ final class LoginViewModel: ObservableObject {
         self.networkSvc.$showNetworkAlert
             .receive(on: DispatchQueue.main)
             .assign(to: &self.$showNetworkAlert)
-        
-//        AppDelegate.shared.fcmTokenSubject
-//            .compactMap { $0 }
-//            .sink { [weak self] fcmToken in
-//                
-//            }
-//            .store(in: &cancellables)
     }
     
     func signInWithApple() async {
