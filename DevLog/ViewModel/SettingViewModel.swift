@@ -202,7 +202,6 @@ class SettingViewModel: ObservableObject {
             self.pushNotificationHour = try await hourTask
         } catch {
             print("푸시 알람 시간 불러오기 실패: \(error.localizedDescription)")
-            // 이미 다른 오류로 알림이 표시될 예정이 아니라면, 알림을 표시합니다.
             if !self.showAlert {
                 self.alertMsg = "푸시 알람 시간을 불러오는 중 오류가 발생했습니다."
                 self.showAlert = true
@@ -222,6 +221,26 @@ class SettingViewModel: ObservableObject {
         } catch {
             print("푸시 알람 활성화 여부 업데이트 실패: \(error.localizedDescription)")
             self.alertMsg = "푸시 알람 활성화 여부를 업데이트하는 중 오류가 발생했습니다."
+            self.showAlert = true
+        }
+    }
+    
+    func updatePushNotificationHour() async {
+        if !self.isConnected { return }
+        
+        do {
+            self.isLoading = true
+            defer {
+                self.isLoading = false
+            }
+            
+            guard let userId = self.authSvc.user?.uid else { return }
+            
+            try await self.userSvc.updatePushNotificationHour(userId, hour: self.pushNotificationHour)
+            
+        } catch {
+            print("푸시 알람 시간 업데이트 실패: \(error.localizedDescription)")
+            self.alertMsg = "푸시 알람 시간을 업데이트하는 중 오류가 발생했습니다."
             self.showAlert = true
         }
     }
