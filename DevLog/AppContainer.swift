@@ -18,6 +18,7 @@ class AppContainer: ObservableObject {
     private let webPageSvc = WebPageService()
     private let todoSvc = TodoService()
     private let userSvc = UserService()
+    private let notiSvc = NotificationService()
     lazy var networkSvc = NetworkActivityService()
     
     // 의존 서비스
@@ -50,7 +51,7 @@ class AppContainer: ObservableObject {
     }()
     
     lazy var notiVM: NotificationViewModel = {
-        NotificationViewModel(authSvc: authSvc, networkSvc: networkSvc)
+        NotificationViewModel(authSvc: authSvc, networkSvc: networkSvc, notiSvc: notiSvc)
     }()
     
     private init() {}
