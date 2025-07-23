@@ -45,4 +45,22 @@ class NotificationViewModel: ObservableObject {
             self.showAlert = true
         }
     }
+    
+    func deleteNotification(notificationId: String) async {
+        if !self.isConnected { return }
+        do {
+            self.isLoading = true
+            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            defer {
+                self.isLoading = false
+            }
+            
+            try await self.notiSvc.deleteNotification(notificationId: notificationId, userId: userId)
+            
+        } catch {
+            print("Error deleting notification: \(error.localizedDescription)")
+            self.alertMsg = "푸시 알람을 삭제하는 중 오류가 발생했습니다."
+            self.showAlert = true
+        }
+    }
 }
