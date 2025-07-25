@@ -17,16 +17,27 @@ struct NotificationView: View {
     var body: some View {
         NavigationStack {
             List(notiVM.notifications) { noti in
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(noti.title)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Text(noti.content)
-                        .font(.subheadline)
-                        .foregroundStyle(Color.gray)
-                        .lineLimit(1)
+                if let notiId = noti.id {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(noti.title)
+                            .font(.headline)
+                            .lineLimit(1)
+                        Text(noti.content)
+                            .font(.subheadline)
+                            .foregroundStyle(Color.gray)
+                            .lineLimit(1)
+                    }
+                    .padding(.vertical, 5)
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive, action: {
+                            Task {
+                                await notiVM.deleteNotification(notificationId: notiId)
+                            }
+                        }) {
+                            Image(systemName: "trash")
+                        }
+                    }
                 }
-                .padding(.vertical, 5)
             }
             .listStyle(.plain)
             .navigationTitle("알림")
