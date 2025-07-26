@@ -13,7 +13,7 @@ struct TodoEditorView: View {
     @Environment(\.dismiss) private var dismiss
     private var navigationTitle: String
     @State private var title: String = ""
-    @State private var dueDate: Date = Date()
+    @State private var dueDate: Date = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
     @State private var content: String = ""
     @State private var tags: [String] = []
     @State private var focusOnEditor: Bool = false
@@ -51,7 +51,7 @@ struct TodoEditorView: View {
                         Divider()
                         Button(action: {
                             hasDueDate.toggle()
-                            dueDate = Date()
+                            dueDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
                         }) {
                             CheckBox(isChecked: $hasDueDate)
                         }
