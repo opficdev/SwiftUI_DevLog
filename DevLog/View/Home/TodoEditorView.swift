@@ -179,6 +179,10 @@ struct TodoEditorView: View {
                     .disabled(title.isEmpty || content.isEmpty)
                 }
             }
+            .onChange(of: dueDate) { newValue in
+                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+                dueDate = max(newValue, tomorrow)
+            }
         }
     }
 }
