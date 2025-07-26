@@ -10,6 +10,7 @@ import UIKit
 import Firebase
 import FirebaseMessaging
 import GoogleSignIn
+import UserNotifications
 
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
@@ -73,10 +74,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         print("Tapped notification: \(response.notification.request.content.userInfo)")
+        // userInfo["todoId"]로 이동할 Todo 식별
+        let userInfo = response.notification.request.content.userInfo
+        NotificationCenter.default.post(name: .pushTapped, object: nil, userInfo: userInfo)
         completionHandler()
     }
+    
+    
 }
 
 extension Notification.Name {
     static let fcmToken = Notification.Name("fcmToken")
+    static let pushTapped = Notification.Name("pushTapped")
 }
