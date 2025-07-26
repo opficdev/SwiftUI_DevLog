@@ -32,7 +32,9 @@ export const scheduleTodoReminder = onDocumentWritten(
             const notificationDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 1, pushNotificationHour, 0, 0);
 
             // 3. Cloud Tasks 큐에 작업 예약
-            const queue = getFunctions().taskQueue("sendPushNotification",LOCATION);
+            const queue = getFunctions().taskQueue(
+                `locations/${LOCATION}/functions/sendPushNotification`
+            );
             await queue.enqueue(
                 {
                     userId: userId,
