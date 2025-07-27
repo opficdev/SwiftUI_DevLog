@@ -10,35 +10,33 @@ import FirebaseFirestore
 
 struct PushNotification: Codable, Identifiable {
     @DocumentID var id: String?
-    var title: String
-    var content: String
-    var kind: NotificationKind
-    var receivedDate: Date
-    var isRead: Bool
+    let title: String   //  알림 제목
+    let body: String    //  알림 내용
+    let receivedDate: Date  //  알림 수신 날짜
+    let isRead: Bool    //  알림 읽음 여부
+    let todoId: String //  Todo ID
     
     init(from: QueryDocumentSnapshot) {
-        self.id = from.documentID
         self.title = from["title"] as? String ?? ""
-        self.content = from["content"] as? String ?? ""
-        self.kind = NotificationKind(rawValue: from["kind"] as? String ?? "") ?? .info
+        self.body = from["body"] as? String ?? ""
         self.receivedDate = (from["receivedDate"] as? Timestamp)?.dateValue() ?? Date()
         self.isRead = from["isRead"] as? Bool ?? false
+        self.todoId = from["todoId"] as? String ?? ""
     }
     
-    init(id: String? = nil, title: String, content: String, kind: NotificationKind, receivedDate: Date, isRead: Bool) {
+    init(id: String? = nil, title: String, body: String, receivedDate: Date, isRead: Bool, todoId: String) {
         self.id = id
         self.title = title
-        self.content = content
-        self.kind = kind
+        self.body = body
         self.receivedDate = receivedDate
         self.isRead = isRead
+        self.todoId = todoId
     }
     
     func toDictionary() -> [String: Any] {
         return [
             "title": title,
-            "content": content,
-            "kind": kind.rawValue,
+            "body": body,
             "receivedDate": Timestamp(date: receivedDate),
             "isRead": isRead
         ]
