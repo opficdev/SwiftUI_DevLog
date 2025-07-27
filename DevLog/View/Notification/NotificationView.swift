@@ -46,6 +46,11 @@ struct NotificationView: View {
             } message: {
                 Text(notiVM.alertMsg)
             }
+            .onAppear {
+                Task {
+                    await notiVM.requestNotifications()
+                }
+            }
         }
     }
 }
