@@ -75,7 +75,7 @@ class SettingViewModel: ObservableObject {
         
         self.$pushNotificationHour
             .dropFirst()
-            .sink { [weak self] newHour in
+            .sink { [weak self] _ in
                 guard let self = self else { return }
                 Task {
                     await self.updatePushNotificationHour()
@@ -85,7 +85,7 @@ class SettingViewModel: ObservableObject {
         
         self.$theme
             .dropFirst() // 초기값은 무시
-            .sink { [weak self] newTheme in
+            .sink { [weak self] _ in
                 guard let self = self else { return }
                 Task {
                     await self.updateAppTheme()
