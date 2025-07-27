@@ -35,14 +35,22 @@ export const scheduleTodoReminder = onDocumentWritten(
             const queue = getFunctions().taskQueue(
                 `locations/${LOCATION}/functions/sendPushNotification`
             );
+            // KST(UTC+9) → UTC 변환
+            const notificationDateKST = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate() - 1, pushNotificationHour, 0, 0);
+            // notificationDateKST는 KST 기준
+            const notificationDateUTC = new Date(notificationDateKST.getTime() - (9 * 60 * 60 * 1000)); // 9시간 빼기
+
             await queue.enqueue(
                 {
                     userId: userId,
                     title: "마감 알림",
                     body: `'${todoData.title || '제목 없음'}'의 마감일이 내일입니다.`,
+                    kind: todoData.kind || "etc",
+                    receivedDate: admin.firestore.Timestamp.fromDate(notificationDateKST), // Date → Firestore Timestamp
+                    isRead: false
                 },
                 {
-                    scheduleTime: notificationDate, // 이 시간에 작업이 실행되도록 예약
+                    scheduleTime: notificationDateUTC,
                 }
             );
 
