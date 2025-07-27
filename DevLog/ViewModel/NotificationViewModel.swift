@@ -55,6 +55,8 @@ class NotificationViewModel: ObservableObject {
                 self.isLoading = false
             }
             
+            self.notifications.removeAll { $0.id == notificationId }
+            
             try await self.notiSvc.deleteNotification(notificationId: notificationId, userId: userId)
             
         } catch {
