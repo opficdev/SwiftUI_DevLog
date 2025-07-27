@@ -43,7 +43,7 @@ export const scheduleTodoReminder = onDocumentWritten(
             await queue.enqueue(
                 {
                     userId: userId,
-                    title: "마감 알림",
+                    title: "DevLog 알림",
                     body: `'${todoData.title || '제목 없음'}'의 마감일이 내일입니다.`,
                     kind: todoData.kind || "etc",
                     receivedDate: admin.firestore.Timestamp.fromDate(notificationDateKST), // Date → Firestore Timestamp
