@@ -16,31 +16,42 @@ struct NotificationView: View {
     
     var body: some View {
         NavigationStack {
-            List(notiVM.notifications) { noti in
-                if let notiId = noti.id {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(noti.title)
-                            .font(.headline)
-                            .lineLimit(1)
-                        Text(noti.content)
-                            .font(.subheadline)
+            VStack {
+                if notiVM.notifications.isEmpty {
+                        Spacer()
+                        Text("작성된 알림이 없습니다.")
                             .foregroundStyle(Color.gray)
-                            .lineLimit(1)
-                    }
-                    .padding(.vertical, 5)
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive, action: {
-                            Task {
-                                await notiVM.deleteNotification(notificationId: notiId)
+                        Spacer()
+                }
+                else {
+                    List(notiVM.notifications) { noti in
+                        if let notiId = noti.id {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(noti.title)
+                                    .font(.headline)
+                                    .lineLimit(1)
+                                Text(noti.body)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.gray)
+                                    .lineLimit(1)
                             }
-                        }) {
-                            Image(systemName: "trash")
+                            .padding(.vertical, 5)
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive, action: {
+                                    Task {
+                                        await notiVM.deleteNotification(notificationId: notiId)
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                }
+                            }
                         }
                     }
+                    .listStyle(.plain)
+                    .navigationTitle("알림")
                 }
             }
-            .listStyle(.plain)
-            .navigationTitle("알림")
+            .frame(maxWidth: .infinity, alignment: .center)
             .alert("", isPresented: $notiVM.showAlert) {
                 Button("확인", role: .cancel) { }
             } message: {
