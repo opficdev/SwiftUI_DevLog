@@ -6,7 +6,7 @@ import * as logger from "firebase-functions/logger";
 export const sendPushNotification = onTaskDispatched(
     {  
         region: "asia-northeast3",
-        retryConfig: { maxAttempts: 3, minBackoffSeconds: 5 },
+        retryConfig: { maxAttempts: 1, minBackoffSeconds: 5 },
         rateLimits: { maxDispatchesPerSecond: 500 },
     },
     async (req) => {
