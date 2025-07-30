@@ -79,6 +79,11 @@ struct PushNotificationSettingsView: View {
                         .onTapGesture {
                             showTimePicker.toggle()
                         }
+                    let hour = settingVM.pushNotificationHour
+                    if hour != 9 && hour != 15 && hour != 18 && hour != 21 {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.accentColor)
+                    }
                 }
             }
             .disabled(!settingVM.pushNotificationEnabled)
