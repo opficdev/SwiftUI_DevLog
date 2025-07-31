@@ -22,6 +22,7 @@ final class TodoViewModel: ObservableObject {
     @Published var alertMsg: String = ""
     @Published var scope: TodoScope = .title
     @Published var filterOption: FilterOption = .create
+    @Published var selectedTodoByNotification: Todo? = nil  //  알림을 통해 선택된 TODO
     
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
