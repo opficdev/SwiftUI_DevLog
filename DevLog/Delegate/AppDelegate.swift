@@ -37,6 +37,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         // Firebase Messaging 설정
         Messaging.messaging().delegate = self
         
+        // 앱이 완전 종료되어도, 알림을 통해 앱이 시작된 경우 처리
+        if let remoteNotification = launchOptions?[.remoteNotification] as? [AnyHashable: Any] {
+            NotificationCenter.default.post(name: .pushTapped, object: nil, userInfo: remoteNotification)
+        }
+        
         return true
     }
     
