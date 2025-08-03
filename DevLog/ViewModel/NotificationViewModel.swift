@@ -12,7 +12,7 @@ class NotificationViewModel: ObservableObject {
     private let authSvc: AuthService
     private let networkSvc: NetworkActivityService
     private let notiSvc: NotificationService
-    @Published var notifications: [PushNotification] = []
+    @Published var todoIds: [String] = []
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
     @Published var isLoading: Bool = false
@@ -37,7 +37,7 @@ class NotificationViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            self.notifications = try await self.notiSvc.requestNotification(userId: userId)
+//            self.notifications = try await self.notiSvc.requestNotification(userId: userId)
             
         } catch {
             print("Error requesting notifications: \(error.localizedDescription)")
@@ -55,7 +55,7 @@ class NotificationViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            self.notifications.removeAll { $0.id == notificationId }
+//            self.notifications.removeAll { $0.id == notificationId }
             
             try await self.notiSvc.deleteNotification(notificationId: notificationId, userId: userId)
             
