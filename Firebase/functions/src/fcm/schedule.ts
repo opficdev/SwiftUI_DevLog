@@ -43,6 +43,7 @@ export const scheduleTodoReminder = onDocumentWritten(
             await queue.enqueue(
                 {
                     userId: userId,
+                    todoId: event.params.todoId,
                     title: "DevLog",
                     body: `'${todoData.title || '제목 없음'}'의 마감일이 내일입니다.`,
                     kind: todoData.kind || "etc",
