@@ -15,10 +15,13 @@
 		DFABA3B02E23526500FEFBDB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DFABA3AF2E23526500FEFBDB /* FirebaseFirestore */; };
 		DFABA3B22E23526500FEFBDB /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = DFABA3B12E23526500FEFBDB /* FirebaseFunctions */; };
 		DFABA3B42E23526500FEFBDB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = DFABA3B32E23526500FEFBDB /* FirebaseMessaging */; };
+		DFD74E2F2E423EA700613803 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DFD74E2E2E423EA700613803 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DF3416452E45F67C00F9312B /* DevLog_Unit.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DevLog_Unit.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFD48B002DC4D6E2005905C5 /* DevLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DevLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFD74E2E2E423EA700613803 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -33,6 +36,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		DF3416462E45F67C00F9312B /* DevLog_Unit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DevLog_Unit;
+			sourceTree = "<group>";
+		};
 		DFD48B022DC4D6E2005905C5 /* DevLog */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -44,6 +52,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		DF3416422E45F67C00F9312B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DFD48AFD2DC4D6E2005905C5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -65,7 +80,9 @@
 		DFD48AF72DC4D6E2005905C5 = {
 			isa = PBXGroup;
 			children = (
+				DFD74E2E2E423EA700613803 /* README.md */,
 				DFD48B022DC4D6E2005905C5 /* DevLog */,
+				DF3416462E45F67C00F9312B /* DevLog_Unit */,
 				DFE28EB62DCCF26300B28FE5 /* Frameworks */,
 				DFD48B012DC4D6E2005905C5 /* Products */,
 			);
@@ -75,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				DFD48B002DC4D6E2005905C5 /* DevLog.app */,
+				DF3416452E45F67C00F9312B /* DevLog_Unit.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,6 +107,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		DF3416442E45F67C00F9312B /* DevLog_Unit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DF34164B2E45F67C00F9312B /* Build configuration list for PBXNativeTarget "DevLog_Unit" */;
+			buildPhases = (
+				DF3416412E45F67C00F9312B /* Sources */,
+				DF3416422E45F67C00F9312B /* Frameworks */,
+				DF3416432E45F67C00F9312B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DF3416462E45F67C00F9312B /* DevLog_Unit */,
+			);
+			name = DevLog_Unit;
+			packageProductDependencies = (
+			);
+			productName = DevLog_Unit;
+			productReference = DF3416452E45F67C00F9312B /* DevLog_Unit.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		DFD48AFF2DC4D6E2005905C5 /* DevLog */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DFD48B112DC4D6E4005905C5 /* Build configuration list for PBXNativeTarget "DevLog" */;
@@ -126,9 +166,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1630;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					DF3416442E45F67C00F9312B = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					DFD48AFF2DC4D6E2005905C5 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -153,21 +196,37 @@
 			projectRoot = "";
 			targets = (
 				DFD48AFF2DC4D6E2005905C5 /* DevLog */,
+				DF3416442E45F67C00F9312B /* DevLog_Unit */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		DFD48AFE2DC4D6E2005905C5 /* Resources */ = {
+		DF3416432E45F67C00F9312B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DFD48AFE2DC4D6E2005905C5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFD74E2F2E423EA700613803 /* README.md in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DF3416412E45F67C00F9312B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DFD48AFC2DC4D6E2005905C5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -178,6 +237,38 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		DF3416492E45F67C00F9312B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "opfic.DevLog-Unit";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DF34164A2E45F67C00F9312B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "opfic.DevLog-Unit";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		DFD48B122DC4D6E4005905C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = DFD48B022DC4D6E2005905C5 /* DevLog */;
@@ -398,6 +489,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DF34164B2E45F67C00F9312B /* Build configuration list for PBXNativeTarget "DevLog_Unit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF3416492E45F67C00F9312B /* Debug */,
+				DF34164A2E45F67C00F9312B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DFD48AFB2DC4D6E2005905C5 /* Build configuration list for PBXProject "DevLog" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
