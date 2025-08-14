@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct ReceivedNotification: Codable, Identifiable {
+struct PushNotification: Codable, Identifiable {
     @DocumentID var id: String?
     let title: String   //  알림 제목
     let body: String    //  알림 내용
