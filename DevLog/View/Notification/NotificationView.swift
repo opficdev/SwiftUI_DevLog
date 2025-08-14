@@ -48,10 +48,10 @@ struct NotificationView: View {
                         }
                     }
                     .listStyle(.plain)
-                    .navigationTitle("알림")
                 }
             }
             .frame(maxWidth: .infinity, alignment: .center)
+            .navigationTitle("받은 푸시 알람")
             .alert("", isPresented: $notiVM.showAlert) {
                 Button("확인", role: .cancel) { }
             } message: {
