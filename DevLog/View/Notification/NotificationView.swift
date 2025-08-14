@@ -51,6 +51,7 @@ struct NotificationView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .center)
+            .background(Color(UIColor.secondarySystemBackground))
             .navigationTitle("받은 푸시 알람")
             .alert("", isPresented: $notiVM.showAlert) {
                 Button("확인", role: .cancel) { }
