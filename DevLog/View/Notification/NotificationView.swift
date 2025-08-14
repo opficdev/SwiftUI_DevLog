@@ -18,10 +18,10 @@ struct NotificationView: View {
         NavigationStack {
             VStack {
                 if notiVM.notifications.isEmpty {
-                        Spacer()
-                        Text("작성된 알림이 없습니다.")
-                            .foregroundStyle(Color.gray)
-                        Spacer()
+                    Spacer()
+                    Text("작성된 알림이 없습니다.")
+                        .foregroundStyle(Color.gray)
+                    Spacer()
                 }
                 else {
                     List(notiVM.notifications) { noti in
