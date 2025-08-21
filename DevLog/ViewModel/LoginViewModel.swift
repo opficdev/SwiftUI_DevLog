@@ -131,6 +131,7 @@ final class LoginViewModel: ObservableObject {
             self.isLoading = true
             defer {
                 self.isLoading = false
+                self.signIn = false
             }
             
             try await self.authSvc.signOut()
