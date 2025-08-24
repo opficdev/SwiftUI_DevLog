@@ -33,7 +33,8 @@ class SettingViewModel: ObservableObject {
     @Published var showNetworkAlert: Bool = false
     
     @Published var pushNotificationEnabled: Bool = true
-    @Published var pushNotificationHour: Int = 9 // 기본값은 오전 9시
+//    @Published var pushNotificationHour: Int = 9 // 기본값은 오전 9시
+    @Published var pushNotificationTime = Date()
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, userSvc: UserService) {
         self.authSvc = authSvc
@@ -73,12 +74,12 @@ class SettingViewModel: ObservableObject {
             }
             .store(in: &self.cancellables)
         
-        self.$pushNotificationHour
+        self.$pushNotificationTime
             .dropFirst()
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 Task {
-                    await self.updatePushNotificationHour()
+                    await self.updatePushNotificationTime()
                 }
             }
             .store(in: &self.cancellables)
@@ -188,7 +189,7 @@ class SettingViewModel: ObservableObject {
         guard let userId = self.authSvc.user?.uid else { return }
         
         async let enabledTask = self.userSvc.fetchAllowPushNotification(userId)
-        async let hourTask = self.userSvc.fetchPushNotificationHour(userId)
+        async let timeTask = self.userSvc.fetchPushNotifcationTime(userId)
         
         do {
             self.pushNotificationEnabled = try await enabledTask
@@ -199,7 +200,9 @@ class SettingViewModel: ObservableObject {
         }
         
         do {
-            self.pushNotificationHour = try await hourTask
+            let components = try await timeTask
+            guard let time = Calendar.current.date(from: components) else { return }
+            self.pushNotificationTime = time
         } catch {
             print("푸시 알람 시간 불러오기 실패: \(error.localizedDescription)")
             if !self.showAlert {
@@ -225,7 +228,7 @@ class SettingViewModel: ObservableObject {
         }
     }
     
-    func updatePushNotificationHour() async {
+    func updatePushNotificationTime() async {
         if !self.isConnected { return }
         
         do {
@@ -236,7 +239,7 @@ class SettingViewModel: ObservableObject {
             
             guard let userId = self.authSvc.user?.uid else { return }
             
-            try await self.userSvc.updatePushNotificationHour(userId, hour: self.pushNotificationHour)
+            try await self.userSvc.updatePushNoficationTime(userId, time: pushNotificationTime)
             
         } catch {
             print("푸시 알람 시간 업데이트 실패: \(error.localizedDescription)")

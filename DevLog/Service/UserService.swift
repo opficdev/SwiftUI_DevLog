@@ -61,7 +61,8 @@ class UserService {
         try await settingsRef.setData([
             "allowPushNotification": true,
             "theme": "automatic",
-            "pushNotificationHour": 9], merge: true)
+            "pushNotificationHour": 9,
+            "pushNotificationMiniute": 0], merge: true)
     }
     
     func fetchUserInfo(user: User) async throws {
@@ -94,31 +95,48 @@ class UserService {
         throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Push notification settings not found"])
     }
     
-    func fetchPushNotificationHour(_ userId: String) async throws -> Int {
+    func fetchPushNotifcationTime(_ userId: String) async throws -> DateComponents {
         let settingsRef = db.document("users/\(userId)/userData/settings")
         let doc = try await settingsRef.getDocument()
         
-        if let hour = doc.data()?["pushNotificationHour"] as? Int { return hour }
+        guard let hour = doc.data()?["pushNotificationHour"] as? Int else {
+            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Notification hour not found"])
+        }
         
-        throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Notification hour not found"])
+        guard let miniute = doc.data()?["pushNotificationMinute"] as? Int else {
+            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Notification minute not found"])
+        }
+        
+        return DateComponents(hour: hour, minute: miniute)
     }
     
     func updatePushNotificationEnabled(_ userId: String, enabled: Bool) async throws {
         let settingRef = db.document("users/\(userId)/userData/settings")
+        let settingsRef = db.document("users/\(userId)/userData/settings")
         
         try await settingRef.setData(["allowPushNotification": enabled], merge: true)
+        try await settingsRef.setData(["allowPushNotification": enabled], merge: true)
     }
     
-    func updatePushNotificationHour(_ userId: String, hour: Int) async throws {
+    func updatePushNoficationTime(_ userId: String, time: Date) async throws {
         let settingRef = db.document("users/\(userId)/userData/settings")
         
-        try await settingRef.setData(["pushNotificationHour": hour], merge: true)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: time)
+        let hour = components.hour ?? 9
+        let minute = components.minute ?? 0
+        
+        try await settingRef.setData([
+            "pushNotificationHour": hour,
+            "pushNotificationMinute": minute], merge: true)
     }
     
     func updateAppTheme(_ userId: String, theme: String) async throws {
         let settingRef = db.document("users/\(userId)/userData/settings")
+        let settingsRef = db.document("users/\(userId)/userData/settings")
         
         try await settingRef.setData(["theme": theme], merge: true)
+        try await settingsRef.setData(["theme": theme], merge: true)
     }
     
     func updateFCMToken(_ userId: String, fcmToken: String) async throws {
