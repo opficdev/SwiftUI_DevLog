@@ -111,10 +111,8 @@ class UserService {
     }
     
     func updatePushNotificationEnabled(_ userId: String, enabled: Bool) async throws {
-        let settingRef = db.document("users/\(userId)/userData/settings")
         let settingsRef = db.document("users/\(userId)/userData/settings")
         
-        try await settingRef.setData(["allowPushNotification": enabled], merge: true)
         try await settingsRef.setData(["allowPushNotification": enabled], merge: true)
     }
     
@@ -132,10 +130,8 @@ class UserService {
     }
     
     func updateAppTheme(_ userId: String, theme: String) async throws {
-        let settingRef = db.document("users/\(userId)/userData/settings")
         let settingsRef = db.document("users/\(userId)/userData/settings")
         
-        try await settingRef.setData(["theme": theme], merge: true)
         try await settingsRef.setData(["theme": theme], merge: true)
     }
     
