@@ -38,6 +38,7 @@ struct ContentView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
                         if loginVM.signIn == nil {
                             Task {
+                                print("10초 동안 로그인 시도했는데 안되서 로그아웃")
                                 isFirstLaunch = true
                                 await loginVM.signOut()
                             }
@@ -58,6 +59,7 @@ struct ContentView: View {
         .onChange(of: isFirstLaunch) { newValue in
             if isFirstLaunch {
                 Task {
+                    print("firstlaunch로 인한 로그아웃")
                     isFirstLaunch = false
                     await loginVM.signOut()
                 }
