@@ -114,7 +114,12 @@ struct TodoEditorView: View {
                 LazyVStack(alignment:.leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Section {
                         if tabViewTag == "editor" {
-                            UIKitTextEditor(text: $content, isFocused: $focusOnEditor, placeholder: "내용을 입력하세요.")
+                            TextField(
+                                "",
+                                text: $content,
+                                prompt: Text("내용을 입력하세요"),
+                                axis: .vertical
+                            )
                                 .padding(.horizontal)
                         }
                         else {
