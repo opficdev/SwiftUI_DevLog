@@ -62,7 +62,7 @@ class UserService {
             "allowPushNotification": true,
             "theme": "automatic",
             "pushNotificationHour": 9,
-            "pushNotificationMiniute": 0], merge: true)
+            "pushNotificationMinute": 0], merge: true)
     }
     
     func fetchUserInfo(user: User) async throws {
@@ -103,11 +103,11 @@ class UserService {
             throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Notification hour not found"])
         }
         
-        guard let miniute = doc.data()?["pushNotificationMinute"] as? Int else {
+        guard let minute = doc.data()?["pushNotificationMinute"] as? Int else {
             throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Notification minute not found"])
         }
         
-        return DateComponents(hour: hour, minute: miniute)
+        return DateComponents(hour: hour, minute: minute)
     }
     
     func updatePushNotificationEnabled(_ userId: String, enabled: Bool) async throws {
