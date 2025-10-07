@@ -17,6 +17,7 @@ struct SearchView: View {
     
     var body: some View {
         NavigationStack {
+            // MARK: - 상단 검색바
             Searchable(isSearching: $searchVM.isSearching)
                 .searchable(text: $searchVM.searchText, prompt: "DevLog 검색")
                 .navigationDestination(isPresented: Binding(

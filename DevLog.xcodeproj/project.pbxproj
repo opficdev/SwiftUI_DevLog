@@ -25,11 +25,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DFEA638A2DCAE47A00616AEC /* Exceptions for "DevLog" folder in "DevLog" target */ = {
+		DF8AB7A72E938CD700E50BBF /* Exceptions for "DevLog" folder in "DevLog" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Config.xcconfig,
-				Info.plist,
+				Resource/Config.xcconfig,
+				Resource/Info.plist,
 			);
 			target = DFD48AFF2DC4D6E2005905C5 /* DevLog */;
 		};
@@ -41,10 +41,10 @@
 			path = DevLog_Unit;
 			sourceTree = "<group>";
 		};
-		DFD48B022DC4D6E2005905C5 /* DevLog */ = {
+		DF8AB7982E938B0B00E50BBF /* DevLog */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				DFEA638A2DCAE47A00616AEC /* Exceptions for "DevLog" folder in "DevLog" target */,
+				DF8AB7A72E938CD700E50BBF /* Exceptions for "DevLog" folder in "DevLog" target */,
 			);
 			path = DevLog;
 			sourceTree = "<group>";
@@ -80,8 +80,8 @@
 		DFD48AF72DC4D6E2005905C5 = {
 			isa = PBXGroup;
 			children = (
+				DF8AB7982E938B0B00E50BBF /* DevLog */,
 				DFD74E2E2E423EA700613803 /* README.md */,
-				DFD48B022DC4D6E2005905C5 /* DevLog */,
 				DF3416462E45F67C00F9312B /* DevLog_Unit */,
 				DFE28EB62DCCF26300B28FE5 /* Frameworks */,
 				DFD48B012DC4D6E2005905C5 /* Products */,
@@ -142,7 +142,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				DFD48B022DC4D6E2005905C5 /* DevLog */,
+				DF8AB7982E938B0B00E50BBF /* DevLog */,
 			);
 			name = DevLog;
 			packageProductDependencies = (
@@ -273,20 +273,20 @@
 		};
 		DFD48B122DC4D6E4005905C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = DFD48B022DC4D6E2005905C5 /* DevLog */;
-			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			baseConfigurationReferenceAnchor = DF8AB7982E938B0B00E50BBF /* DevLog */;
+			baseConfigurationReferenceRelativePath = Resource/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = DevLog/DevLog.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DevLog/Resource/DevLog.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4CPC6N38WA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DevLog/Info.plist;
+				INFOPLIST_FILE = DevLog/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DevLog;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -318,20 +318,20 @@
 		};
 		DFD48B132DC4D6E4005905C5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = DFD48B022DC4D6E2005905C5 /* DevLog */;
-			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			baseConfigurationReferenceAnchor = DF8AB7982E938B0B00E50BBF /* DevLog */;
+			baseConfigurationReferenceRelativePath = Resource/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = DevLog/DevLog.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DevLog/Resource/DevLog.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4CPC6N38WA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DevLog/Info.plist;
+				INFOPLIST_FILE = DevLog/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DevLog;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -363,8 +363,8 @@
 		};
 		DFD48B142DC4D6E4005905C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = DFD48B022DC4D6E2005905C5 /* DevLog */;
-			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			baseConfigurationReferenceAnchor = DF8AB7982E938B0B00E50BBF /* DevLog */;
+			baseConfigurationReferenceRelativePath = Resource/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -431,8 +431,8 @@
 		};
 		DFD48B152DC4D6E4005905C5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = DFD48B022DC4D6E2005905C5 /* DevLog */;
-			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			baseConfigurationReferenceAnchor = DF8AB7982E938B0B00E50BBF /* DevLog */;
+			baseConfigurationReferenceRelativePath = Resource/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

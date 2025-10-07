@@ -33,16 +33,16 @@ enum TodoKind: String, Identifiable, CaseIterable, Codable {
     }
     
     var localizedName: String {
-       switch self {
-       case .issue: return NSLocalizedString("task_kind_issue", comment: "Task kind: Issue")
-       case .feature: return NSLocalizedString("task_kind_feature", comment: "Task kind: Feature")
-       case .improvement: return NSLocalizedString("task_kind_improvement", comment: "Task kind: Improvement")
-       case .review: return NSLocalizedString("task_kind_review", comment: "Task kind: Review")
-       case .test: return NSLocalizedString("task_kind_test", comment: "Task kind: Test")
-       case .doc: return NSLocalizedString("task_kind_doc", comment: "Task kind: Documentation")
-       case .research: return NSLocalizedString("task_kind_research", comment: "Task kind: Research")
-       case .etc: return NSLocalizedString("task_kind_etc", comment: "Task kind: Etc")
-       }
+        switch self {
+        case .issue: return NSLocalizedString("task_kind_issue", comment: "Task kind: Issue")
+        case .feature: return NSLocalizedString("task_kind_feature", comment: "Task kind: Feature")
+        case .improvement: return NSLocalizedString("task_kind_improvement", comment: "Task kind: Improvement")
+        case .review: return NSLocalizedString("task_kind_review", comment: "Task kind: Review")
+        case .test: return NSLocalizedString("task_kind_test", comment: "Task kind: Test")
+        case .doc: return NSLocalizedString("task_kind_doc", comment: "Task kind: Documentation")
+        case .research: return NSLocalizedString("task_kind_research", comment: "Task kind: Research")
+        case .etc: return NSLocalizedString("task_kind_etc", comment: "Task kind: Etc")
+        }
     }
     
     var color: Color {
