@@ -9,7 +9,7 @@ import Foundation
 
 protocol UserRepository {
     func upsertUser(user: AuthUser, fcmToken: String, provider: AuthProvider?, githubAccessToken: String?) async throws
-    func fetchPushSettings(userId: String) async throws -> PushSetting
+    func fetchPushSettings(userId: String) async throws -> PushNotificationSettings
     func updatePushEnabled(_ userId: String, enabled: Bool) async throws
     func updatePushTime(_ userId: String, hour: Int, minute: Int) async throws
     func updateAppTheme(_ userId: String, theme: SystemTheme) async throws
