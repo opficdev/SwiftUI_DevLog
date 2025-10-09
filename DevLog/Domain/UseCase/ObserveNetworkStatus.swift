@@ -10,17 +10,29 @@ import Combine
 import Network
 
 final class ObserveNetworkStatus: NetworkRepository {
-    private let monitor = NWPathMonitor()
-    private let queue = DispatchQueue(label: "NetworkMonitor")
-    private(set) var isConnectedPublisher: AnyPublisher<Bool, Never> = Just(true).eraseToAnyPublisher()
+    private let networkPathMonitor = NWPathMonitor()
+    private let networkMonitorQueue = DispatchQueue(label: "NetworkMonitor")
+    private let isConnectedCurrentValueSubject: CurrentValueSubject<Bool, Never>
+    
+    var isConnectedPublisher: AnyPublisher<Bool, Never> {
+        isConnectedCurrentValueSubject.eraseToAnyPublisher()
+    }
     
     init() {
-        monitor.pathUpdateHandler = { [weak self] path in
+        let initialIsConnected = networkPathMonitor.currentPath.status == .satisfied
+        self.isConnectedCurrentValueSubject = CurrentValueSubject<Bool, Never>(initialIsConnected)
+        
+        networkPathMonitor.pathUpdateHandler = { [weak self] path in
+            let isConnected = (path.status == .satisfied)
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.isConnectedPublisher = Just(path.status == .satisfied).eraseToAnyPublisher()
+                self?.isConnectedCurrentValueSubject.value = isConnected
             }
         }
-        monitor.start(queue: queue)
+        
+        networkPathMonitor.start(queue: networkMonitorQueue)
+    }
+    
+    deinit {
+        networkPathMonitor.cancel()
     }
 }
