@@ -1,5 +1,5 @@
 //
-//  ObserveNetworkStatus.swift
+//  NetworkRepositoryImpl.swift
 //  DevLog
 //
 //  Created by 최윤진 on 10/9/25.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import Network
 
-final class ObserveNetworkStatus: NetworkRepository {
+final class NetworkRepositoryImpl: NetworkRepository {
     private let networkPathMonitor = NWPathMonitor()
     private let networkMonitorQueue = DispatchQueue(label: "NetworkMonitor")
     private let isConnectedCurrentValueSubject: CurrentValueSubject<Bool, Never>
