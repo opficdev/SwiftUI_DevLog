@@ -15,7 +15,6 @@ import FirebaseMessaging
 import GoogleSignIn
 import SwiftUI
 
-@MainActor
 final class AuthService: ObservableObject {
     private let db = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
@@ -68,7 +67,7 @@ final class AuthService: ObservableObject {
         
         let user = try await self.appleSvc.signInWithApple()
         
-        self.currentProvider = "apple.com"
+        self.currentProvider = AuthProviderID.apple.rawValue
         
         let fcmToken = try await Messaging.messaging().token()
         
@@ -80,7 +79,7 @@ final class AuthService: ObservableObject {
         
         let fcmToken = try await Messaging.messaging().token()
         
-        self.currentProvider = "github.com"
+        self.currentProvider = AuthProviderID.gitHub.rawValue
         
         return (user, fcmToken, accessToken)
     }
@@ -88,7 +87,7 @@ final class AuthService: ObservableObject {
     func signInWithGoogle() async throws -> (User, String) {
         let user = try await self.googleSvc.signInWithGoogle()
         
-        self.currentProvider = "google.com"
+        self.currentProvider = AuthProviderID.google.rawValue
         
         let fcmToken = try await Messaging.messaging().token()
         
@@ -98,7 +97,7 @@ final class AuthService: ObservableObject {
     func signOut() async throws {
         guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
         
-        if user.providerData.contains(where: { $0.providerID == "google.com" }) {
+        if user.providerData.contains(where: { $0.providerID == AuthProviderID.google.rawValue }) {
             GIDSignIn.sharedInstance.signOut()
             try await GIDSignIn.sharedInstance.disconnect()
         }
@@ -118,10 +117,10 @@ final class AuthService: ObservableObject {
     func deleteAuth() async throws {
         guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
         
-        if user.providerData.contains(where: { $0.providerID == "github.com" }) {
+        if user.providerData.contains(where: { $0.providerID == AuthProviderID.gitHub.rawValue }) {
             try await self.githubSvc.revokeGitHubAccessToken()
         }
-        if user.providerData.contains(where: { $0.providerID == "apple.com" }) {
+        if user.providerData.contains(where: { $0.providerID == AuthProviderID.apple.rawValue }) {
             let appleToken = try await self.appleSvc.refreshAppleAccessToken()
             try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
         }
@@ -136,13 +135,13 @@ final class AuthService: ObservableObject {
     
     func linkWithProvider(provider: String) async throws {
         do {
-            if provider == "apple.com" {
+            if provider == AuthProviderID.apple.rawValue {
                 try await self.appleSvc.linkWithApple()
             }
-            else if provider == "github.com" {
+            else if provider == AuthProviderID.gitHub.rawValue {
                 try await self.githubSvc.linkWithGithub()
             }
-            else if provider == "google.com" {
+            else if provider == AuthProviderID.google.rawValue {
                 try await self.googleSvc.linkWithGoogle()
             }
             self.providers.append(provider)
@@ -157,18 +156,18 @@ final class AuthService: ObservableObject {
                 self.providers.remove(at: index)
             }
             
-            if provider == "google.com" {
+            if provider == AuthProviderID.google.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     GIDSignIn.sharedInstance.signOut()
                     try await GIDSignIn.sharedInstance.disconnect()
                 }
             }
-            else if provider == "github.com" {
+            else if provider == AuthProviderID.gitHub.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     try await self.githubSvc.revokeGitHubAccessToken()
                 }
             }
-            else if provider == "apple.com" {
+            else if provider == AuthProviderID.apple.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     let appleToken = try await self.appleSvc.refreshAppleAccessToken()
                     try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
