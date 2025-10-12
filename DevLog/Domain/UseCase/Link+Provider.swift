@@ -6,15 +6,16 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 final class LinkProvider {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func link(_ provider: AuthProvider) async throws { try await repo.link(provider: provider) }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func link(_ provider: AuthProviderID) async throws { try await authRepository.link(provider: provider) }
 }
 
 final class UnlinkProvider {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func unlink(_ provider: AuthProvider) async throws { try await repo.unlink(provider: provider) }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func unlink(_ provider: AuthProviderID) async throws { try await authRepository.unlink(provider: provider) }
 }

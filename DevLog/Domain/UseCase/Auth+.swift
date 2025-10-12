@@ -9,13 +9,13 @@ import Foundation
 import Combine
 
 final class AuthState {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    var publisher: AnyPublisher<AuthUser?, Never> { repo.authStatePublisher }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    var publisher: AnyPublisher<AuthUser?, Never> { authRepository.authStatePublisher }
 }
 
 final class DeleteAuth {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func delete() async throws { try await repo.deleteAuth() }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func delete() async throws { try await authRepository.deleteAuth() }
 }

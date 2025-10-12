@@ -8,25 +8,25 @@
 import Foundation
 
 final class SignInWithApple {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func signIn() async throws -> (AuthUser, String) { try await repo.signInWithApple() }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func signIn() async throws -> (AuthUser, String) { try await authRepository.signInWithApple() }
 }
 
 final class SignInWithGithub {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func signIn() async throws -> (AuthUser, String, String) { try await repo.signInWithGithub() }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func signIn() async throws -> (AuthUser, String, String) { try await authRepository.signInWithGithub() }
 }
 
 final class SignInWithGoogle {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func signIn() async throws -> (AuthUser, String) { try await repo.signInWithGoogle() }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func signIn() async throws -> (AuthUser, String) { try await authRepository.signInWithGoogle() }
 }
 
 final class SignOut {
-    private let repo: AuthRepository
-    init(repo: AuthRepository) { self.repo = repo }
-    func signOut() async throws { try await repo.signOut() }
+    private let authRepository: AuthRepository
+    init(authRepository: AuthRepository) { self.authRepository = authRepository }
+    func signOut() async throws { try await authRepository.signOut() }
 }

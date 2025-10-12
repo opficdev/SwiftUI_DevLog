@@ -8,54 +8,54 @@
 import Foundation
 
 final class FetchPushNotificationSettings {
-    private let repo: UserRepository
-    private let auth: AuthRepository
+    private let authRepository: AuthRepository
+    private let userRepository: UserRepository
     
-    init(repo: UserRepository, auth: AuthRepository) {
-        self.repo = repo
-        self.auth = auth
+    init(authRepository: AuthRepository, userRepository: UserRepository) {
+        self.authRepository = authRepository
+        self.userRepository = userRepository
     }
     
     func fetch() async throws -> PushNotificationSettings {
-        guard let uid = auth.currentUser?.id else { throw URLError(.userAuthenticationRequired) }
-        return try await repo.fetchPushSettings(userId: uid)
+        guard let uid = authRepository.currentUser?.uid else { throw URLError(.userAuthenticationRequired) }
+        return try await userRepository.fetchPushNotificationSettings(userId: uid)
     }
 }
 
 final class UpdatePushNotificationSettings {
-    private let repo: UserRepository
-    private let auth: AuthRepository
+    private let authRepository: AuthRepository
+    private let userRepository: UserRepository
     
-    init(repo: UserRepository, auth: AuthRepository) {
-        self.repo = repo
-        self.auth = auth
+    init(authRepository: AuthRepository, userRepository: UserRepository) {
+        self.authRepository = authRepository
+        self.userRepository = userRepository
     }
     
     func updateEnabled(_ enabled: Bool) async throws {
-        guard let uid = auth.currentUser?.id else { throw URLError(.userAuthenticationRequired) }
-        try await repo.updatePushEnabled(uid, enabled: enabled)
+        guard let uid = authRepository.currentUser?.uid else { throw URLError(.userAuthenticationRequired) }
+        try await userRepository.updatePushNotificationEnabled(uid, enabled: enabled)
     }
     
     func updateTime(_ date: Date) async throws {
         let components = Calendar.current.dateComponents([.hour, .minute], from: date)
         guard let hour = components.hour,
               let minute = components.minute else { return }
-        guard let uid = auth.currentUser?.id else { throw URLError(.userAuthenticationRequired) }
-        try await repo.updatePushTime(uid, hour: hour, minute: minute)
+        guard let uid = authRepository.currentUser?.uid else { throw URLError(.userAuthenticationRequired) }
+        try await userRepository.updatePushNotificationTime(uid, time: date)
     }
 }
 
 final class UpdateAppTheme {
-    private let repo: UserRepository
-    private let auth: AuthRepository
+    private let userRepository: UserRepository
+    private let authRepository: AuthRepository
     
-    init(repo: UserRepository, auth: AuthRepository) {
-        self.repo = repo
-        self.auth = auth
+    init(userRepository: UserRepository, authRepository: AuthRepository) {
+        self.userRepository = userRepository
+        self.authRepository = authRepository
     }
     
     func update(_ theme: SystemTheme) async throws {
-        guard let uid = auth.currentUser?.id else { throw URLError(.userAuthenticationRequired) }
-        try await repo.updateAppTheme(uid, theme: theme)
+        guard let uid = authRepository.currentUser?.uid else { throw URLError(.userAuthenticationRequired) }
+        try await userRepository.updateAppTheme(uid, theme: theme)
     }
 }
