@@ -136,6 +136,7 @@
 				DFD48AFC2DC4D6E2005905C5 /* Sources */,
 				DFD48AFD2DC4D6E2005905C5 /* Frameworks */,
 				DFD48AFE2DC4D6E2005905C5 /* Resources */,
+				DF922CEA2EA3DE2C00E06E5A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -189,6 +190,7 @@
 				DFABA3A22E2351A800FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				DFABA3A52E2351EE00FEFBDB /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				DFABA3AA2E23526500FEFBDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				DF922C7D2EA3DC3A00E06E5A /* XCRemoteSwiftPackageReference "SwiftLint" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFD48B012DC4D6E2005905C5 /* Products */;
@@ -218,6 +220,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DF922CEA2EA3DE2C00E06E5A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; than\n    swiftlint\nelse\n    echo \"waring: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		DF3416412E45F67C00F9312B /* Sources */ = {
@@ -285,6 +307,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4CPC6N38WA;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DevLog/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DevLog;
@@ -330,6 +353,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4CPC6N38WA;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DevLog/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DevLog;
@@ -523,6 +547,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DF922C7D2EA3DC3A00E06E5A /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.62.1;
+			};
+		};
 		DFABA3A22E2351A800FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui.git";

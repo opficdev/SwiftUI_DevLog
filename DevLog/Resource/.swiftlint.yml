@@ -1,0 +1,4 @@
+disabled_rules:
+  - nesting
+  - multiple_closures_with_trailing_closure
+  - trailing_whitespace
