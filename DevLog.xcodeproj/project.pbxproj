@@ -136,11 +136,11 @@
 				DFD48AFC2DC4D6E2005905C5 /* Sources */,
 				DFD48AFD2DC4D6E2005905C5 /* Frameworks */,
 				DFD48AFE2DC4D6E2005905C5 /* Resources */,
-				DF922CEA2EA3DE2C00E06E5A /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DF66A07D2EA52E9F0098E643 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				DF8AB7982E938B0B00E50BBF /* DevLog */,
@@ -190,7 +190,7 @@
 				DFABA3A22E2351A800FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				DFABA3A52E2351EE00FEFBDB /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				DFABA3AA2E23526500FEFBDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				DF922C7D2EA3DC3A00E06E5A /* XCRemoteSwiftPackageReference "SwiftLint" */,
+				DF66A07B2EA52E970098E643 /* XCRemoteSwiftPackageReference "SwiftLint" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFD48B012DC4D6E2005905C5 /* Products */;
@@ -221,26 +221,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		DF922CEA2EA3DE2C00E06E5A /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; than\n    swiftlint\nelse\n    echo \"waring: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		DF3416412E45F67C00F9312B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -257,6 +237,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DF66A07D2EA52E9F0098E643 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = DF66A07C2EA52E9F0098E643 /* SwiftLintBuildToolPlugin */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		DF3416492E45F67C00F9312B /* Debug */ = {
@@ -547,7 +534,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DF922C7D2EA3DC3A00E06E5A /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+		DF66A07B2EA52E970098E643 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/SwiftLint";
 			requirement = {
@@ -582,6 +569,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DF66A07C2EA52E9F0098E643 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF66A07B2EA52E970098E643 /* XCRemoteSwiftPackageReference "SwiftLint" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
 		DFABA3A32E2351A800FEFBDB /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DFABA3A22E2351A800FEFBDB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
