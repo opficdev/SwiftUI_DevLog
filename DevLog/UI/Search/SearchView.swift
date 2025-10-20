@@ -9,10 +9,10 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var searchVM: SearchViewModel
-    
+    @ObservedObject private var searchVM: SearchViewModel
+
     init(searchVM: SearchViewModel) {
-        self._searchVM = StateObject(wrappedValue: searchVM)
+        self._searchVM = ObservedObject(wrappedValue: searchVM)
     }
     
     var body: some View {

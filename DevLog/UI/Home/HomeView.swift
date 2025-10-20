@@ -9,13 +9,13 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var container: AppContainer
-    @StateObject private var homeVM: HomeViewModel
+    @ObservedObject private var homeVM: HomeViewModel
     @State private var searchText: String = ""
     @State private var isSearching: Bool = false
     @State private var reorderTodo: Bool = false
     
     init(container: AppContainer) {
-        self._homeVM = StateObject(wrappedValue: container.homeVM)
+        self._homeVM = ObservedObject(wrappedValue: container.homeVM)
     }
         
     var body: some View {

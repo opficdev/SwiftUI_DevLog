@@ -9,13 +9,13 @@ import SwiftUI
 
 struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
-    @StateObject private var settingVM: SettingViewModel
+    @ObservedObject private var viewModel: SettingViewModel
     @State private var signOutAlert = false
     @State private var deleteUserAlert = false
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     
-    init(settingVM: SettingViewModel) {
-        self._settingVM = StateObject(wrappedValue: settingVM)
+    init(viewModel: SettingViewModel) {
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
     
     var body: some View {
