@@ -11,5 +11,3 @@ struct PushNotificationSettings: Equatable {
     let allow: Bool
     let time: Date
 }
-
-//enum SystemTheme: String { case light, dark, automatic }  //  Storage에 선언되어있음

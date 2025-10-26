@@ -14,7 +14,7 @@ import Foundation
 
 @MainActor
 class GithubSignInService: NSObject {
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
     
     private var user: User? { Auth.auth().currentUser }
@@ -159,7 +159,7 @@ class GithubSignInService: NSObject {
         guard let user = self.user, let userId = self.userId else {
             throw URLError(.userAuthenticationRequired)
         }
-        let tokensRef = db.document("users/\(userId)/userData/tokens")
+        let tokensRef = store.document("users/\(userId)/userData/tokens")
         let authorizationCode = try await requestGithubAuthorizationCode()
         let (accessToken, _) = try await requestGithubTokens(authorizationCode: authorizationCode)
         

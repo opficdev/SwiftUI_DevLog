@@ -8,13 +8,17 @@
 import SwiftUI
 
 struct Searchable: View {
-    @Environment(\.isSearching) private var is_searching
-    @Binding var isSearching: Bool
+    @Environment(\.isSearching) private var isSearching
+    @Binding var bindedSearching: Bool
+
+    init(isSearching: Binding<Bool>) {
+        self._bindedSearching = isSearching
+    }
     
     var body: some View {
         EmptyView()
-        .onChange(of: is_searching) { newValue in
-            isSearching = newValue
+        .onChange(of: isSearching) { newValue in
+            bindedSearching = newValue
         }
     }
 }

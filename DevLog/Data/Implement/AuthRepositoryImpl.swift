@@ -18,12 +18,8 @@ final class AuthRepositoryImpl: AuthRepository {
     
     // MARK: - State
     private let currentAuthUserSubject: CurrentValueSubject<AuthUser?, Never>
-    var authStatePublisher: AnyPublisher<AuthUser?, Never> {
+    var publisher: AnyPublisher<AuthUser?, Never> {
         currentAuthUserSubject.eraseToAnyPublisher()
-    }
-    var currentUser: AuthUser? {
-        get { currentAuthUserSubject.value }
-        set { currentAuthUserSubject.value = newValue }
     }
     private var cancellables: Set<AnyCancellable> = []
     
@@ -42,10 +38,11 @@ final class AuthRepositoryImpl: AuthRepository {
         self.currentAuthUserSubject = CurrentValueSubject<AuthUser?, Never>(initialAuthUser)
         
         // AuthService의 사용자 상태를 도메인 모델로 매핑하여 퍼블리시
-        authService.$user
-            .map { [weak self] (firebaseUser: User?) -> AuthUser? in
-                guard let self = self, let firebaseUser = firebaseUser else { return nil }
-                return self.firebaseUserToAuthUser(from: firebaseUser)
+        Publishers.CombineLatest(authService.$user, authService.$currentProvider)
+            .map { [self] (firebaseUser: User?, currentProvider: AuthProviderID?) -> AuthUser? in
+                guard let firebaseUser = firebaseUser,
+                      let provider = currentProvider else { return nil }
+                return firebaseUserToAuthUser(from: firebaseUser, currentProvider: provider)
             }
             .sink { [weak self] authUser in
                 self?.currentAuthUserSubject.value = authUser
@@ -91,21 +88,22 @@ final class AuthRepositoryImpl: AuthRepository {
         currentAuthUserSubject.value = nil
     }
     
-    func link(provider: AuthProviderID) async throws {
+    func link(provider: AuthProvider) async throws {
         try await authService.linkWithProvider(provider: provider.rawValue)
     }
     
-    func unlink(provider: AuthProviderID) async throws {
+    func unlink(provider: AuthProvider) async throws {
         try await authService.unlinkFromProvider(provider: provider.rawValue)
     }
     
     // MARK: - Helpers
-    private func firebaseUserToAuthUser(from user: User, currentProvider: AuthProviderID? = nil) -> AuthUser {
+    private func firebaseUserToAuthUser(from user: User, currentProvider: AuthProviderID) -> AuthUser {
         return AuthUser(
-            id: user.uid,
-            email: user.email,
+            uid: user.uid,
+            displayName: user.displayName ?? "",
+            email: user.email ?? "",
             providers: user.providerData.map { $0.providerID },
-            currentProvider: currentProvider?.rawValue
+            currentProvider: currentProvider.rawValue
         )
     }
 }

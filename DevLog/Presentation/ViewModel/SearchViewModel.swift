@@ -37,8 +37,8 @@ final class SearchViewModel: ObservableObject {
     func requestWebPages() async {
         if !self.isConnected { return }
         do {
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             self.isLoading = true
             defer {
                 self.isLoading = false
@@ -56,7 +56,7 @@ final class SearchViewModel: ObservableObject {
     func upsertWebPage(webPage: WebPageInfo) async {
         if !self.isConnected { return }
         do {
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
             self.isLoading = true
             defer {
                 self.isLoading = false
@@ -74,7 +74,7 @@ final class SearchViewModel: ObservableObject {
     func deleteWebPage(webPage: WebPageInfo) async {
         if !self.isConnected { return }
         do {
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
             self.isLoading = true
             defer {
                 self.isLoading = false

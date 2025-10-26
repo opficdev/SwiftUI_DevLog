@@ -12,7 +12,7 @@ import SwiftUI
 final class SettingViewModel: ObservableObject {
     private let authState: AuthState
     private let updatePushNotificationSettings: UpdatePushNotificationSettings
-    private let fetchPushSettings: FetchPushNotificationSettings
+    private let fetchPushNotificationSettings: FetchPushNotificationSettings
     private let updateAppTheme: UpdateAppTheme
     private let signOut: SignOut
     private let deleteAuth: DeleteAuth
@@ -20,8 +20,8 @@ final class SettingViewModel: ObservableObject {
     private let unlinkProvider: UnlinkProvider
     private let network: NetworkRepository
     private var cancellables = Set<AnyCancellable>()
+
     @Published var theme: String = ""
-    
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
     
@@ -40,7 +40,7 @@ final class SettingViewModel: ObservableObject {
     init(
         authState: AuthState,
         updatePushNotificationSettings: UpdatePushNotificationSettings,
-        fetchPushSettings: FetchPushNotificationSettings,
+        fetchPushNotificationSettings: FetchPushNotificationSettings,
         updateAppTheme: UpdateAppTheme,
         signOut: SignOut,
         deleteAuth: DeleteAuth,
@@ -50,7 +50,7 @@ final class SettingViewModel: ObservableObject {
     ) {
         self.authState = authState
         self.updatePushNotificationSettings = updatePushNotificationSettings
-        self.fetchPushSettings = fetchPushSettings
+        self.fetchPushNotificationSettings = fetchPushNotificationSettings
         self.updateAppTheme = updateAppTheme
         self.signOut = signOut
         self.deleteAuth = deleteAuth
@@ -69,7 +69,6 @@ final class SettingViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        // NetworkActivityService.isConnected를 self.isConnected와와 단방향 연결
         self.network.isConnectedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] connected in
@@ -109,7 +108,6 @@ final class SettingViewModel: ObservableObject {
         }
     }
 
-    
     func deleteAuth() async {
         guard isConnected else { return }
         isLoading = true
@@ -155,7 +153,7 @@ final class SettingViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         do {
-            let settings = try await fetchPushSettings.fetch()
+            let settings = try await fetchPushNotificationSettings.fetch()
             self.pushNotificationEnabled = settings.allow
             self.pushNotificationTime = settings.time
         } catch {

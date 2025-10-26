@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct NotificationView: View {
-    @StateObject private var notiVM: NotificationViewModel
-    
+    @ObservedObject private var notiVM: NotificationViewModel
+
     init(notiVM: NotificationViewModel) {
-        self._notiVM = StateObject(wrappedValue: notiVM)
+        self._notiVM = ObservedObject(wrappedValue: notiVM)
     }
     
     var body: some View {

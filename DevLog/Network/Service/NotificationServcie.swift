@@ -11,10 +11,10 @@ import FirebaseFirestore
 
 @MainActor
 final class NotificationService: ObservableObject {
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     
     func requestNotification(userId: String) async throws -> [PushNotification] {
-        let collection = db.collection("users/\(userId)/notifications")
+        let collection = store.collection("users/\(userId)/notifications")
         
         let snapshot = try await collection.getDocuments()
         
@@ -22,7 +22,7 @@ final class NotificationService: ObservableObject {
     }
     
     func deleteNotification(notificationId: String, userId: String) async throws {
-        let docRef = db.collection("users/\(userId)/notifications").document(notificationId)
+        let docRef = store.collection("users/\(userId)/notifications").document(notificationId)
         
         try await docRef.delete()
     }

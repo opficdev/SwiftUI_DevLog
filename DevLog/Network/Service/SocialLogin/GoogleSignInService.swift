@@ -12,7 +12,7 @@ import GoogleSignIn
 
 @MainActor
 class GoogleSignInService {
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     
     private var user: User? { Auth.auth().currentUser }
     private var userId: String? { user?.uid }

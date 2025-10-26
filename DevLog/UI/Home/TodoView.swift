@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct TodoView: View {
-    @StateObject private var todoVM: TodoViewModel
+    @ObservedObject private var todoVM: TodoViewModel
     @State private var showEditor: Bool = false
     
     init(todoVM: TodoViewModel) {
-        self._todoVM = StateObject(wrappedValue: todoVM)
+        self._todoVM = ObservedObject(wrappedValue: todoVM)
     }
     
     var body: some View {

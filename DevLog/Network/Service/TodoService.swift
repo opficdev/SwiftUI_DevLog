@@ -10,10 +10,10 @@ import Combine
 import FirebaseFirestore
 
 class TodoService {
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     
     func requestPinnedTodoList(userId: String) async throws -> [Todo] {
-        let collection = db.collection("users/\(userId)/todoLists/")
+        let collection = store.collection("users/\(userId)/todoLists/")
         
         let query = collection.whereField(("isPinned"), isEqualTo: true)
             .order(by: "createdAt", descending: true)
@@ -24,7 +24,7 @@ class TodoService {
     }
 
     func requestTodoList(kind: TodoKind, userId: String) async throws -> [Todo] {
-        let collection = db.collection("users/\(userId)/todoLists/")
+        let collection = store.collection("users/\(userId)/todoLists/")
         
         let query = collection.whereField("kind", isEqualTo: kind.rawValue)
             .order(by: "createdAt", descending: true)
@@ -35,7 +35,7 @@ class TodoService {
     }
     
     func upsertTodo(todo: Todo, userId: String) async throws {
-        let collection = db.collection("users/\(userId)/todoLists/")
+        let collection = store.collection("users/\(userId)/todoLists/")
         
         let docRef = collection.document(todo.id.uuidString)
         
@@ -43,7 +43,7 @@ class TodoService {
     }
     
     func deleteTodo(todo: Todo, userId: String) async throws {
-        let collection = db.collection("users/\(userId)/todoLists/")
+        let collection = store.collection("users/\(userId)/todoLists/")
         
         let docRef = collection.document(todo.id.uuidString)
         

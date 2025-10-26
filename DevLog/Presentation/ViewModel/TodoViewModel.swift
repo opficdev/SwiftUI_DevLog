@@ -100,8 +100,8 @@ final class TodoViewModel: ObservableObject {
             defer {
                 self.isLoading = false
             }
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-        
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             self.todos = try await self.todoSvc.requestTodoList(kind: self.kind, userId: userId)
         } catch {
             print("Error requesting todos: \(error.localizedDescription)")
@@ -117,8 +117,8 @@ final class TodoViewModel: ObservableObject {
             defer {
                 self.isLoading = false
             }
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-        
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             try await self.todoSvc.upsertTodo(todo: todo, userId: userId)
         } catch {
             print("Error upserting todo: \(error.localizedDescription)")
@@ -142,8 +142,8 @@ final class TodoViewModel: ObservableObject {
             self.todos.remove(at: todosIndex)
             self.filteredTodos.remove(at: filteredTodosIndex)
             
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             try await self.todoSvc.deleteTodo(todo: todo, userId: userId)
         } catch {
             print("Error deleting todo: \(error.localizedDescription)")
@@ -164,8 +164,8 @@ final class TodoViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             var updatedTodo = todo
             
             updatedTodo.isPinned.toggle()
@@ -195,7 +195,7 @@ final class TodoViewModel: ObservableObject {
                 self.isLoading = false
             }
             
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
             
             var updatedTodo = todo
             

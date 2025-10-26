@@ -9,7 +9,7 @@ import Foundation
 import FirebaseAuth
 
 protocol UserRepository {
-    func upsertUser(user: AuthUser, fcmToken: String, provider: AuthProviderID?, githubAccessToken: String?) async throws
+    func upsertUser(user: User, fcmToken: String, provider: AuthProviderID?, githubAccessToken: String?) async throws
     func fetchPushNotificationSettings(userId: String) async throws -> PushNotificationSettings
     func updatePushNotificationEnabled(_ userId: String, enabled: Bool) async throws
     func updatePushNotificationTime(_ userId: String, time: Date) async throws

@@ -8,8 +8,9 @@
 import Foundation
 
 struct AuthUser: Equatable {
-    let id: String
-    let email: String?
+    let uid: String
+    let displayName: String
+    let email: String
     let providers: [String]
-    let currentProvider: String?
+    let currentProvider: String
 }
