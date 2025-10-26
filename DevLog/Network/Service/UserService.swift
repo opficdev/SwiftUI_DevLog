@@ -8,14 +8,13 @@
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseFunctions
-import SwiftUI
 
 class UserService {
     private let store = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
     
     @Published var name: String = ""
-    @Published var avatar: Image = Image(systemName: "person.crop.circle.fill")
+    @Published var avatarURL: URL? = nil
     @Published var statusMsg: String = ""
     
     // 유저를 Firestore에 저장 및 업데이트
@@ -39,7 +38,7 @@ class UserService {
             field["email"] = email
         }
         
-        if let displayName = user.displayName {
+        if let displayName = user.displayName, displayName != "" {
             field["name"] = displayName
         }
         
@@ -66,17 +65,8 @@ class UserService {
     }
     
     func fetchUserInfo(user: User) async throws {
-        var avatar = Image(systemName: "person.crop.circle.fill")
-        
-        if let url = user.photoURL {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            if let uiImage = UIImage(data: data) {
-                avatar = Image(uiImage: uiImage)
-            }
-        }
-                
-        self.avatar = avatar
         self.name = user.displayName ?? String(user.email?.split(separator: "@").first ?? "")
+        self.avatarURL = user.photoURL
         self.statusMsg = statusMsg
     }
     
