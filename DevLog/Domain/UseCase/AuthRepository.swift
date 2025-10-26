@@ -10,16 +10,12 @@ import Combine
 import FirebaseAuth
 
 protocol AuthRepository {
-    var authStatePublisher: AnyPublisher<AuthUser?, Never> { get }
-    var currentUser: AuthUser? { get }
-    
-    func signInWithApple() async throws -> (AuthUser, String /* fcmToken */)
+    var publisher: AnyPublisher<AuthUser?, Never> { get }
+    func signInWithApple() async throws -> (AuthUser, String)    // fcmToken
     func signInWithGoogle() async throws -> (AuthUser, String)
-    func signInWithGithub() async throws -> (AuthUser, String /* fcmToken */, String /* githubAccessToken */)
-    
+    func signInWithGithub() async throws -> (AuthUser, String, String)   // fcmToken, githubAccessToken
     func signOut() async throws
     func deleteAuth() async throws
-    
     func link(provider: AuthProviderID) async throws
     func unlink(provider: AuthProviderID) async throws
 }
