@@ -8,14 +8,14 @@
 import SwiftUI
 
 enum TodoKind: String, Identifiable, CaseIterable, Codable {
-    case issue = "issue"              // 이슈
-    case feature = "feature"        // 신규 기능
-    case improvement = "improvement"// 개선/리팩터링
-    case review = "review"          // 코드/문서 리뷰
-    case test = "test"              // 테스트/QA
-    case doc = "doc"                // 문서화
-    case research = "research"      // 리서치/학습
-    case etc = "etc"                // 기타
+    case issue          // 이슈
+    case feature        // 신규 기능
+    case improvement    // 개선/리팩터링
+    case review         // 코드/문서 리뷰
+    case test           // 테스트/QA
+    case doc            // 문서화
+    case research       // 리서치/학습
+    case etc            // 기타
 
     var id: String { rawValue }
 
@@ -47,14 +47,14 @@ enum TodoKind: String, Identifiable, CaseIterable, Codable {
     
     var color: Color {
         switch self {
-            case .issue: return Color.red
-            case .feature: return Color.green
-            case .improvement: return Color.cyan
-            case .review: return Color.orange
-            case .test: return Color.purple
-            case .doc: return Color.yellow
-            case .research: return Color.teal
-            case .etc: return Color.gray
+        case .issue: return Color.red
+        case .feature: return Color.green
+        case .improvement: return Color.cyan
+        case .review: return Color.orange
+        case .test: return Color.purple
+        case .doc: return Color.yellow
+        case .research: return Color.teal
+        case .etc: return Color.gray
         }
     }
 }

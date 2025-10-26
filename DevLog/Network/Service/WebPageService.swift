@@ -39,7 +39,10 @@ class WebPageService {
     
     func upsertWebPage(webPageInfo: WebPageInfo, userId: String) async throws {
         let webPageInfosRef = store.document("users/\(userId)/userData/webPageInfos")
-        try await webPageInfosRef.setData(["WebPageInfos": FieldValue.arrayUnion([webPageInfo.url.description])], merge: true)
+        try await webPageInfosRef.setData(
+            ["WebPageInfos": FieldValue.arrayUnion([webPageInfo.url.description])],
+            merge: true
+        )
     }
     
     func deleteWebPage(webPageInfo: WebPageInfo, userId: String) async throws {

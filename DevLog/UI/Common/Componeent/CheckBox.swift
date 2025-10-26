@@ -22,8 +22,7 @@ struct CheckBox: View {
                 Image(systemName: "checkmark.circle.fill")
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(Color.white, Color.accentColor)
-            }
-            else {
+            } else {
                 Image(systemName: "circle")
                     .foregroundStyle(Color.gray)
             }

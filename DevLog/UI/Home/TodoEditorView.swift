@@ -111,7 +111,7 @@ struct TodoEditorView: View {
                     }
                     .padding(.horizontal)
                 }
-                LazyVStack(alignment:.leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Section {
                         if tabViewTag == "editor" {
                             TextField(
@@ -121,8 +121,7 @@ struct TodoEditorView: View {
                                 axis: .vertical
                             )
                                 .padding(.horizontal)
-                        }
-                        else {
+                        } else {
                             Markdown(content)
                                 .markdownTheme(.basic)
                                 .padding(.horizontal)

@@ -22,6 +22,8 @@
 	<false/>
 	<key>GITHUB_CLIENT_ID</key>
 	<string>$(GITHUB_CLIENT_ID)</string>
+	<key>APPSTORE_URL</key>
+	<string>$(APPSTORE_URL)</string>
 	<key>APP_REDIRECT_URL</key>
 	<string>$(APP_REDIRECT_URL)</string>
 	<key>UIBackgroundModes</key>

@@ -14,7 +14,7 @@ class UserService {
     private let functions = Functions.functions(region: "asia-northeast3")
     
     @Published var name: String = ""
-    @Published var avatarURL: URL? = nil
+    @Published var avatarURL: URL?
     @Published var statusMsg: String = ""
     
     // 유저를 Firestore에 저장 및 업데이트
@@ -26,7 +26,7 @@ class UserService {
         // 사용자 기본 정보
         var field: [String: Any] = [
             "statusMsg": "",
-            "lastLogin": FieldValue.serverTimestamp(),
+            "lastLogin": FieldValue.serverTimestamp()
         ]
         
         if let provider = provider {
@@ -82,7 +82,10 @@ class UserService {
         
         if let allowPush = doc.data()?["allowPushNotification"] as? Bool { return allowPush }
         
-        throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Push notification settings not found"])
+        throw URLError(
+            .badServerResponse,
+            userInfo: [NSLocalizedDescriptionKey: "Push notification settings not found"]
+        )
     }
     
     func fetchPushNotificationTime(_ userId: String) async throws -> DateComponents {

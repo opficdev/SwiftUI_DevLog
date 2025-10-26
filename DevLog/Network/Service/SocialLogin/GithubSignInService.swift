@@ -10,7 +10,6 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseFunctions
-import Foundation
 
 @MainActor
 class GithubSignInService: NSObject {
@@ -76,7 +75,8 @@ class GithubSignInService: NSObject {
         }
 
         return try await withCheckedThrowingContinuation { continuation in
-                let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: callbackURLScheme) { callbackURL, error in
+            let session = ASWebAuthenticationSession(
+                url: authURL, callbackURLScheme: callbackURLScheme) { callbackURL, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                     return
@@ -96,7 +96,7 @@ class GithubSignInService: NSObject {
                     return
                 }
 
-               continuation.resume(returning: code)
+                continuation.resume(returning: code)
             }
 
             session.presentationContextProvider = self
@@ -122,7 +122,7 @@ class GithubSignInService: NSObject {
     }
     
     func revokeGitHubAccessToken(accessToken: String? = nil) async throws {
-        guard let _ = self.user else {
+        guard self.user != nil else {
             throw URLError(.userAuthenticationRequired)
         }
         
@@ -134,7 +134,7 @@ class GithubSignInService: NSObject {
         
         let revokeFunction = functions.httpsCallable("revokeGithubAccessToken")
         
-        let _ = try await revokeFunction.call(param)
+        _ = try await revokeFunction.call(param)
     }
 
     // GitHub API로 사용자 프로필 정보 가져오기

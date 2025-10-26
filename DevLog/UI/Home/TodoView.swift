@@ -26,8 +26,7 @@ struct TodoView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
-                }
-                else {
+                } else {
                     List(todoVM.filteredTodos) { todo in
                         NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(todoVM)) {
                             VStack(alignment: .leading, spacing: 5) {

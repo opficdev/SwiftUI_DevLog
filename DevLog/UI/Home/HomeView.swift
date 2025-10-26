@@ -71,10 +71,12 @@ struct HomeView: View {
                                         .font(.callout)
                                     Spacer()
                                 }
-                            }
-                            else {
+                            } else {
                                 ForEach(homeVM.pinnedTodos, id: \.id) { todo in
-                                    NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(container.todoVM(kind: todo.kind))) {
+                                    NavigationLink(
+                                        destination: TodoDetailView(todo: todo)
+                                            .environmentObject(container.todoVM(kind: todo.kind))
+                                    ) {
                                         let width = UIScreen.main.bounds.width * 0.08
                                         HStack {
                                             RoundedRectangle(cornerRadius: 8)
@@ -88,7 +90,9 @@ struct HomeView: View {
                                             VStack(alignment: .leading) {
                                                 Text(todo.title)
                                                     .bold()
-                                                Text(todo.dueDate?.formatted(date: .abbreviated, time: .omitted) ?? "마감일 없음")
+                                                Text(todo.dueDate?
+                                                    .formatted(date: .abbreviated, time: .omitted) ?? "마감일 없음"
+                                                )
                                                     .font(.caption2)
                                                     .foregroundStyle(Color.gray)
                                             }
@@ -138,7 +142,6 @@ struct HomeView: View {
         }
     }
 }
-
 
 #Preview {
     HomeView(container: AppContainer.shared)

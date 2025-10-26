@@ -51,7 +51,9 @@ struct SettingView: View {
                     if let url = URL(string: "itms-beta://") {
                            UIApplication.shared.open(url, options: [:]) { success in
                                if !success {
-                                   if let appStoreURL = URL(string: "https://apps.apple.com/app/testflight/id899247664") {
+                                   if let urlString = Bundle.main.object(
+                                    forInfoDictionaryKey: "APPSTORE_URL") as? String,
+                                      let appStoreURL = URL(string: urlString) {
                                        UIApplication.shared.open(appStoreURL)
                                    }
                                }

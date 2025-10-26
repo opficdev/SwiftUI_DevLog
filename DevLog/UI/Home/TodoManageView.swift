@@ -23,15 +23,14 @@ struct TodoManageView: View {
                                     if homeVM.selectedTodoKinds.count > 1 {
                                         homeVM.selectedTodoKindStrings.removeAll { $0 == kind.rawValue }
                                     }
-                                }
-                                else {
+                                } else {
                                     let currIdx = homeVM.todoKindStrings.firstIndex(of: kind.rawValue)!
                                     var prevIdx = 0
-                                    for idx in stride(from: currIdx - 1, through: 0, by: -1) {
-                                        if homeVM.selectedTodoKindStrings.contains(homeVM.todoKindStrings[idx]) {
-                                            prevIdx = idx
-                                            break
-                                        }
+                                    for idx in stride(from: currIdx - 1, through: 0, by: -1)
+                                    where homeVM.selectedTodoKindStrings
+                                        .contains(homeVM.todoKindStrings[idx]) {
+                                        prevIdx = idx
+                                        break
                                     }
                                     homeVM.selectedTodoKindStrings.insert(kind.rawValue, at: prevIdx)
                                 }
@@ -53,7 +52,7 @@ struct TodoManageView: View {
             .navigationBarBackButtonHidden()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action : {
+                    Button(action: {
                         dismiss()
                     }) {
                         Text("완료")

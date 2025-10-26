@@ -17,8 +17,7 @@ struct ContentView: View {
             if let signIn = loginVM.signIn {
                 if signIn && !isFirstLaunch {
                     MainView()
-                }
-                else {
+                } else {
                     LoginView()
                         .environmentObject(loginVM)
                         .onAppear {
@@ -32,8 +31,7 @@ struct ContentView: View {
                 if loginVM.isLoading {
                     LoadingView()
                 }
-            }
-            else {
+            } else {
                 Color.clear.onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
                         if loginVM.signIn == nil {
@@ -56,7 +54,7 @@ struct ContentView: View {
         } message: {
             Text("네트워크 연결을 확인해주세요")
         }
-        .onChange(of: isFirstLaunch) { newValue in
+        .onChange(of: isFirstLaunch) { _ in
             if isFirstLaunch {
                 Task {
                     print("firstlaunch로 인한 로그아웃")
@@ -67,7 +65,6 @@ struct ContentView: View {
         }
     }
 }
-
 
 #Preview {
     ContentView()

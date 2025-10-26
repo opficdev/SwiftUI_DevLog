@@ -22,56 +22,56 @@ final class TodoViewModel: ObservableObject {
     @Published var alertMsg: String = ""
     @Published var scope: TodoScope = .title
     @Published var filterOption: FilterOption = .create
-    @Published var selectedTodoByNotification: Todo? = nil  //  알림을 통해 선택된 TODO
-    
+    @Published var selectedTodoByNotification: Todo?  //  알림을 통해 선택된 Todo
+
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
     
     enum FilterOption {
         case create, update, day, week, month, year
+
+        var matchingDateComponent: Calendar.Component? {
+            switch self {
+            case .day: .day
+            case .week: .weekOfYear
+            case .month: .month
+            case .year: .year
+            default:  nil
+            }
+        }
     }
     
-    init(authSvc: AuthService, networkSvc: NetworkActivityService, todoSvc: TodoService, kind: TodoKind) {
+    init(
+        authSvc: AuthService,
+        networkSvc: NetworkActivityService,
+        todoSvc: TodoService,
+        kind: TodoKind
+    ) {
         self.authSvc = authSvc
         self.networkSvc = networkSvc
         self.todoSvc = todoSvc
         self.kind = kind
-        
         self.$searchText
             .combineLatest(self.$scope, self.$todos, self.$filterOption)
             .map { [weak self] searchText, scope, currentTodos, option -> [Todo] in
-                guard let _ = self else { return [] }
-                
+                guard self != nil else { return [] }
+
                 var newTodos: [Todo] = []
-                
+
                 switch option {
                 case .create:
                     newTodos = currentTodos
                 case .update:
                     newTodos = currentTodos.sorted { $0.updatedAt > $1.updatedAt }
-                case .day:
+                default:
+                    guard let dateComponent = option.matchingDateComponent else { return currentTodos }
+                    let date = Calendar.current.date(byAdding: dateComponent, value: -1, to: Date())!
                     newTodos = currentTodos.filter { todo in
-                        let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
-                        return oneDayAgo <= todo.createdAt
-                    }
-                case .week:
-                    newTodos = currentTodos.filter { todo in
-                        let oneWeekAgo = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())!
-                        return oneWeekAgo <= todo.createdAt
-                    }
-                case .month:
-                    newTodos = currentTodos.filter { todo in
-                        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date())!
-                        return oneMonthAgo <= todo.createdAt
-                    }
-                case .year:
-                    newTodos = currentTodos.filter { todo in
-                        let oneYearAgo = Calendar.current.date(byAdding: .year, value: -1, to: Date())!
-                        return oneYearAgo <= todo.createdAt
+                        date <= todo.createdAt
                     }
                 }
-                
+
                 if !searchText.isEmpty {
                     return newTodos.filter { todo in
                         switch scope {
@@ -84,9 +84,9 @@ final class TodoViewModel: ObservableObject {
                 }
                 return newTodos
             }
-            .receive(on: DispatchQueue.main) // UI 업데이트는 메인 스레드
+            .receive(on: DispatchQueue.main)
             .assign(to: &$filteredTodos)
-        
+
         // NetworkActivityService.isConnected -> self.isConnected 단방향 연결
         self.networkSvc.$isConnected
             .receive(on: DispatchQueue.main)

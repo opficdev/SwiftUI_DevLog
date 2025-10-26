@@ -50,7 +50,13 @@ struct Todo: Identifiable, Codable {
         self.kind = TodoKind(rawValue: data["kind"] as? String ?? "") ?? .etc
     }
     
-    mutating func modify(title: String, isPinned: Bool, content: String, tags: [String], dueDate: Date? = nil, kind: TodoKind) {
+    mutating func modify(
+        title: String,
+        isPinned: Bool,
+        content: String, tags: [String],
+        dueDate: Date? = nil,
+        kind: TodoKind
+    ) {
         self.title = title
         self.isPinned = isPinned
         self.content = content

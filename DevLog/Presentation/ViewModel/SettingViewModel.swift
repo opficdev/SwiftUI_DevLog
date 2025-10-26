@@ -78,20 +78,20 @@ final class SettingViewModel: ObservableObject {
             .store(in: &cancellables)
         
         self.$pushNotificationEnabled.dropFirst()
-            .sink { [weak self] enabled in
+            .sink { [weak self] _ in
                 Task { await self?.updatePushNotificationEnabled() }
             }
             .store(in: &cancellables)
         
         self.$pushNotificationTime.dropFirst()
-            .sink { [weak self] date in
+            .sink { [weak self] _ in
                 Task { await self?.updatePushNotificationTime() }
             }
             .store(in: &cancellables)
         
         self.$theme.dropFirst()
             .compactMap(SystemTheme.init(rawValue:))
-            .sink { [weak self] theme in
+            .sink { [weak self] _ in
                 Task { await self?.updateAppTheme() }
             }
             .store(in: &cancellables)
@@ -129,8 +129,7 @@ final class SettingViewModel: ObservableObject {
             var alertMessage = "알 수 없는 오류가 발생했습니다."
             if let emailError = error as? EmailFetchError, emailError == .emailNotFound {
                 alertMessage = "연동하려는 계정의 이메일을 확인할 수 없습니다."
-            }
-            else if let emailError = error as? EmailFetchError, emailError == .emailMismatch {
+            } else if let emailError = error as? EmailFetchError, emailError == .emailMismatch {
                 alertMessage = "동일한 이메일을 가진 계정과 연동을 시도해주세요."
             }
             show(alertMessage)
