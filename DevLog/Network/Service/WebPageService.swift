@@ -12,8 +12,9 @@ class WebPageService {
     private let store = Firestore.firestore()
     
     func requestWebPages(userId: String) async throws -> [WebPageInfo] {
-        let doc = try await WebPageInfoRef.getDocument()
-        
+        let webPageInfoRef = store.document("users/\(userId)/userData/webPageInfos")
+        let doc = try await webPageInfoRef.getDocument()
+
         if doc.exists, let data = doc.data() {
             if let webPageInfos = data["webPageInfos"] as? [String] {
                 return try await withThrowingTaskGroup(of: WebPageInfo.self, returning: [WebPageInfo].self) { group in
