@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ThemeView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
-    @EnvironmentObject var settingVM: SettingViewModel
-    
+    @ObservedObject var viewModel: SettingViewModel
+
     var body: some View {
         List {
             Button(action: {
@@ -59,11 +59,11 @@ struct ThemeView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: theme.localizedName) { newValue in
-            settingVM.theme = newValue
+            viewModel.theme = newValue
         }
     }
 }
 
 #Preview {
-    ThemeView()
+    ThemeView(viewModel: AppContainer.shared.settingViewModel)
 }

@@ -9,7 +9,7 @@ import SwiftUI
 import FirebaseAuth
 
 struct AccountView: View {
-    @EnvironmentObject var settingVM: SettingViewModel
+    @ObservedObject var viewModel: SettingViewModel
     @State private var connectedProviders: [String] = []
     @State private var disconnectedProviders: [String] = []
     
@@ -18,7 +18,7 @@ struct AccountView: View {
             Section("현재 계정") {
                 HStack {
                     // provider에서 첫번째 글자만 대문자로 바꾸고 .을 포함한 뒤는 다 제거 ex) google.com -> Google
-                    let formattedProvider = settingVM.currentProvider.prefix(1).uppercased() + settingVM.currentProvider.dropFirst().prefix(while: { $0 != "." })
+                    let formattedProvider = viewModel.currentProvider.prefix(1).uppercased() + viewModel.currentProvider.dropFirst().prefix(while: { $0 != "." })
                     Image(formattedProvider)
                         .resizable()
                         .scaledToFit()
@@ -39,7 +39,7 @@ struct AccountView: View {
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive, action: {
                             Task {
-                                await settingVM.unlinkFromProvider(provider: provider)
+//                                await viewModel.unlinkFromProvider(provider: provider)
                             }
                         }) {
                             Label("계정 삭제", systemImage: "trash")
@@ -49,16 +49,16 @@ struct AccountView: View {
             }
         }
         .onAppear {
-            connectedProviders = settingVM.providers.filter { provider in
-                provider != settingVM.currentProvider
+            connectedProviders = viewModel.providers.filter { provider in
+                provider != viewModel.currentProvider
             }
             disconnectedProviders = ["google.com", "github.com", "apple.com"].filter { provider in
-                !settingVM.providers.contains(provider)
+                !viewModel.providers.contains(provider)
             }
         }
-        .onChange(of: settingVM.providers) { newProviders in
+        .onChange(of: viewModel.providers) { newProviders in
             connectedProviders = newProviders.filter { provider in
-                provider != settingVM.currentProvider
+                provider != viewModel.currentProvider
             }
             disconnectedProviders = ["google.com", "github.com", "apple.com"].filter { provider in
                 !newProviders.contains(provider)
@@ -72,7 +72,7 @@ struct AccountView: View {
                     ForEach(disconnectedProviders, id: \.self) { provider in
                         Button(action: {
                             Task {
-                                await settingVM.linkWithProvider(provider: provider)
+//                                await viewModel.linkWithProvider(provider: provider)
                             }
                         }) {
                             HStack {
@@ -88,16 +88,16 @@ struct AccountView: View {
                 }
             }
         }
-        .alert("계정 연동 실패", isPresented: $settingVM.showAlert) {
+        .alert("계정 연동 실패", isPresented: $viewModel.showAlert) {
             Button("확인", role: .cancel) {
-                settingVM.showAlert = false
+                viewModel.showAlert = false
             }
         } message: {
-            Text(settingVM.alertMsg)
+            Text(viewModel.alertMsg)
         }
     }
 }
 
 #Preview {
-    AccountView()
+    AccountView(viewModel: AppContainer.shared.settingViewModel)
 }

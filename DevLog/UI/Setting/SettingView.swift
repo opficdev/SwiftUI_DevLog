@@ -9,31 +9,27 @@ import SwiftUI
 
 struct SettingView: View {
     @AppStorage("theme") var theme: SystemTheme = .automatic
-    @ObservedObject private var viewModel: SettingViewModel
+    @ObservedObject var viewModel: SettingViewModel
     @State private var signOutAlert = false
     @State private var deleteUserAlert = false
-    let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
-    
-    init(viewModel: SettingViewModel) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
-    }
-    
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+
     var body: some View {
         Form {
             Section {
-                NavigationLink(destination: ThemeView().environmentObject(settingVM)) {
+                NavigationLink(destination: ThemeView(viewModel: viewModel)) {
                     HStack {
                         Text("테마")
                             .foregroundStyle(Color.primary)
                         Spacer()
-                        Text(settingVM.theme)
+                        Text(viewModel.theme)
                             .foregroundStyle(Color.gray)
                     }
                     .onAppear {
-                        settingVM.theme = theme.localizedName
+                        viewModel.theme = theme.localizedName
                     }
                 }
-                NavigationLink(destination: PushNotificationSettingsView().environmentObject(settingVM)) {
+                NavigationLink(destination: PushNotificationSettingsView(viewModel: viewModel)) {
                     Text("알림")
                         .foregroundStyle(Color.primary)
                 }
@@ -62,7 +58,7 @@ struct SettingView: View {
                            }
                        }
                 }) {
-                    VStack(alignment:. leading) {
+                    VStack(alignment: .leading) {
                         Text("베타 테스트 참여")
                         Text("신규 기능을 빠르게 만나볼 수 있습니다")
                             .foregroundStyle(Color.gray)
@@ -72,7 +68,7 @@ struct SettingView: View {
             }
             
             Section {
-                NavigationLink(destination: AccountView().environmentObject(settingVM)) {
+                NavigationLink(destination: AccountView(viewModel: viewModel)) {
                     Text("계정 연동")
                 }
                 Button(role: .destructive, action: {
@@ -102,7 +98,7 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
-                    await settingVM.signOut()
+                    await viewModel.signOut()
                 }
             }) {
                 Text("확인")
@@ -118,7 +114,7 @@ struct SettingView: View {
             }
             Button(role: .destructive, action: {
                 Task {
-                    await settingVM.deleteAuth()
+                    await viewModel.deleteAuth()
                 }
             }) {
                 Text("탈퇴")
@@ -126,17 +122,17 @@ struct SettingView: View {
         } message: {
             Text("회원 탈퇴가 진행되면 모든 데이터가 지워지고 복구할 수 없습니다.")
         }
-        .alert("", isPresented: $settingVM.showAlert) {
+        .alert("", isPresented: $viewModel.showAlert) {
             Button(role: .cancel, action: {
-                settingVM.showAlert = false
+                viewModel.showAlert = false
             }) {
                 Text("확인")
             }
         } message: {
-            Text(settingVM.alertMsg)
+            Text(viewModel.alertMsg)
         }
         .overlay {
-            if settingVM.isLoading {
+            if viewModel.isLoading {
                 LoadingView()
             }
         }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PushNotificationSettingsView: View {
-    @EnvironmentObject var settingVM: SettingViewModel
+    @ObservedObject var viewModel: SettingViewModel
     @State private var showTimePicker = false // 시간 선택기 표시 여부
     @State private var sheetHeight: CGFloat = 0 // 시트 높이 조정용
     
@@ -19,7 +19,7 @@ struct PushNotificationSettingsView: View {
    var body: some View {
        List {
            Section(content: {
-               Toggle(isOn: $settingVM.pushNotificationEnabled, label: {
+               Toggle(isOn: $viewModel.pushNotificationEnabled, label: {
                    Text("푸시 알람 활성화")
                })
            }, footer: {
@@ -30,7 +30,7 @@ struct PushNotificationSettingsView: View {
                    HStack {
                        Text((hour < 12 ? "오전 \(hour)시" : "오후 \(hour - 12)시"))
                        Spacer()
-                       if hours(from: settingVM.pushNotificationTime) == hour {
+                       if hours(from: viewModel.pushNotificationTime) == hour {
                            Image(systemName: "checkmark")
                                .foregroundStyle(Color.accentColor)
                        }
@@ -40,20 +40,20 @@ struct PushNotificationSettingsView: View {
                        //  시간만 변경
                        if let newDate = Calendar.current.date(
                            bySettingHour: hour,
-                           minute: Calendar.current.component(.minute, from: settingVM.pushNotificationTime),
+                           minute: Calendar.current.component(.minute, from: viewModel.pushNotificationTime),
                            second: 0,
-                           of: settingVM.pushNotificationTime
+                           of: viewModel.pushNotificationTime
                        ) {
-                           settingVM.pushNotificationTime = newDate
+                           viewModel.pushNotificationTime = newDate
                        }
                    }
                }
                HStack {
                    Text("사용자 설정")
                    Spacer()
-                   Text("\(hours(from: settingVM.pushNotificationTime))시")
+                   Text("\(hours(from: viewModel.pushNotificationTime))시")
                        .foregroundStyle(.secondary)
-                   let hour = hours(from: settingVM.pushNotificationTime)
+                   let hour = hours(from: viewModel.pushNotificationTime)
                    if ![9, 15, 18, 21].contains(hour) {
                        Image(systemName: "checkmark")
                            .foregroundStyle(Color.accentColor)
@@ -64,14 +64,14 @@ struct PushNotificationSettingsView: View {
                    showTimePicker.toggle()
                }
            }
-           .disabled(!settingVM.pushNotificationEnabled)
-           .opacity(settingVM.pushNotificationEnabled ? 1.0 : 0.2)
+           .disabled(!viewModel.pushNotificationEnabled)
+           .opacity(viewModel.pushNotificationEnabled ? 1.0 : 0.2)
        }
        .listStyle(.insetGrouped)
        .navigationTitle("알람")
        .sheet(isPresented: $showTimePicker) {
            DatePicker("",
-                      selection: $settingVM.pushNotificationTime,
+                      selection: $viewModel.pushNotificationTime,
                       displayedComponents: .hourAndMinute
            )
            .datePickerStyle(.wheel)
@@ -98,5 +98,5 @@ struct PushNotificationSettingsView: View {
 }
 
 #Preview {
-    PushNotificationSettingsView()
+    PushNotificationSettingsView(viewModel: AppContainer.shared.settingViewModel)
 }

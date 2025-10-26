@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var container: AppContainer  //  settingVM을 주입하기 위함
     @ObservedObject private var profileVM: ProfileViewModel
     @FocusState private var focusedOnStatusMsg: Bool
     @State private var showDoneBtn: Bool = false
@@ -84,7 +83,7 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 0) {
-                        NavigationLink(destination: SettingView(settingVM: container.settingVM)) {
+                        NavigationLink(destination: SettingView(viewModel: AppContainer.shared.settingViewModel)) {
                             Image(systemName: "gearshape")
                         }
                         Button(action: {
