@@ -88,11 +88,11 @@ final class AuthRepositoryImpl: AuthRepository {
         currentAuthUserSubject.value = nil
     }
     
-    func link(provider: AuthProviderID) async throws {
+    func link(provider: AuthProvider) async throws {
         try await authService.linkWithProvider(provider: provider.rawValue)
     }
     
-    func unlink(provider: AuthProviderID) async throws {
+    func unlink(provider: AuthProvider) async throws {
         try await authService.unlinkFromProvider(provider: provider.rawValue)
     }
     

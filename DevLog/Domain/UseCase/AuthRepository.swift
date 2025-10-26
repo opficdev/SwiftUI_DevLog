@@ -7,7 +7,6 @@
 
 import Foundation
 import Combine
-import FirebaseAuth
 
 protocol AuthRepository {
     var publisher: AnyPublisher<AuthUser?, Never> { get }
@@ -16,6 +15,6 @@ protocol AuthRepository {
     func signInWithGithub() async throws -> (AuthUser, String, String)   // fcmToken, githubAccessToken
     func signOut() async throws
     func deleteAuth() async throws
-    func link(provider: AuthProviderID) async throws
-    func unlink(provider: AuthProviderID) async throws
+    func link(provider: AuthProvider) async throws
+    func unlink(provider: AuthProvider) async throws
 }
