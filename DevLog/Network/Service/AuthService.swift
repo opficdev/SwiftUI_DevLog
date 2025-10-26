@@ -41,7 +41,7 @@ final class AuthService {
             guard let self = self else { return }
             Task {
                 self.user = user
-                if let _ = user {
+                if user != nil {
                     await self.fetchAuth()
                 } else {
                     self.currentProvider = nil
@@ -120,7 +120,7 @@ final class AuthService {
         
         let deleteFunction = functions.httpsCallable("deleteAllUserFirestoreData")
         
-        let _ = try await deleteFunction.call(["userId": user.uid])
+        _ = try await deleteFunction.call(["userId": user.uid])
         
         try await signOut()
         try await user.delete()
@@ -130,14 +130,11 @@ final class AuthService {
         do {
             if provider == AuthProviderID.apple.rawValue {
                 try await self.appleSvc.linkWithApple()
-            }
-            else if provider == AuthProviderID.gitHub.rawValue {
+            } else if provider == AuthProviderID.gitHub.rawValue {
                 try await self.githubSvc.linkWithGithub()
-            }
-            else if provider == AuthProviderID.google.rawValue {
+            } else if provider == AuthProviderID.google.rawValue {
                 try await self.googleSvc.linkWithGoogle()
             }
-//            self.providers.append(provider)
         }
     }
     
@@ -145,22 +142,16 @@ final class AuthService {
         do {
             guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
             
-//            if let index = self.providers.firstIndex(of: provider) {
-//                self.providers.remove(at: index)
-//            }
-            
             if provider == AuthProviderID.google.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     GIDSignIn.sharedInstance.signOut()
                     try await GIDSignIn.sharedInstance.disconnect()
                 }
-            }
-            else if provider == AuthProviderID.gitHub.rawValue {
+            } else if provider == AuthProviderID.gitHub.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     try await self.githubSvc.revokeGitHubAccessToken()
                 }
-            }
-            else if provider == AuthProviderID.apple.rawValue {
+            } else if provider == AuthProviderID.apple.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     let appleToken = try await self.appleSvc.refreshAppleAccessToken()
                     try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
@@ -173,7 +164,6 @@ final class AuthService {
             }
             _ = try await user.unlink(fromProvider: provider)
         } catch {
-//            self.providers.append(provider)
             throw error
         }
     }

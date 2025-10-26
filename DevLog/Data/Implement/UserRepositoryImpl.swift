@@ -16,7 +16,12 @@ final class UserRepositoryImpl: UserRepository {
     }
     
     func upsertUser(user: User, fcmToken: String, provider: AuthProviderID?, githubAccessToken: String?) async throws {
-        try await userService.upsertUser(user: user, fcmToken: fcmToken, provider: provider?.rawValue, accessToken: githubAccessToken)
+        try await userService.upsertUser(
+            user: user,
+            fcmToken: fcmToken,
+            provider: provider?.rawValue,
+            accessToken: githubAccessToken
+        )
     }
 
     func fetchPushNotificationSettings(userId: String) async throws -> PushNotificationSettings {
@@ -31,7 +36,11 @@ final class UserRepositoryImpl: UserRepository {
         dateComponents.minute = timeComponents.minute
         
         guard let date = calendar.date(from: dateComponents) else {
-            throw NSError(domain: "UserRepositoryImpl", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid time components"])
+            throw NSError(
+                domain: "UserRepositoryImpl",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid time components"]
+            )
         }
         return PushNotificationSettings(allow: isEnabled, time: date)
     }

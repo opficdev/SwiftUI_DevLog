@@ -12,9 +12,12 @@ struct LoginButton: View {
     @State private var text = ""
     @State private var height = CGFloat.zero
     let action: () -> Void
-    
-    
-    init(logo: Image? = nil, text: String = "", action: @escaping () -> Void = {}) {
+
+    init(
+        logo: Image? = nil,
+        text: String = "",
+        action: @escaping () -> Void = {}
+    ) {
         self._logo = State(initialValue: logo)
         self._text = State(initialValue: text)
         self.action = action

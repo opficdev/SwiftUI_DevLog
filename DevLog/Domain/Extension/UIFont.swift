@@ -9,32 +9,21 @@ import SwiftUI
 
 extension UIFont {
     static func from(font: Font) -> UIFont {
-        // Basic conversion - you can expand with more cases as needed
-        switch font {
-        case .largeTitle:
-            return UIFont.preferredFont(forTextStyle: .largeTitle)
-        case .title:
-            return UIFont.preferredFont(forTextStyle: .title1)
-        case .title2:
-            return UIFont.preferredFont(forTextStyle: .title2)
-        case .title3:
-            return UIFont.preferredFont(forTextStyle: .title3)
-        case .headline:
-            return UIFont.preferredFont(forTextStyle: .headline)
-        case .subheadline:
-            return UIFont.preferredFont(forTextStyle: .subheadline)
-        case .body:
-            return UIFont.preferredFont(forTextStyle: .body)
-        case .callout:
-            return UIFont.preferredFont(forTextStyle: .callout)
-        case .footnote:
-            return UIFont.preferredFont(forTextStyle: .footnote)
-        case .caption:
-            return UIFont.preferredFont(forTextStyle: .caption1)
-        case .caption2:
-            return UIFont.preferredFont(forTextStyle: .caption2)
-        default:
-            return UIFont.preferredFont(forTextStyle: .body)
-        }
+        let fontMapping: [Font: UIFont.TextStyle] = [
+            .largeTitle: .largeTitle,
+            .title: .title1,
+            .title2: .title2,
+            .title3: .title3,
+            .headline: .headline,
+            .subheadline: .subheadline,
+            .body: .body,
+            .callout: .callout,
+            .footnote: .footnote,
+            .caption: .caption1,
+            .caption2: .caption2
+        ]
+
+        let textStyle: UIFont.TextStyle = fontMapping[font] ?? .body
+        return UIFont.preferredFont(forTextStyle: textStyle)
     }
 }

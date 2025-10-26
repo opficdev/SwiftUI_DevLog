@@ -18,7 +18,7 @@ final class LoginViewModel: ObservableObject {
     private var didSignedInBySession = true
     private var cancellables = Set<AnyCancellable>()
     
-    @Published var signIn: Bool? = nil
+    @Published var signIn: Bool?
     @Published var showAlert: Bool = false
     @Published var alertMsg: String = ""
     
@@ -26,7 +26,6 @@ final class LoginViewModel: ObservableObject {
     @Published var isConnected: Bool = true
     @Published var isLoading: Bool = false
     @Published var showNetworkAlert: Bool = false
-    
     
     init(authSvc: AuthService, networkSvc: NetworkActivityService, userSvc: UserService) {
         self.authSvc = authSvc
@@ -89,8 +88,13 @@ final class LoginViewModel: ObservableObject {
             
             let (user, fcmToken, accessToken) = try await self.authSvc.signInWithGithub()
             
-            try await self.userSvc.upsertUser(user: user, fcmToken: fcmToken, provider: "github.com", accessToken: accessToken)
-            
+            try await self.userSvc.upsertUser(
+                user: user,
+                fcmToken: fcmToken,
+                provider: "github.com",
+                accessToken: accessToken
+            )
+
             try await self.userSvc.fetchUserInfo(user: self.authSvc.user!)
             
             self.signIn = true

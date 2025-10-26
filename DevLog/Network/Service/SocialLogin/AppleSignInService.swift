@@ -40,7 +40,7 @@ class AppleSignInService {
         let result = try await Auth.auth().signIn(withCustomToken: customToken)
         
         let changeRequest = result.user.createProfileChangeRequest()
-        var displayName: String? = nil
+        var displayName: String?
 
         // 최초 사용자 가입 시 사용자 이름 설정
         if let fullName = credential.fullName {
@@ -90,13 +90,13 @@ class AppleSignInService {
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
         
-        let authorization = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<ASAuthorization, Error>) in
+        let authorization = try await withCheckedThrowingContinuation { continuation in
             self.appleSignInDelegate = AppleSignInDelegate(continuation: continuation)
             controller.delegate = self.appleSignInDelegate
             controller.presentationContextProvider = self.appleSignInDelegate
             controller.performRequests()
         }
-        
+
         // Apple ID 인증 결과 처리
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let appleIdToken = credential.identityToken,
@@ -155,7 +155,7 @@ class AppleSignInService {
     
     // Apple AceessToken 재발급 메서드
     func refreshAppleAccessToken() async throws -> String {
-        guard let _ = self.user else {
+        guard self.user != nil else {
             throw URLError(.userAuthenticationRequired)
         }
     
@@ -172,16 +172,15 @@ class AppleSignInService {
     
     // Apple AccessToken 취소 메서드
     func revokeAppleAccessToken(token: String) async throws {
-        guard let _ = self.user else {
+        guard self.user != nil else {
             throw URLError(.userAuthenticationRequired)
         }
        
         let revokeFunction = functions.httpsCallable("revokeAppleAccessToken")
         
-        let _ = try await revokeFunction.call(["token": token])
+        _ = try await revokeFunction.call(["token": token])
     }
-    
-    
+
     // FirebaseAuth 사용자와 Apple 연결
     func linkWithApple() async throws {
         guard let user = self.user else {

@@ -26,7 +26,7 @@ struct SearchView: View {
                 )) {
                     if let url = searchVM.selectedWebPage?.url {
                         WebView(url: url)
-                            .navigationBarTitleDisplayMode(.inline) //  이렇게 명시해주지 않으면 iOS 18 미만에서는 Large 크기만큼의 상단의 영역을 어느정도 먹고있음
+                            .navigationBarTitleDisplayMode(.inline) //  명시하지 않으면 iOS 18 미만에서는 Large 크기만큼의 상단의 영역을 차지
                             .toolbar {
                                 ToolbarItem(placement: .principal) {
                                     Text(searchVM.selectedWebPage!.title)
@@ -49,8 +49,7 @@ struct SearchView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
-                        }
-                        else {
+                        } else {
                             let webPages = searchVM.webPages.filter {
                                 $0.title.localizedCaseInsensitiveContains(searchVM.searchText) ||
                                 $0.urlString.localizedCaseInsensitiveContains(searchVM.searchText)
@@ -66,8 +65,7 @@ struct SearchView: View {
                                                     Image(uiImage: uiImage)
                                                         .resizable()
                                                         .scaledToFill()
-                                                }
-                                                else {
+                                                } else {
                                                     Image(systemName: "globe")
                                                         .resizable()
                                                         .scaledToFit()
@@ -92,8 +90,7 @@ struct SearchView: View {
                                 }
                             }
                         }
-                    }
-                    else {
+                    } else {
                         Section {
                             if searchVM.webPages.isEmpty {
                                 Text("저장된 웹페이지가 없습니다.\n우측 '+' 버튼을 눌러 웹페이지를 추가해보세요.")
@@ -101,9 +98,9 @@ struct SearchView: View {
                                     .frame(maxWidth: .infinity)
                                     .frame(height: geometry.size.height)
                                     .multilineTextAlignment(.center)
-                            }
-                            else {
-                                ForEach(Array(zip(searchVM.webPages.indices, searchVM.webPages)), id: \.1.id) { idx, page in
+                            } else {
+                                let webPages = searchVM.webPages
+                                ForEach(Array(zip(webPages.indices, webPages)), id: \.1.id) { idx, page in
                                     Button(action: {
                                         searchVM.selectedWebPage = page
                                     }) {
@@ -117,8 +114,7 @@ struct SearchView: View {
                                                         .frame(width: geo.size.width, height: geo.size.height)
                                                         .clipped()
                                                 }
-                                            }
-                                            else {
+                                            } else {
                                                 VStack {
                                                     Image(systemName: "globe")
                                                         .resizable()

@@ -33,7 +33,7 @@ struct WebPageInfo: Identifiable, Hashable {
 
     static func fetch(from url: URL) async -> WebPageInfo {
         let provider = LPMetadataProvider()
-        var image: UIImage? = nil
+        var image: UIImage?
         var title: String = ""
         var urlString: String = url.absoluteString
 

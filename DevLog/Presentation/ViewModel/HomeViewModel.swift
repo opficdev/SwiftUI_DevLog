@@ -19,20 +19,26 @@ class HomeViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     
     // TodoManageView
-    @AppStorage("todoKindStrings") var todoKindStrings: [String] = TodoKind.allCases.sorted { $0.localizedName < $1.localizedName }.map { $0.rawValue } {
-        didSet {
-            self.todoKinds = self.todoKindStrings.compactMap { TodoKind(rawValue: $0) }
-            objectWillChange.send()
+    @AppStorage("todoKindStrings") var todoKindStrings = TodoKind
+        .allCases
+        .sorted { $0.localizedName < $1.localizedName }
+        .map { $0.rawValue } {
+            didSet {
+                self.todoKinds = self.todoKindStrings.compactMap { TodoKind(rawValue: $0) }
+                objectWillChange.send()
+            }
         }
-    }
     @Published var todoKinds: [TodoKind] = []
     
     // HomeView, TodoManageView
-    @AppStorage("selectedTodoKindStrings") var selectedTodoKindStrings: [String] = TodoKind.allCases.sorted { $0.localizedName < $1.localizedName }.map { $0.rawValue } {
-        didSet {
-            self.selectedTodoKinds = self.selectedTodoKindStrings.compactMap { TodoKind(rawValue: $0) }
+    @AppStorage("selectedTodoKindStrings") var selectedTodoKindStrings = TodoKind
+        .allCases
+        .sorted { $0.localizedName < $1.localizedName }
+        .map { $0.rawValue } {
+            didSet {
+                self.selectedTodoKinds = self.selectedTodoKindStrings.compactMap { TodoKind(rawValue: $0) }
+            }
         }
-    }
     @Published var selectedTodoKinds: [TodoKind] = []
     @Published var isConnected: Bool = true
     

@@ -17,8 +17,8 @@ struct AccountView: View {
         List {
             Section("현재 계정") {
                 HStack {
-                    // provider에서 첫번째 글자만 대문자로 바꾸고 .을 포함한 뒤는 다 제거 ex) google.com -> Google
-                    let formattedProvider = viewModel.currentProvider.prefix(1).uppercased() + viewModel.currentProvider.dropFirst().prefix(while: { $0 != "." })
+                    let provider = viewModel.currentProvider
+                    let formattedProvider = formattedProviderName(provider)
                     Image(formattedProvider)
                         .resizable()
                         .scaledToFit()
@@ -29,7 +29,7 @@ struct AccountView: View {
             Section("연동된 계정") {
                 ForEach(connectedProviders, id: \.self) { provider in
                     HStack {
-                        let formattedProvider = provider.prefix(1).uppercased() + provider.dropFirst().prefix(while: { $0 != "." })
+                        let formattedProvider = formattedProviderName(provider)
                         Image(formattedProvider)
                             .resizable()
                             .scaledToFit()
@@ -76,7 +76,7 @@ struct AccountView: View {
                             }
                         }) {
                             HStack {
-                                let formattedProvider = provider.prefix(1).uppercased() + provider.dropFirst().prefix(while: { $0 != "." })
+                                let formattedProvider = formattedProviderName(provider)
                                 Image(formattedProvider)
                                     .resizable()
                                     .scaledToFit()
@@ -95,6 +95,13 @@ struct AccountView: View {
         } message: {
             Text(viewModel.alertMsg)
         }
+    }
+
+    private func formattedProviderName(_ provider: String) -> String {
+        // provider에서 첫번째 글자만 대문자로 바꾸고 .을 포함한 뒤는 다 제거 ex) google.com -> Google
+        let providerPrefix = provider.prefix(1).uppercased()
+        let providerSuffix = provider.dropFirst().prefix(while: { $0 != "." })
+        return providerPrefix + providerSuffix
     }
 }
 

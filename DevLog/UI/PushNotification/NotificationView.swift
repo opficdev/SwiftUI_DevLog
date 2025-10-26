@@ -22,8 +22,7 @@ struct NotificationView: View {
                     Text("작성된 알림이 없습니다.")
                         .foregroundStyle(Color.gray)
                     Spacer()
-                }
-                else {
+                } else {
                     List(notiVM.notifications) { noti in
                         if let notiId = noti.id {
                             VStack(alignment: .leading, spacing: 5) {

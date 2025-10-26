@@ -19,7 +19,7 @@ final class SearchViewModel: ObservableObject {
     @Published var addNewLink: Bool = false
     @Published var newURL: String = "https://"
     @Published var alertMsg: String = ""
-    @Published var selectedWebPage: WebPageInfo? = nil
+    @Published var selectedWebPage: WebPageInfo?
     @Published var isLoading: Bool = false
     @Published var isConnected: Bool = true
     
