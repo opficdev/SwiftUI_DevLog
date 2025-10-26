@@ -11,7 +11,7 @@ import FirebaseFunctions
 import SwiftUI
 
 class UserService {
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
     
     @Published var name: String = ""
@@ -20,9 +20,9 @@ class UserService {
     
     // 유저를 Firestore에 저장 및 업데이트
     func upsertUser(user: User, fcmToken: String, provider: String? = nil, accessToken: String? = nil) async throws {
-        let infoRef = db.document("users/\(user.uid)/userData/info")
-        let tokensRef = db.document("users/\(user.uid)/userData/tokens")
-        let settingsRef = db.document("users/\(user.uid)/userData/settings")
+        let infoRef = store.document("users/\(user.uid)/userData/info")
+        let tokensRef = store.document("users/\(user.uid)/userData/tokens")
+        let settingsRef = store.document("users/\(user.uid)/userData/settings")
         
         // 사용자 기본 정보
         var field: [String: Any] = [
@@ -81,13 +81,13 @@ class UserService {
     }
     
     func upsertStatusMsg(userId: String, statusMsg: String) async throws {
-        let infoRef = db.document("users/\(userId)/userData/info")
+        let infoRef = store.document("users/\(userId)/userData/info")
         
         try await infoRef.setData(["statusMsg": statusMsg], merge: true)
     }
     
-    func fetchAllowPushNotification(_ userId: String) async throws -> Bool {
-        let settingsRef = db.document("users/\(userId)/userData/settings")
+    func fetchPushNotificationEnabled(_ userId: String) async throws -> Bool {
+        let settingsRef = store.document("users/\(userId)/userData/settings")
         let doc = try await settingsRef.getDocument()
         
         if let allowPush = doc.data()?["allowPushNotification"] as? Bool { return allowPush }
@@ -95,8 +95,8 @@ class UserService {
         throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Push notification settings not found"])
     }
     
-    func fetchPushNotifcationTime(_ userId: String) async throws -> DateComponents {
-        let settingsRef = db.document("users/\(userId)/userData/settings")
+    func fetchPushNotificationTime(_ userId: String) async throws -> DateComponents {
+        let settingsRef = store.document("users/\(userId)/userData/settings")
         let doc = try await settingsRef.getDocument()
         
         guard let hour = doc.data()?["pushNotificationHour"] as? Int else {
@@ -111,13 +111,13 @@ class UserService {
     }
     
     func updatePushNotificationEnabled(_ userId: String, enabled: Bool) async throws {
-        let settingsRef = db.document("users/\(userId)/userData/settings")
+        let settingsRef = store.document("users/\(userId)/userData/settings")
         
         try await settingsRef.setData(["allowPushNotification": enabled], merge: true)
     }
     
-    func updatePushNoficationTime(_ userId: String, time: Date) async throws {
-        let settingRef = db.document("users/\(userId)/userData/settings")
+    func updatePushNotificationTime(_ userId: String, time: Date) async throws {
+        let settingRef = store.document("users/\(userId)/userData/settings")
         
         let calendar = Calendar.current
         let components = calendar.dateComponents([.hour, .minute], from: time)
@@ -130,13 +130,13 @@ class UserService {
     }
     
     func updateAppTheme(_ userId: String, theme: String) async throws {
-        let settingsRef = db.document("users/\(userId)/userData/settings")
+        let settingsRef = store.document("users/\(userId)/userData/settings")
         
         try await settingsRef.setData(["theme": theme], merge: true)
     }
     
     func updateFCMToken(_ userId: String, fcmToken: String) async throws {
-        let tokensRef = db.document("users/\(userId)/userData/tokens")
+        let tokensRef = store.document("users/\(userId)/userData/tokens")
         
         try await tokensRef.setData(["fcmToken": fcmToken], merge: true)
     }

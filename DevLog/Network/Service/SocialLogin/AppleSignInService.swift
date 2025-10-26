@@ -14,7 +14,7 @@ import Foundation
 
 class AppleSignInService {
     private var appleSignInDelegate: AppleSignInDelegate?
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
     
     // 아래 변수들은 서비스 내에서만 사용할 뿐 뷰, 뷰모델 혹은 타 서비스에서 접근하는 용도가 아님
@@ -54,7 +54,7 @@ class AppleSignInService {
 
         // 이미 가입된 사용자일 경우 Firestore에서 사용자 이름 가져오기
         if displayName == nil {
-            let doc = try await db.document("users/\(result.user.uid)/userData/info").getDocument()
+            let doc = try await store.document("users/\(result.user.uid)/userData/info").getDocument()
             displayName = doc.data()?["appleName"] as? String
         }
 

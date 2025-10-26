@@ -9,14 +9,13 @@ import Foundation
 import FirebaseFirestore
 
 class WebPageService {
-    private let db = Firestore.firestore()
+    private let store = Firestore.firestore()
     
     func requestWebPages(userId: String) async throws -> [WebPageInfo] {
-        let WebPageInfoRef = db.document("users/\(userId)/userData/webPageInfos")
         let doc = try await WebPageInfoRef.getDocument()
         
         if doc.exists, let data = doc.data() {
-            if let webPageInfos = data["WebPageInfos"] as? [String] {
+            if let webPageInfos = data["webPageInfos"] as? [String] {
                 return try await withThrowingTaskGroup(of: WebPageInfo.self, returning: [WebPageInfo].self) { group in
                     for urlString in webPageInfos {
                         group.addTask {
@@ -38,12 +37,12 @@ class WebPageService {
     }
     
     func upsertWebPage(webPageInfo: WebPageInfo, userId: String) async throws {
-        let WebPageInfosRef = db.document("users/\(userId)/userData/webPageInfos")
-        try await WebPageInfosRef.setData(["WebPageInfos": FieldValue.arrayUnion([webPageInfo.url.description])], merge: true)
+        let webPageInfosRef = store.document("users/\(userId)/userData/webPageInfos")
+        try await webPageInfosRef.setData(["WebPageInfos": FieldValue.arrayUnion([webPageInfo.url.description])], merge: true)
     }
     
     func deleteWebPage(webPageInfo: WebPageInfo, userId: String) async throws {
-        let WebPageInfosRef = db.document("users/\(userId)/userData/webPageInfos")
-        try await WebPageInfosRef.updateData(["WebPageInfos": FieldValue.arrayRemove([webPageInfo.url.description])])
+        let webPageInfosRef = store.document("users/\(userId)/userData/webPageInfos")
+        try await webPageInfosRef.updateData(["WebPageInfos": FieldValue.arrayRemove([webPageInfo.url.description])])
     }
 }
