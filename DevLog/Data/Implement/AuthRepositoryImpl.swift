@@ -100,8 +100,8 @@ final class AuthRepositoryImpl: AuthRepository {
     private func firebaseUserToAuthUser(from user: User, currentProvider: AuthProviderID) -> AuthUser {
         return AuthUser(
             uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
+            displayName: user.displayName ?? "",
+            email: user.email ?? "",
             providers: user.providerData.map { $0.providerID },
             currentProvider: currentProvider.rawValue
         )
