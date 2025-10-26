@@ -8,9 +8,10 @@
 import Foundation
 
 @MainActor
-class AppContainer: ObservableObject {
+final class AppContainer: ObservableObject {
     static let shared = AppContainer()
-    
+    private init() {}
+
     // 코어 서비스
     private let appleSvc = AppleSignInService()
     private let githubSvc = GithubSignInService()
@@ -23,7 +24,27 @@ class AppContainer: ObservableObject {
     
     // 의존 서비스
     lazy var authSvc = AuthService(appleSvc: appleSvc, githubSvc: githubSvc, googleSvc: googleSvc)
-    
+    private lazy var authState = AuthState(authRepository: authRepo)
+    private lazy var authRepo = AuthRepositoryImpl(
+        authService: authSvc,
+        appleSignInService: appleSvc,
+        googleSignInService: googleSvc,
+        githubSignInService: githubSvc
+    )
+    private lazy var userRepo = UserRepositoryImpl(userService: userSvc)
+    private lazy var updatePushNotificationSettings = UpdatePushNotificationSettings(
+        authRepository: authRepo, userRepository: userRepo
+    )
+    private lazy var fetchPushNotificationSettings = FetchPushNotificationSettings(
+        authRepository: authRepo, userRepository: userRepo
+    )
+    private lazy var updateAppTheme  = UpdateAppTheme(authRepository: authRepo, userRepository: userRepo)
+    private lazy var signOut = SignOut(authRepository: authRepo)
+    private lazy var deleteAuth = DeleteAuth(authRepository: authRepo)
+    private lazy var linkProvider = LinkProvider(authRepository: authRepo)
+    private lazy var unlinkProvider = UnlinkProvider(authRepository: authRepo)
+    private let network = NetworkRepositoryImpl()
+
     // 캐싱된 뷰모델
     lazy var loginVM: LoginViewModel = {
         LoginViewModel(authSvc: authSvc, networkSvc: networkSvc, userSvc: userSvc)
@@ -53,6 +74,4 @@ class AppContainer: ObservableObject {
     lazy var notiVM: NotificationViewModel = {
         NotificationViewModel(authSvc: authSvc, networkSvc: networkSvc, notiSvc: notiSvc)
     }()
-    
-    private init() {}
 }
