@@ -54,10 +54,18 @@ final class AppContainer: ObservableObject {
         SearchViewModel(authSvc: authSvc, networkSvc: networkSvc, webPageSvc: webPageSvc)
     }()
     
-    lazy var settingVM: SettingViewModel = {
-        SettingViewModel(authSvc: authSvc, networkSvc: networkSvc, userSvc: userSvc)
-    }()
-    
+    private(set) lazy var settingViewModel = SettingViewModel(
+        authState: authState,
+        updatePushNotificationSettings: updatePushNotificationSettings,
+        fetchPushNotificationSettings: fetchPushNotificationSettings,
+        updateAppTheme: updateAppTheme,
+        signOut: signOut,
+        deleteAuth: deleteAuth,
+        linkProvider: linkProvider,
+        unlinkProvider: unlinkProvider,
+        network: network
+    )
+
     // kind 라는 변수에 따라 뷰모델이 생성될 필요성에 의해 캐싱을 시도하지 않음
     func todoVM(kind: TodoKind) -> TodoViewModel {
         TodoViewModel(authSvc: authSvc, networkSvc: networkSvc, todoSvc: todoSvc, kind: kind)
