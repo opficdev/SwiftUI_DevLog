@@ -12,7 +12,8 @@ import SwiftUI
 class ProfileViewModel: ObservableObject {
     private let authSvc: AuthService
     private let userSvc: UserService
-    
+    private var cancellables = Set<AnyCancellable>()
+
     // AuthInfo
     @Published var email = ""
     
@@ -27,14 +28,14 @@ class ProfileViewModel: ObservableObject {
     init(authSvc: AuthService, userSvc: UserService) {
         self.authSvc = authSvc
         self.userSvc = userSvc
-        
-        
-        self.authSvc.$email
+
+        self.authSvc.$user
             .receive(on: DispatchQueue.main)
-            .assign(to: &$email)
-        
-        
-        self.userSvc.$avatar
+            .sink { [weak self] user in
+                self?.email = user?.email ?? ""
+            }
+            .store(in: &self.cancellables)
+
             .receive(on: DispatchQueue.main)
             .assign(to: &$avatar)
         
@@ -49,8 +50,8 @@ class ProfileViewModel: ObservableObject {
 
     func upsertStatusMsg() async {
         do {
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             try await self.userSvc.upsertStatusMsg(userId: userId, statusMsg: self.statusMsg)
         } catch {
             print("Error updating status message: \(error.localizedDescription)")

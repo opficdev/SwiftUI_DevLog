@@ -32,7 +32,7 @@ class NotificationViewModel: ObservableObject {
         if !self.isConnected { return }
         do {
             self.isLoading = true
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
             defer {
                 self.isLoading = false
             }
@@ -50,7 +50,7 @@ class NotificationViewModel: ObservableObject {
         if !self.isConnected { return }
         do {
             self.isLoading = true
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
             defer {
                 self.isLoading = false
             }

@@ -15,8 +15,8 @@ import FirebaseMessaging
 import GoogleSignIn
 import SwiftUI
 
-final class AuthService: ObservableObject {
-    private let db = Firestore.firestore()
+final class AuthService {
+    private let store = Firestore.firestore()
     private let functions = Functions.functions(region: "asia-northeast3")
     private var appleSignInDelegate: AppleSignInDelegate?
     
@@ -25,33 +25,26 @@ final class AuthService: ObservableObject {
     private let googleSvc: GoogleSignInService
     private var authStateHandler: AuthStateDidChangeListenerHandle?
     
-    @Published var user: User? = nil
-    @Published var userId: String? = nil
+    @Published var user: User?
+    @Published var currentProvider: AuthProviderID?
     
-    @Published var currentProvider: String = ""
-    @Published var email: String = ""
-    @Published var providers: [String] = []
-    
-    init(appleSvc: AppleSignInService, githubSvc: GithubSignInService, googleSvc: GoogleSignInService) {
+    init(
+        appleSvc: AppleSignInService,
+        githubSvc: GithubSignInService,
+        googleSvc: GoogleSignInService
+    ) {
         self.appleSvc = appleSvc
         self.githubSvc = githubSvc
         self.googleSvc = googleSvc
-        self.user = Auth.auth().currentUser
-        
+
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self = self else { return }
             Task {
                 self.user = user
-                if let user = user {
-                    self.userId = user.uid
-                    self.email = user.email ?? ""
-                    self.providers = user.providerData.map { $0.providerID }
+                if let _ = user {
                     await self.fetchAuth()
-                }
-                else {
-                    self.currentProvider = ""
-                    self.email = ""
-                    self.providers.removeAll()
+                } else {
+                    self.currentProvider = nil
                 }
             }
         }
@@ -67,7 +60,7 @@ final class AuthService: ObservableObject {
         
         let user = try await self.appleSvc.signInWithApple()
         
-        self.currentProvider = AuthProviderID.apple.rawValue
+        self.currentProvider = AuthProviderID.apple
         
         let fcmToken = try await Messaging.messaging().token()
         
@@ -79,7 +72,7 @@ final class AuthService: ObservableObject {
         
         let fcmToken = try await Messaging.messaging().token()
         
-        self.currentProvider = AuthProviderID.gitHub.rawValue
+        self.currentProvider = AuthProviderID.gitHub
         
         return (user, fcmToken, accessToken)
     }
@@ -87,7 +80,7 @@ final class AuthService: ObservableObject {
     func signInWithGoogle() async throws -> (User, String) {
         let user = try await self.googleSvc.signInWithGoogle()
         
-        self.currentProvider = AuthProviderID.google.rawValue
+        self.currentProvider = AuthProviderID.google
         
         let fcmToken = try await Messaging.messaging().token()
         
@@ -102,7 +95,7 @@ final class AuthService: ObservableObject {
             try await GIDSignIn.sharedInstance.disconnect()
         }
         
-        let infoRef = db.document("users/\(user.uid)/userData/tokens")
+        let infoRef = store.document("users/\(user.uid)/userData/tokens")
         let doc = try await infoRef.getDocument()
         
         if doc.exists {
@@ -144,7 +137,7 @@ final class AuthService: ObservableObject {
             else if provider == AuthProviderID.google.rawValue {
                 try await self.googleSvc.linkWithGoogle()
             }
-            self.providers.append(provider)
+//            self.providers.append(provider)
         }
     }
     
@@ -152,9 +145,9 @@ final class AuthService: ObservableObject {
         do {
             guard let user = self.user else { throw URLError(.userAuthenticationRequired) }
             
-            if let index = self.providers.firstIndex(of: provider) {
-                self.providers.remove(at: index)
-            }
+//            if let index = self.providers.firstIndex(of: provider) {
+//                self.providers.remove(at: index)
+//            }
             
             if provider == AuthProviderID.google.rawValue {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
@@ -171,7 +164,7 @@ final class AuthService: ObservableObject {
                 if user.providerData.contains(where: { $0.providerID == provider }) {
                     let appleToken = try await self.appleSvc.refreshAppleAccessToken()
                     try await self.appleSvc.revokeAppleAccessToken(token: appleToken)
-                    let tokensRef = db.document("users/\(user.uid)/userData/tokens")
+                    let tokensRef = store.document("users/\(user.uid)/userData/tokens")
                     let doc = try await tokensRef.getDocument()
                     if doc.exists {
                         try await tokensRef.updateData(["appleRefreshToken": FieldValue.delete()])
@@ -180,7 +173,7 @@ final class AuthService: ObservableObject {
             }
             _ = try await user.unlink(fromProvider: provider)
         } catch {
-            self.providers.append(provider)
+//            self.providers.append(provider)
             throw error
         }
     }
@@ -193,11 +186,19 @@ final class AuthService: ObservableObject {
         
     private func fetchAuth() async {
         do {
-            guard let userId = self.userId else { throw URLError(.userAuthenticationRequired) }
-            let infoRef = db.document("users/\(userId)/userData/info")
+            guard let userId = self.user?.uid else { throw URLError(.userAuthenticationRequired) }
+            let infoRef = store.document("users/\(userId)/userData/info")
             let doc = try await infoRef.getDocument()
             if doc.exists {
-                self.currentProvider = doc.get("currentProvider") as? String ?? ""
+                if let provider = doc.get("currentProvider") as? String {
+                    if provider == AuthProviderID.apple.rawValue {
+                        self.currentProvider = .apple
+                    } else if provider == AuthProviderID.google.rawValue {
+                        self.currentProvider = .google
+                    } else if provider == AuthProviderID.gitHub.rawValue {
+                        self.currentProvider = .gitHub
+                    }
+                }
             }
         } catch {
             print("Error fetching auth: \(error.localizedDescription)")

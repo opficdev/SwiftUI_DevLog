@@ -39,7 +39,6 @@ class HomeViewModel: ObservableObject {
     // NetworkActivityService와 연결되는 Published 프로퍼티
     @Published var isLoading: Bool = false
     
-    
     init(authSvc: AuthService, networkSvc: NetworkActivityService, todoSvc: TodoService) {
         self.authSvc = authSvc
         self.networkSvc = networkSvc
@@ -61,8 +60,8 @@ class HomeViewModel: ObservableObject {
             defer {
                 self.isLoading = false
             }
-            guard let userId = self.authSvc.userId else { throw URLError(.userAuthenticationRequired) }
-            
+            guard let userId = self.authSvc.user?.uid else { throw URLError(.userAuthenticationRequired) }
+
             self.pinnedTodos = try await self.todoSvc.requestPinnedTodoList(userId: userId)
             
         } catch {
