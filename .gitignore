@@ -1,0 +1,9 @@
+.DS_Store
+*.p8
+*.p12
+Config.xcconfig
+GoogleService-Info.plist
+UserInterfaceState.xcuserstate
+Breakpoints_v2.xcbkptlist
+**/build/
+**/xcuserdata/
