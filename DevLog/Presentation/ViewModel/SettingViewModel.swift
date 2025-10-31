@@ -48,6 +48,7 @@ final class SettingViewModel: ObservableObject {
         unlinkProvider: UnlinkProvider,
         network: NetworkRepository
     ) {
+        print(1)
         self.authState = authState
         self.updatePushNotificationSettings = updatePushNotificationSettings
         self.fetchPushNotificationSettings = fetchPushNotificationSettings
