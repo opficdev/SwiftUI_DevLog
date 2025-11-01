@@ -28,7 +28,7 @@ struct TodoView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                 } else {
                     List(todoVM.filteredTodos) { todo in
-                        NavigationLink(destination: TodoDetailView(todo: todo).environmentObject(todoVM)) {
+                        NavigationLink(value: todo) {
                             VStack(alignment: .leading, spacing: 5) {
                                 HStack {
                                     if todo.isPinned {
@@ -73,6 +73,9 @@ struct TodoView: View {
                         Task {
                             await todoVM.requestTodoList()
                         }
+                    }
+                    .navigationDestination(for: Todo.self) { todo in
+                        TodoDetailView(todo: todo).environmentObject(todoVM)
                     }
                 }
             }

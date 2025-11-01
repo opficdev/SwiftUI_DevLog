@@ -24,39 +24,39 @@ class UserService {
         let settingsRef = store.document("users/\(user.uid)/userData/settings")
         
         // 사용자 기본 정보
-        var field: [String: Any] = [
+        var userField: [String: Any] = [
             "statusMsg": "",
             "lastLogin": FieldValue.serverTimestamp()
         ]
         
         if let provider = provider {
-            field["currentProvider"] = provider
+            userField["currentProvider"] = provider
         }
         
         // 공급자 이슈로 인한 nil 방지
         if let email = user.email {
-            field["email"] = email
+            userField["email"] = email
         }
         
         if let displayName = user.displayName, displayName != "" {
-            field["name"] = displayName
+            userField["name"] = displayName
         }
         
         if provider == "apple.com" && user.displayName != nil && user.displayName != "" {
-            field["appleName"] = user.displayName
+            userField["appleName"] = user.displayName
         }
         
-        try await infoRef.setData(field, merge: true); field.removeAll()
-        
-        field["fcmToken"] = fcmToken
+        try await infoRef.setData(userField, merge: true)
+
+        var settingField = ["fcmToken": fcmToken]
         
         // 깃헙, 애플 로그인 시 추가 정보 저장
         if provider == "github.com", let accessToken = accessToken {
-            field["githubAccessToken"] = accessToken
+            settingField["githubAccessToken"] = accessToken
         }
         
-        try await tokensRef.setData(field, merge: true); field.removeAll()
-        
+        try await tokensRef.setData(settingField, merge: true)
+
         try await settingsRef.setData([
             "allowPushNotification": true,
             "theme": "automatic",

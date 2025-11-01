@@ -28,7 +28,7 @@ struct HomeView: View {
                     List {
                         Section(content: {
                             ForEach(homeVM.selectedTodoKinds, id: \.self) { kind in
-                                NavigationLink(destination: TodoView(todoVM: container.todoVM(kind: kind))) {
+                                NavigationLink(value: kind) {
                                     let width = UIScreen.main.bounds.width * 0.08
                                     HStack {
                                         RoundedRectangle(cornerRadius: 8)
@@ -73,10 +73,7 @@ struct HomeView: View {
                                 }
                             } else {
                                 ForEach(homeVM.pinnedTodos, id: \.id) { todo in
-                                    NavigationLink(
-                                        destination: TodoDetailView(todo: todo)
-                                            .environmentObject(container.todoVM(kind: todo.kind))
-                                    ) {
+                                    NavigationLink(value: todo.kind) {
                                         let width = UIScreen.main.bounds.width * 0.08
                                         HStack {
                                             RoundedRectangle(cornerRadius: 8)
@@ -93,8 +90,8 @@ struct HomeView: View {
                                                 Text(todo.dueDate?
                                                     .formatted(date: .abbreviated, time: .omitted) ?? "마감일 없음"
                                                 )
-                                                    .font(.caption2)
-                                                    .foregroundStyle(Color.gray)
+                                                .font(.caption2)
+                                                .foregroundStyle(Color.gray)
                                             }
                                         }
                                         .frame(height: width * 1.3)
@@ -114,6 +111,13 @@ struct HomeView: View {
                         })
                     }
                 }
+            }
+            .navigationDestination(for: TodoKind.self) { kind in
+                TodoView(todoVM: container.todoVM(kind: kind))
+            }
+            .navigationDestination(for: Todo.self) { todo in
+                TodoDetailView(todo: todo)
+                    .environmentObject(container.todoVM(kind: todo.kind))
             }
             .navigationTitle("홈")
             .sheet(isPresented: $reorderTodo) {

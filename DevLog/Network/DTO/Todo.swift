@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct Todo: Identifiable, Codable {
+struct Todo: Identifiable, Codable, Hashable {
     let id: UUID
     var isPinned: Bool      //  해당 할 일이 상단에 고정되어 있는지 여부
     var isCompleted: Bool   //  해당 할 일의 완료 여부
@@ -49,7 +49,11 @@ struct Todo: Identifiable, Codable {
         self.tags = data["tags"] as? [String] ?? []
         self.kind = TodoKind(rawValue: data["kind"] as? String ?? "") ?? .etc
     }
-    
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
     mutating func modify(
         title: String,
         isPinned: Bool,
