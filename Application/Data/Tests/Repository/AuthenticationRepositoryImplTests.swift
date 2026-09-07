@@ -269,7 +269,10 @@ final class AuthenticationRepositoryAuthServiceSpy: AuthService {
     }
 }
 
-final class AuthenticationServiceSpy: AuthenticationService {
+final class AuthenticationServiceSpy:
+    AppleAuthenticationService,
+    GithubAuthenticationService,
+    GoogleAuthenticationService {
     private let provider: String
     private let signInResult: Result<AuthDataResponse?, Error>
     private let linkResult: Result<Bool, Error>

@@ -6,12 +6,10 @@
 //
 
 import SwiftUI
-import Core
 import Domain
 import PresentationShared
 
 public struct TodoEditorWindowView: View {
-    @Environment(\.diContainer) private var container: DIContainer
     @State private var windowScene: UIWindowScene?
     private let value: TodoEditorWindowValue
     private let windowEvent: TodoEditorWindowEvent
@@ -31,12 +29,6 @@ public struct TodoEditorWindowView: View {
                 TodoEditorView(
                     store: Store(initialState: TodoEditorFeature.State(category: windowCategory.todoCategory)) {
                         TodoEditorFeature()
-                    } withDependencies: {
-                        $0.fetchTodoCategoryPreferencesUseCase = container.resolve(
-                            FetchTodoCategoryPreferencesUseCase.self
-                        )
-                        $0.fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
-                        $0.upsertTodoUseCase = container.resolve(UpsertTodoUseCase.self)
                     },
                     onCreateSuccess: create,
                     onClose: closeWindow
@@ -45,12 +37,6 @@ public struct TodoEditorWindowView: View {
                 TodoEditorView(
                     store: Store(initialState: TodoEditorFeature.State(todo: windowTodo.todo)) {
                         TodoEditorFeature()
-                    } withDependencies: {
-                        $0.fetchTodoCategoryPreferencesUseCase = container.resolve(
-                            FetchTodoCategoryPreferencesUseCase.self
-                        )
-                        $0.fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
-                        $0.upsertTodoUseCase = container.resolve(UpsertTodoUseCase.self)
                     },
                     onUpdateSuccess: update,
                     onClose: closeWindow

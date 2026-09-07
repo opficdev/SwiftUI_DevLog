@@ -6,32 +6,23 @@
 //
 
 import SwiftUI
-import Core
-import Data
-import Domain
 import Presentation
 import Widget
 
 @main
 struct DevLogApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @Environment(\.diContainer) var container: DIContainer
     @Environment(\.scenePhase) var scenePhase
     @State private var windowEvent = TodoEditorWindowEvent()
     @State private var syncDate = Date()
 
     init() {
-        AppAssembler().assemble(AppDIContainer.shared)
+        AppGraph.shared.preparePresentationDependencies()
     }
 
     var body: some Scene {
         WindowGroup {
             RootView(
-                sessionUseCase: container.resolve(ObserveAuthSessionUseCase.self),
-                networkConnectivityUseCase: container.resolve(ObserveNetworkConnectivityUseCase.self),
-                systemThemeUseCase: container.resolve(ObserveSystemThemeUseCase.self),
-                trackAnalyticsEventUseCase: container.resolve(TrackAnalyticsEventUseCase.self),
-                checkAppUpdateUseCase: container.resolve(CheckAppUpdateUseCase.self),
                 widgetURLTab: { MainTab(widgetURL: $0) },
                 windowEvent: windowEvent,
                 pushNotificationTodoIdPublisher: PushNotificationRoute.shared.observe(),
@@ -51,7 +42,11 @@ struct DevLogApp: App {
                 guard !Calendar.current.isDate(syncDate, inSameDayAs: now) else { return }
 
                 syncDate = now
-                container.resolve(WidgetSyncEventBus.self).publish(.syncRequested)
+                AppGraph.shared
+                    .widgetGraphSet
+                    .widgetSyncEventBusGraph
+                    .widgetSyncEventBus
+                    .publish(.syncRequested)
             }
         }
         WindowGroup(id: TodoEditorWindowValue.sceneId, for: TodoEditorWindowValue.self) { value in

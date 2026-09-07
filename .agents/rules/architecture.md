@@ -18,7 +18,7 @@ Read this file before work that changes any of these areas:
 
 - Module boundaries or file ownership across `Application/*`, `Libraries/*`, and `Widget/*` targets.
 - Swift imports or Tuist target dependencies.
-- DI assembler wiring or same-layer dependency injection.
+- DI graph wiring or same-layer dependency injection.
 - Repository, service, store, or use case contracts.
 - Firebase, social login, network, link metadata, notification, or WidgetKit dependency placement.
 - Widget snapshot, App Group, or widget deep-link data flow.
@@ -110,7 +110,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-	App["App\nComposition root\nApp lifecycle\nAssembler wiring"]
+	App["App\nComposition root\nApp lifecycle\nCradle graph wiring"]
 	Presentation["Presentation\nSwiftUI views\nViewModels\nCoordinators\nUI state"]
 	Domain["Domain\nEntities\nRepository protocols\nUse cases"]
 	Data["Data\nRepository implementations\nDTOs\nMappers\nService/store protocols"]
@@ -160,15 +160,15 @@ flowchart TD
 | Layer | Owns | Allowed direction | Ask before |
 | --- | --- | --- | --- |
 | `ThirdParty` | external package declarations, product linkage, marker sources | No DevLog target dependency; may be depended on by any target | Adding DevLog feature, service, adapter, or layer dependency; changing package versions or products outside the requested scope |
-| `Core` | DI primitives, logger, shared value/query types, display options, activity kinds, lightweight widget bridge values | No DevLog layer dependency; `ThirdParty` when needed | Moving domain entities into Core |
+| `Core` | logger, shared value/query types, display options, activity kinds, lightweight widget bridge values | No DevLog layer dependency; `ThirdParty` when needed | Moving domain entities into Core |
 | `Domain` | entities, repository protocols, use cases | Core, `ThirdParty` when needed | Adding Data, Infra, Persistence, Presentation, App, or Widget UI dependency |
 | `Data` | repository implementations, DTOs, mappers, data protocols, widget repository/updater/sync contracts | Domain, Core, `ThirdParty` when needed | Adding WidgetKit, storage, WidgetCore snapshot model/factory usage, or platform implementation details; moving concrete widget handlers into Data |
 | `Infra` | application infrastructure service implementations for social login, network, metadata, and messaging | Data, Core, `ThirdParty` when needed | Adding any Domain dependency or SDK service contract coupling |
 | `Persistence` | local stores, image cache, non-widget app persistence | Data, Core, `ThirdParty` when needed | Adding WidgetCore, WidgetKit reload, Widget, widget snapshot generation, or widget bridge ownership |
 | `Presentation` | UI, view models, coordinators, presentation state, narrow presentation-scoped platform side effects | Domain, Core, `ThirdParty` when needed | Adding Data, Infra, Persistence, or App dependency; expanding platform service ownership beyond UI-side effects |
 | `MarkdownRenderer` | public SwiftUI renderer and reference value, internal WebKit bridge, renderer resources, TypeScript Tooling, renderer tests | system frameworks, `ThirdParty` when needed | Adding a DevLog application layer dependency, exposing WebKit bridge types, adding another Presentation importer, or re-exporting the module |
-| `Widget` | app-side widget bridge, sync bus implementation, sync/session handlers, snapshot generation/persistence orchestration, WidgetKit reload bridge, widget assembler | Data, Core, WidgetCore, `ThirdParty` when needed | Adding Domain, Infra, Persistence, Presentation, or App dependency |
-| `App` | composition root, lifecycle, assembler wiring, app target ownership for widget extension embedding | Concrete app layers, `ThirdParty` for framework linking | Moving feature logic into App |
+| `Widget` | app-side widget bridge, sync bus implementation, sync/session handlers, snapshot generation/persistence orchestration, WidgetKit reload bridge, provider graph | Data, Core, WidgetCore, `ThirdParty` when needed | Adding Domain, Infra, Persistence, Presentation, or App dependency |
+| `App` | composition root, lifecycle, Cradle graph wiring, app target ownership for widget extension embedding | Concrete app layers, `ThirdParty` for framework linking | Moving feature logic into App |
 | `WidgetCore` | widget snapshot models, factories, app-group keys/defaults store, deep links, pure snapshot logic | Core, `ThirdParty` when needed | Adding Domain, Data, Infra, Persistence, Presentation, App, or Widget dependency |
 | `WidgetExtension` | WidgetKit rendering and timeline plumbing | WidgetCore, `ThirdParty` when needed | Calling app/domain services directly |
 
@@ -179,7 +179,7 @@ flowchart TD
 - `EntryTests` validates `Entry` through `Application/Presentation/Entry/Tests/**/*.swift`.
 - `HomeTab`, `TodayTab`, `NotificationTab`, and `ProfileTab` remain tab-specific feature targets and each target owns the `Domain` references it needs.
 - `PresentationShared` owns shared Todo, Search, Loading UI, and presentation contracts.
-- `App` owns composition root, lifecycle, and assembler wiring. It must not take ownership of presentation feature or root flows.
+- `App` owns composition root, lifecycle, and Cradle graph wiring. It must not take ownership of presentation feature or root flows.
 
 ## MarkdownRenderer module boundary
 
@@ -194,7 +194,7 @@ flowchart TD
 
 Do not inject dependencies between types that belong to the same layer.
 
-This rule covers initializer injection, stored-property injection, environment injection, and resolving same-layer types through `DIContainer`.
+This rule covers initializer injection, stored-property injection, environment injection, and resolving same-layer types through a runtime resolver.
 
 The only allowed exception is a SwiftUI `View` file in `Application/Presentation` receiving same-layer presentation objects such as a ViewModel, Coordinator, or Store for UI composition.
 

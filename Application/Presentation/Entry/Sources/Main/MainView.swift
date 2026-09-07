@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import Core
-import Domain
 import HomeTab
 import NotificationTab
 import ProfileTab
@@ -26,23 +24,19 @@ struct MainView: View {
     private let windowEvent: TodoEditorWindowEvent
 
     init(
-        container: DIContainer,
         windowEvent: TodoEditorWindowEvent,
         selectedTab: Binding<MainTab>
     ) {
         self._store = State(initialValue: Store(initialState: MainFeature.State()) {
             MainFeature()
-        } withDependencies: {
-            $0.observeUnreadPushCountUseCase = container.resolve(ObserveUnreadPushCountUseCase.self)
-            $0.trackAnalyticsEventUseCase = container.resolve(TrackAnalyticsEventUseCase.self)
         })
-        self._todoWindowCoordinator = State(initialValue: TodoWindowCoordinator(container: container))
-        self._homeViewCoordinator = State(initialValue: HomeViewCoordinator(container: container))
-        self._todayViewCoordinator = State(initialValue: TodayViewCoordinator(container: container))
+        self._todoWindowCoordinator = State(initialValue: TodoWindowCoordinator())
+        self._homeViewCoordinator = State(initialValue: HomeViewCoordinator())
+        self._todayViewCoordinator = State(initialValue: TodayViewCoordinator())
         self._pushNotificationListViewCoordinator = State(
-            initialValue: PushNotificationListViewCoordinator(container: container)
+            initialValue: PushNotificationListViewCoordinator()
         )
-        self._profileViewCoordinator = State(initialValue: ProfileViewCoordinator(container: container))
+        self._profileViewCoordinator = State(initialValue: ProfileViewCoordinator())
 
         self._selectedTab = selectedTab
         self.windowEvent = windowEvent

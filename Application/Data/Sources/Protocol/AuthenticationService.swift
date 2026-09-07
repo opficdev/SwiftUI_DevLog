@@ -14,3 +14,9 @@ public protocol AuthenticationService {
     func link(uid: String) async throws -> Bool
     func unlink(_ uid: String) async throws
 }
+
+public protocol AppleAuthenticationService: AuthenticationService { }
+
+public protocol GithubAuthenticationService: AuthenticationService { }
+
+public protocol GoogleAuthenticationService: AuthenticationService { }

@@ -7,24 +7,20 @@
 
 import Combine
 import Foundation
-import Core
 import Domain
 import PresentationShared
 
 @MainActor
 @Observable
 final class TodoWindowCoordinator {
-    private let container: DIContainer
+    @ObservationIgnored
+    @Dependency(\.trackAnalyticsEventUseCase) private var trackAnalyticsEventUseCase
     @ObservationIgnored
     private var listStore: StoreOf<TodoListFeature>?
     @ObservationIgnored
     private var detailStore: StoreOf<TodoDetailFeature>?
     @ObservationIgnored
     private var cancellable: AnyCancellable?
-
-    init(container: DIContainer) {
-        self.container = container
-    }
 
     func bindWindowEvent(_ windowEvent: TodoEditorWindowEvent) {
         guard cancellable == nil else { return }
@@ -43,15 +39,6 @@ final class TodoWindowCoordinator {
 
         let listStore = Store(initialState: TodoListFeature.State(category: category)) {
             TodoListFeature()
-        } withDependencies: {
-            $0.fetchTodoCategoryPreferencesUseCase = self.container.resolve(FetchTodoCategoryPreferencesUseCase.self)
-            $0.fetchReferenceItemsUseCase = self.container.resolve(FetchReferenceItemsUseCase.self)
-            $0.todoListFetchTodosUseCase = self.container.resolve(FetchTodosUseCase.self)
-            $0.fetchTodoByIdUseCase = self.container.resolve(FetchTodoByIdUseCase.self)
-            $0.upsertTodoUseCase = self.container.resolve(UpsertTodoUseCase.self)
-            $0.todoListDeleteTodoUseCase = self.container.resolve(DeleteTodoUseCase.self)
-            $0.todoListUndoDeleteTodoUseCase = self.container.resolve(UndoDeleteTodoUseCase.self)
-            $0.trackAnalyticsEventUseCase = self.container.resolve(TrackAnalyticsEventUseCase.self)
         }
         self.listStore = listStore
         return listStore
@@ -73,11 +60,6 @@ final class TodoWindowCoordinator {
             )
         ) {
             TodoDetailFeature()
-        } withDependencies: {
-            $0.fetchTodoCategoryPreferencesUseCase = self.container.resolve(FetchTodoCategoryPreferencesUseCase.self)
-            $0.fetchTodoByIdUseCase = self.container.resolve(FetchTodoByIdUseCase.self)
-            $0.fetchReferenceItemsUseCase = self.container.resolve(FetchReferenceItemsUseCase.self)
-            $0.upsertTodoUseCase = self.container.resolve(UpsertTodoUseCase.self)
         }
         self.detailStore = detailStore
         return detailStore
@@ -86,7 +68,7 @@ final class TodoWindowCoordinator {
     private func handleTodoEditorSubmit(_ submit: TodoEditorWindowSubmit) {
         switch submit {
         case .create(let value):
-            container.resolve(TrackAnalyticsEventUseCase.self).execute(.todoCreate)
+            trackAnalyticsEventUseCase.execute(.todoCreate)
             if let listStore,
                value.matchesCreate(category: listStore.category, source: .list) {
                 listStore.send(.view(.refresh))

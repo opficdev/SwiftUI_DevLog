@@ -335,11 +335,11 @@ test -f .codex/agents/designer.toml
 test ! -e .codex/agents/designer_luna.toml
 test ! -e .codex/agents/code_reviewer_luna.toml
 rg -qx 'name = "designer"' .codex/agents/designer.toml
-rg -qx 'model = "gpt-5.6-sol"' .codex/agents/designer.toml
-rg -qx 'model_reasoning_effort = "xhigh"' .codex/agents/designer.toml
+rg -qx 'model = "gpt-6-astra"' .codex/agents/designer.toml
+rg -qx 'model_reasoning_effort = "medium"' .codex/agents/designer.toml
 rg -qx 'name = "code_reviewer"' .codex/agents/code_reviewer.toml
-rg -qx 'model = "gpt-5.6-sol"' .codex/agents/code_reviewer.toml
-rg -qx 'model_reasoning_effort = "xhigh"' .codex/agents/code_reviewer.toml
+rg -qx 'model = "gpt-6-astra"' .codex/agents/code_reviewer.toml
+rg -qx 'model_reasoning_effort = "medium"' .codex/agents/code_reviewer.toml
 ```
 
 If only Markdown workflow files and agent TOML files changed, no iOS build is required.
@@ -409,7 +409,7 @@ Include the selected workflow name in the task packet `Source` or `Goal` field s
 - Current owner: repository workflow documentation
 - Architecture risk: none
 - Required roles: Planner, Designer, Implementer, Code Reviewer, Verification Runner
-- Model assignment: Planner=Primary, Designer=designer (SDD Gate, `gpt-5.6-sol`, `xhigh`), Implementer=Primary, Code Reviewer=code_reviewer (SDD Gate, `gpt-5.6-sol`, `xhigh`), Verification Runner=verification_runner (Lightweight)
+- Model assignment: Planner=Primary, Designer=designer (SDD Gate, `gpt-6-astra`, `medium`), Implementer=Primary, Code Reviewer=code_reviewer (SDD Gate, `gpt-6-astra`, `medium`), Verification Runner=verification_runner (Lightweight)
 - Custom agent `task_name`: Designer=`designer`, Code Reviewer=`code_reviewer`, Verification Runner=`verification_runner`
 - Result recipient: `Primary` of the current main task
 - Execution authority: app or Simulator=not allowed / external writes=not allowed / CI or PR actions=not allowed
@@ -432,7 +432,7 @@ Include the selected workflow name in the task packet `Source` or `Goal` field s
 - Current owner: <layer and target identified by Planner>
 - Architecture risk: none / possible / confirmed
 - Required roles: GitHub/CI Analyst, Planner, Designer, Implementer, Code Reviewer, Verification Runner
-- Model assignment: GitHub/CI Analyst=github_ci_analyst (Lightweight), Planner=Primary, Designer=designer (SDD Gate, `gpt-5.6-sol`, `xhigh`), Implementer=Primary, Code Reviewer=code_reviewer (SDD Gate, `gpt-5.6-sol`, `xhigh`), Verification Runner=verification_runner (Lightweight)
+- Model assignment: GitHub/CI Analyst=github_ci_analyst (Lightweight), Planner=Primary, Designer=designer (SDD Gate, `gpt-6-astra`, `medium`), Implementer=Primary, Code Reviewer=code_reviewer (SDD Gate, `gpt-6-astra`, `medium`), Verification Runner=verification_runner (Lightweight)
 - Custom agent `task_name`: GitHub/CI Analyst=`github_ci_analyst`, Designer=`designer`, Code Reviewer=`code_reviewer`, Verification Runner=`verification_runner`
 - Result recipient: `Primary` of the current main task
 - Execution authority: app or Simulator=not allowed / external writes=only user-authorized reply or resolution / CI or PR actions=inspection only

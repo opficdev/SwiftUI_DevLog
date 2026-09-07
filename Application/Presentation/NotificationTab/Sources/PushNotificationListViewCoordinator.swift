@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Core
 import Domain
 import PresentationShared
 
@@ -14,15 +13,13 @@ import PresentationShared
 @Observable
 public final class PushNotificationListViewCoordinator {
     let store: StoreOf<PushNotificationListFeature>
-    private let container: DIContainer
     @ObservationIgnored
     private var todoDetailStore: StoreOf<TodoDetailFeature>?
     @ObservationIgnored
     private var fetchNotificationsTask: Task<Void, Never>?
 
-    public init(container: DIContainer) {
-        self.container = container
-        let fetchQueryUseCase = container.resolve(FetchPushNotificationQueryUseCase.self)
+    public init() {
+        @Dependency(\.fetchPushNotificationQueryUseCase) var fetchQueryUseCase
 
         self.store = Store(
             initialState: PushNotificationListFeature.State(
@@ -30,12 +27,6 @@ public final class PushNotificationListViewCoordinator {
             )
         ) {
             PushNotificationListFeature()
-        } withDependencies: {
-            $0.fetchPushNotificationsUseCase = container.resolve(FetchPushNotificationsUseCase.self)
-            $0.deletePushNotificationUseCase = container.resolve(DeletePushNotificationUseCase.self)
-            $0.undoDeletePushNotificationUseCase = container.resolve(UndoDeletePushNotificationUseCase.self)
-            $0.togglePushNotificationReadUseCase = container.resolve(TogglePushNotificationReadUseCase.self)
-            $0.updatePushNotificationQueryUseCase = container.resolve(UpdatePushNotificationQueryUseCase.self)
         }
     }
 
@@ -62,8 +53,6 @@ public final class PushNotificationListViewCoordinator {
             return todoDetailStore
         }
 
-        let fetchTodoUseCase = container.resolve(FetchTodoByIdUseCase.self)
-        let fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
         let todoDetailStore = Store(
             initialState: TodoDetailFeature.State(
                 todoId: todoId,
@@ -71,9 +60,6 @@ public final class PushNotificationListViewCoordinator {
             )
         ) {
             TodoDetailFeature()
-        } withDependencies: {
-            $0.fetchTodoByIdUseCase = fetchTodoUseCase
-            $0.fetchReferenceItemsUseCase = fetchReferenceItemsUseCase
         }
         self.todoDetailStore = todoDetailStore
         return todoDetailStore

@@ -11,6 +11,7 @@ let project = Project.devlogFramework(
     dependencies: [
         .project(target: "Data", path: "../Data"),
         .project(target: "Core", path: "../Core"),
+        .project(target: "ThirdParty", path: "../../Libraries/ThirdParty"),
     ],
     hasTests: true
 )

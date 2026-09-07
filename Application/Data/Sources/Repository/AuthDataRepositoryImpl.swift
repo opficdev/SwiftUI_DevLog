@@ -9,15 +9,15 @@ import Domain
 
 final class AuthDataRepositoryImpl: AuthDataRepository {
     private let authService: AuthService
-    private let appleAuthService: AuthenticationService
-    private let githubAuthService: AuthenticationService
-    private let googleAuthService: AuthenticationService
+    private let appleAuthService: AppleAuthenticationService
+    private let githubAuthService: GithubAuthenticationService
+    private let googleAuthService: GoogleAuthenticationService
     
     init(
         authService: AuthService,
-        appleAuthService: AuthenticationService,
-        githubAuthService: AuthenticationService,
-        googleAuthService: AuthenticationService
+        appleAuthService: AppleAuthenticationService,
+        githubAuthService: GithubAuthenticationService,
+        googleAuthService: GoogleAuthenticationService
     ) {
         self.authService = authService
         self.appleAuthService = appleAuthService

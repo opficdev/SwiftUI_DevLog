@@ -7,7 +7,6 @@
 
 import SwiftUI
 import ComposableArchitecture
-import Core
 import Domain
 
 public extension View {
@@ -17,7 +16,6 @@ public extension View {
 }
 
 private struct TodoDetailPreviewModifier: ViewModifier {
-    @Environment(\.diContainer) private var container
     let todoId: String
 
     func body(content: Content) -> some View {
@@ -37,9 +35,6 @@ private struct TodoDetailPreviewModifier: ViewModifier {
             )
         ) {
             TodoDetailFeature()
-        } withDependencies: {
-            $0.fetchTodoByIdUseCase = container.resolve(FetchTodoByIdUseCase.self)
-            $0.fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
         }
         return UIHostingController(rootView: TodoDetailPreviewView(store: store))
     }
