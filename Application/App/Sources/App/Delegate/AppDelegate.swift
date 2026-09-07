@@ -13,7 +13,6 @@ import Widget
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     private let logger = Logger(category: "AppDelegate")
-    private let container = AppDIContainer.shared
 
     // Google 로그인 URL 콜백 처리
     func application(
@@ -28,11 +27,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        container.resolve(FirebaseAppService.self).configure()
-        _ = container.resolve(FCMTokenSyncHandler.self)
-        _ = container.resolve(UserTimeZoneSyncHandler.self)
-        _ = container.resolve(WidgetSyncEventHandler.self)
-        _ = container.resolve(WidgetSessionSyncHandler.self)
+        let lifecycleGraphSet = AppGraph.shared.lifecycleGraphSet
+        _ = lifecycleGraphSet.fcmTokenSyncHandlerGraph.fcmTokenSyncHandler
+        _ = lifecycleGraphSet.userTimeZoneSyncHandlerGraph.userTimeZoneSyncHandler
+        _ = lifecycleGraphSet.widgetSyncEventHandlerGraph.widgetSyncEventHandler
+        _ = lifecycleGraphSet.widgetSessionSyncHandlerGraph.widgetSessionSyncHandler
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleRemoteNotificationRegistrationRequest),
@@ -64,11 +63,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         // Firebase Messaging 설정
-        container.resolve(PushMessagingService.self).setDelegate(self)
+        AppGraph.shared.infraGraphSet.pushMessagingServiceGraph.pushMessagingService.setDelegate(self)
 
         // 앱이 완전 종료되어도, 알림을 통해 앱이 시작된 경우 처리
         if let remoteNotification = launchOptions?[.remoteNotification] as? [AnyHashable: Any] {
-            let handler = container.resolve(PushNotificationOpenHandler.self)
+            let handler = lifecycleGraphSet.pushNotificationOpenHandlerGraph.pushNotificationOpenHandler
             Task { @MainActor in
                 handler.handlePushOpen(userInfo: remoteNotification)
             }
@@ -145,7 +144,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         logger.info("Tapped notification: \(response.notification.request.content.userInfo)")
         let userInfo = response.notification.request.content.userInfo
-        let handler = container.resolve(PushNotificationOpenHandler.self)
+        let handler = AppGraph.shared
+            .lifecycleGraphSet
+            .pushNotificationOpenHandlerGraph
+            .pushNotificationOpenHandler
         Task { @MainActor in
             handler.handlePushOpen(userInfo: userInfo)
         }

@@ -151,4 +151,22 @@ final class AppGraph {
             networkConnectivityProviderGraph: infraGraphSet.networkConnectivityProviderGraph
         )
     }
+
+    @Provide
+    private func makeLifecycleGraphSet(
+        infraGraphSet: InfraGraphSet,
+        widgetGraphSet: WidgetGraphSet,
+        todoGraphSet: TodoGraphSet
+    ) -> LifecycleGraphSet {
+        LifecycleGraphSet(
+            authServiceGraph: infraGraphSet.authServiceGraph,
+            pushMessagingServiceGraph: infraGraphSet.pushMessagingServiceGraph,
+            userServiceGraph: infraGraphSet.userServiceGraph,
+            analyticsServiceGraph: infraGraphSet.analyticsServiceGraph,
+            widgetSyncEventBusGraph: widgetGraphSet.widgetSyncEventBusGraph,
+            widgetTodoSnapshotRepositoryGraph: todoGraphSet.widgetTodoSnapshotRepositoryGraph,
+            widgetSnapshotUpdaterGraph: widgetGraphSet.widgetSnapshotUpdaterGraph,
+            authSessionStateProviderGraph: widgetGraphSet.authSessionStateProviderGraph
+        )
+    }
 }
