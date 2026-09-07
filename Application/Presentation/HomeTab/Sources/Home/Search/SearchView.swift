@@ -6,13 +6,11 @@
 //
 
 import SwiftUI
-import Core
 import Domain
 import PresentationShared
 
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.diContainer) private var container: DIContainer
     @State private var router = NavigationRouter<Path>()
     @State var store: StoreOf<SearchFeature>
 
@@ -30,13 +28,6 @@ struct SearchView: View {
                             initialState: TodoDetailFeature.State(todoId: todoId, showEditButton: true)
                         ) {
                             TodoDetailFeature()
-                        } withDependencies: {
-                            $0.fetchTodoCategoryPreferencesUseCase = container.resolve(
-                                FetchTodoCategoryPreferencesUseCase.self
-                            )
-                            $0.fetchTodoByIdUseCase = container.resolve(FetchTodoByIdUseCase.self)
-                            $0.fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
-                            $0.upsertTodoUseCase = container.resolve(UpsertTodoUseCase.self)
                         })
                     case .web(let page):
                         WebView(url: page.url)

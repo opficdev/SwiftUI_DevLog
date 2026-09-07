@@ -11,7 +11,6 @@ import Core
 import Domain
 
 public struct TodoDetailView: View {
-    @Environment(\.diContainer) private var container: DIContainer
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @State var store: StoreOf<TodoDetailFeature>

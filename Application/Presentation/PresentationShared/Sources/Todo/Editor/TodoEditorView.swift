@@ -11,7 +11,6 @@ import Core
 import Domain
 
 public struct TodoEditorView: View {
-    @Environment(\.diContainer) private var container: DIContainer
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @State var store: StoreOf<TodoEditorFeature>
@@ -259,9 +258,6 @@ public struct TodoEditorView: View {
                     initialState: TodoDetailFeature.State(todoId: item.id, showEditButton: false)
                 ) {
                     TodoDetailFeature()
-                } withDependencies: {
-                    $0.fetchTodoByIdUseCase = container.resolve(FetchTodoByIdUseCase.self)
-                    $0.fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
                 })
                 .toolbar {
                     ToolbarLeadingButton {

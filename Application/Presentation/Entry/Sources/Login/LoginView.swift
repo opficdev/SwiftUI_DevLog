@@ -15,13 +15,11 @@ struct LoginView: View {
     @Environment(\.sceneWidth) var sceneWidth
     @State private var store: StoreOf<LoginFeature>
 
-    init(signInUseCase: SignInUseCase) {
+    init() {
         self._store = State(initialValue: Store(
             initialState: LoginFeature.State()
         ) {
             LoginFeature()
-        } withDependencies: {
-            $0.signInUseCase = signInUseCase
         })
     }
 

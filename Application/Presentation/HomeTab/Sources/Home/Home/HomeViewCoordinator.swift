@@ -7,7 +7,6 @@
 
 import Combine
 import Foundation
-import Core
 import Domain
 import PresentationShared
 
@@ -16,7 +15,10 @@ import PresentationShared
 public final class HomeViewCoordinator {
     let store: StoreOf<HomeFeature>
     public let router = NavigationRouter<HomeRoute>()
-    private let container: DIContainer
+    @ObservationIgnored
+    @Dependency(\.homeTodoMutationEventBus) private var todoMutationEventBus
+    @ObservationIgnored
+    @Dependency(\.homeFetchRecentSearchQueriesUseCase) private var fetchRecentSearchQueriesUseCase
     @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
     @ObservationIgnored
@@ -24,24 +26,9 @@ public final class HomeViewCoordinator {
     @ObservationIgnored
     private var isWindowEventBound = false
 
-    public init(container: DIContainer) {
-        self.container = container
+    public init() {
         self.store = Store(initialState: HomeFeature.State()) {
             HomeFeature()
-        } withDependencies: {
-            $0.fetchTodoCategoryPreferencesUseCase = container.resolve(FetchTodoCategoryPreferencesUseCase.self)
-            $0.homeUpdateTodoCategoryPreferencesUseCase = container.resolve(
-                UpdateTodoCategoryPreferencesUseCase.self
-            )
-            $0.homeAddWebPageUseCase = container.resolve(AddWebPageUseCase.self)
-            $0.homeDeleteWebPageUseCase = container.resolve(DeleteWebPageUseCase.self)
-            $0.homeUndoDeleteWebPageUseCase = container.resolve(UndoDeleteWebPageUseCase.self)
-            $0.homeFetchTodosUseCase = container.resolve(FetchTodosUseCase.self)
-            $0.homeFetchWebPagesUseCase = container.resolve(FetchWebPagesUseCase.self)
-            $0.fetchReferenceItemsUseCase = container.resolve(FetchReferenceItemsUseCase.self)
-            $0.upsertTodoUseCase = container.resolve(UpsertTodoUseCase.self)
-            $0.homeNetworkConnectivityUseCase = container.resolve(ObserveNetworkConnectivityUseCase.self)
-            $0.trackAnalyticsEventUseCase = container.resolve(TrackAnalyticsEventUseCase.self)
         }
         self.store.send(.view(.startObserving))
     }
@@ -58,8 +45,7 @@ public final class HomeViewCoordinator {
         guard isTodoMutationEventBound == false else { return }
         isTodoMutationEventBound = true
 
-        let bus = container.resolve(TodoMutationEventBus.self)
-        bus.observe()
+        todoMutationEventBus.observe()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 guard let self else { return }
@@ -88,14 +74,10 @@ public final class HomeViewCoordinator {
     func makeSearchStore() -> StoreOf<SearchFeature> {
         Store(
             initialState: SearchFeature.State(
-                recentQueries: container.resolve(FetchRecentSearchQueriesUseCase.self).execute()
+                recentQueries: fetchRecentSearchQueriesUseCase.execute()
             )
         ) {
             SearchFeature()
-        } withDependencies: {
-            $0.searchFetchWebPagesUseCase = self.container.resolve(FetchWebPagesUseCase.self)
-            $0.searchFetchTodosUseCase = self.container.resolve(FetchTodosUseCase.self)
-            $0.searchUpdateRecentQueriesUseCase = self.container.resolve(UpdateRecentSearchQueriesUseCase.self)
         }
     }
 }
