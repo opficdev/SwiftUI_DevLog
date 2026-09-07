@@ -29,7 +29,7 @@ Use these model tiers when assigning work to another LLM.
 | Tier | Use | Default model |
 | --- | --- | --- |
 | `Primary` | Planning, implementation, architecture decisions, final integration, failed-check triage | Strongest available Codex/GPT coding model |
-| `SDD Gate` | Design analysis and final diff review | `gpt-5.6-sol` with `xhigh` reasoning |
+| `SDD Gate` | Design analysis and final diff review | `gpt-6-astra` with `medium` reasoning |
 | `Lightweight` | Read-only review, checklist validation, log summarization, documentation draft, first-pass architecture preflight | `gpt-5.3-codex-spark`, unavailable 시 `gpt-5.6-luna`와 `high` 추론 |
 | `Fast` | Low-risk text cleanup, simple file presence checks, short summaries | Pinned fast model from the configured custom agent TOML when a Fast role is defined |
 
@@ -46,7 +46,7 @@ Default role-to-model and execution assignment:
 | GitHub/CI Analyst | `github_ci_analyst` | `Lightweight` | CI root cause requires code or workflow changes, or review comments conflict |
 | Documentation Writer | `documentation_writer` | `Lightweight` | Text must explain complex architecture, release risk, CI root cause, or PR scope tradeoffs |
 
-Project-scoped custom agents live in `.codex/agents/`. Their TOML files pin the concrete model and sandbox for spawned sessions; this table is the canonical role-to-agent routing map. `Designer` and `Code Reviewer` are Sol-only SDD gates; the other custom roles retain the existing Spark-first routing.
+Project-scoped custom agents live in `.codex/agents/`. Their TOML files pin the concrete model and sandbox for spawned sessions; this table is the canonical role-to-agent routing map. `Designer` and `Code Reviewer` are Astra-only SDD gates; the other custom roles retain the existing Spark-first routing.
 
 Do not assign `Lightweight` as the only model for production Swift implementation, target dependency changes, DI assembly, repository/service contract changes, Firebase or SDK placement, Widget data-flow changes, StorePattern responsibility changes, commits, pushes, PR creation, or final integration.
 
@@ -54,13 +54,13 @@ Do not assign `Lightweight` as the only model for production Swift implementatio
 
 - A model tier assignment is an execution requirement, not a label for work the main agent already performed.
 - `Primary` roles belong to the active main agent and must not be delegated to a sub-agent that uses or inherits the active `Primary` model.
-- Every sub-agent created through this role workflow must use the configured `SDD Gate`, `Lightweight`, or `Fast` model that is different from the active `Primary` model. The exact `designer` and `code_reviewer` custom agent dispatches are the only exception when the active `Primary` also uses their required Sol model.
+- Every sub-agent created through this role workflow must use the configured `SDD Gate`, `Lightweight`, or `Fast` model that is different from the active `Primary` model. The exact `designer` and `code_reviewer` custom agent dispatches are the only exception when the active `Primary` also uses their required Astra model.
 - When a role is assigned to `SDD Gate`, `Lightweight`, or `Fast`, the main agent must dispatch the configured custom agent from the routing table before using its result.
-- A sub-agent that inherits the active `Primary` model does not satisfy an `SDD Gate`, `Lightweight`, or `Fast` assignment. The Sol exception applies only to the exact `designer` and `code_reviewer` custom agent dispatches; it does not permit an inherited or generic sub-agent.
+- A sub-agent that inherits the active `Primary` model does not satisfy an `SDD Gate`, `Lightweight`, or `Fast` assignment. The Astra exception applies only to the exact `designer` and `code_reviewer` custom agent dispatches; it does not permit an inherited or generic sub-agent.
 - Do not satisfy an `SDD Gate`, `Lightweight`, or `Fast` role by completing the role directly in `Primary` and describing it as delegated work.
 - A generic sub-agent spawn that does not load the configured custom agent TOML does not satisfy an `SDD Gate`, `Lightweight`, or `Fast` role execution.
 - If the custom agent cannot be loaded or the dispatch surface cannot select that custom agent, stop before dispatch and report which role cannot run.
-- `Designer` and `Code Reviewer` must use only `gpt-5.6-sol` with `xhigh` reasoning. If the connected side-task surface cannot select Sol after an exact `task_name` retry, stop the SDD gate; do not use a fallback.
+- `Designer` and `Code Reviewer` must use only `gpt-6-astra` with `medium` reasoning. If the connected side-task surface cannot select Astra after an exact `task_name` retry, stop the SDD gate; do not use a fallback.
 - A configured `gpt-5.3-codex-spark` model is unavailable only when the connected side-task surface cannot select it after an exact `task_name` retry. In that case, dispatch the matching `*_luna` custom role with `gpt-5.6-luna` and `high` reasoning effort. Do not select another fallback model.
 - If the assigned model is available but current tool policy requires explicit user permission before dispatch, missing permission is not fallback. Stop and ask for permission before continuing the required role.
 - `Primary` must integrate and verify delegated output, but must not skip the delegated role when the workflow requires it and the assigned model is available.
@@ -233,7 +233,7 @@ Output:
 
 ## Designer
 
-Designer is the `gpt-5.6-sol` and `xhigh` SDD gate for non-trivial work.
+Designer is the `gpt-6-astra` and `medium` SDD gate for non-trivial work.
 
 May:
 
@@ -245,7 +245,7 @@ Must not:
 
 - Edit files, stage changes, commit, push, or change GitHub state.
 - Approve its own result on behalf of the user.
-- Select a fallback model when Sol is unavailable.
+- Select a fallback model when Astra is unavailable.
 
 Output:
 
@@ -344,7 +344,7 @@ Output:
 
 ## Code Reviewer
 
-Code Reviewer is the `gpt-5.6-sol` and `xhigh` read-only final-diff SDD gate.
+Code Reviewer is the `gpt-6-astra` and `medium` read-only final-diff SDD gate.
 
 May:
 
