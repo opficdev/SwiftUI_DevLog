@@ -1,17 +1,27 @@
 //
-//  AuthenticationRepositoryGraphSet.swift
+//  AuthenticationGraphSet.swift
 //  App
 //
 //  Created by opfic on 9/7/26.
 //
 
 import Data
+import Domain
 import Infra
+import Persistence
 import Widget
 
-final class AuthenticationRepositoryGraphSet {
+final class AuthenticationGraphSet {
     let authenticationRepositoryGraph: AuthenticationRepositoryGraph
     let authDataRepositoryGraph: AuthDataRepositoryGraph
+    let authSessionRepositoryGraph: AuthSessionRepositoryGraph
+    let authenticationUseCaseGraph: AuthenticationUseCaseGraph
+    let authProviderUseCaseGraph: AuthProviderUseCaseGraph
+    private(set) lazy var authSessionUseCaseGraph = AuthSessionUseCaseGraph(
+        input: AuthSessionUseCaseGraphInput(
+            repository: authSessionRepositoryGraph.authSessionRepository
+        )
+    )
 
     init(
         authServiceGraph: AuthServiceGraph,
@@ -19,7 +29,10 @@ final class AuthenticationRepositoryGraphSet {
         githubAuthenticationServiceGraph: GithubAuthenticationServiceGraph,
         googleAuthenticationServiceGraph: GoogleAuthenticationServiceGraph,
         userServiceGraph: UserServiceGraph,
-        widgetSnapshotUpdaterGraph: WidgetSnapshotUpdaterGraph
+        todoCategoryServiceGraph: TodoCategoryServiceGraph,
+        memoryCacheStoreGraph: MemoryCacheStoreGraph,
+        widgetSnapshotUpdaterGraph: WidgetSnapshotUpdaterGraph,
+        authSessionStateProviderGraph: AuthSessionStateProviderGraph
     ) {
         self.authenticationRepositoryGraph = AuthenticationRepositoryGraph(
             input: AuthenticationRepositoryGraphInput(
@@ -37,6 +50,24 @@ final class AuthenticationRepositoryGraphSet {
                 appleAuthService: appleAuthenticationServiceGraph.appleAuthenticationService,
                 githubAuthService: githubAuthenticationServiceGraph.githubAuthenticationService,
                 googleAuthService: googleAuthenticationServiceGraph.googleAuthenticationService
+            )
+        )
+        self.authSessionRepositoryGraph = AuthSessionRepositoryGraph(
+            input: AuthSessionRepositoryGraphInput(
+                authService: authServiceGraph.authService,
+                todoCategoryService: todoCategoryServiceGraph.todoCategoryService,
+                store: memoryCacheStoreGraph.memoryCacheStore,
+                provider: authSessionStateProviderGraph.authSessionStateProvider
+            )
+        )
+        self.authenticationUseCaseGraph = AuthenticationUseCaseGraph(
+            input: AuthenticationUseCaseGraphInput(
+                repository: authenticationRepositoryGraph.authenticationRepository
+            )
+        )
+        self.authProviderUseCaseGraph = AuthProviderUseCaseGraph(
+            input: AuthProviderUseCaseGraphInput(
+                repository: authDataRepositoryGraph.authDataRepository
             )
         )
     }

@@ -1,17 +1,20 @@
 //
-//  WebPageRepositoryGraphSet.swift
+//  WebPageGraphSet.swift
 //  App
 //
 //  Created by opfic on 9/7/26.
 //
 
 import Data
+import Domain
 import Infra
 import Persistence
 
-final class WebPageRepositoryGraphSet {
+final class WebPageGraphSet {
     let webPageRepositoryGraph: WebPageRepositoryGraph
     let webPageImageRepositoryGraph: WebPageImageRepositoryGraph
+    let webPageUseCaseGraph: WebPageUseCaseGraph
+    let webPageImageUseCaseGraph: WebPageImageUseCaseGraph
 
     init(
         authServiceGraph: AuthServiceGraph,
@@ -30,6 +33,16 @@ final class WebPageRepositoryGraphSet {
             input: WebPageImageRepositoryGraphInput(
                 authService: authServiceGraph.authService,
                 store: webPageImageStoreGraph.webPageImageStore
+            )
+        )
+        self.webPageUseCaseGraph = WebPageUseCaseGraph(
+            input: WebPageUseCaseGraphInput(
+                repository: webPageRepositoryGraph.webPageRepository
+            )
+        )
+        self.webPageImageUseCaseGraph = WebPageImageUseCaseGraph(
+            input: WebPageImageUseCaseGraphInput(
+                repository: webPageImageRepositoryGraph.webPageImageRepository
             )
         )
     }
