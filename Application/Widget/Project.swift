@@ -12,6 +12,7 @@ let project = Project.devlogFramework(
         .project(target: "Data", path: "../Data"),
         .project(target: "Core", path: "../Core"),
         .project(target: "WidgetCore", path: "../../Widget/WidgetCore"),
+        .project(target: "ThirdParty", path: "../../Libraries/ThirdParty"),
     ],
     hasTests: true
 )
