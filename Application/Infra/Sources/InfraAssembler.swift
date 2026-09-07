@@ -29,21 +29,21 @@ public final class InfraAssembler: Assembler {
         }
 
         container.register(
-            AuthenticationService.self,
+            AppleAuthenticationService.self,
             name: "AppleAuthenticationService"
         ) {
             AppleAuthenticationServiceImpl()
         }
 
         container.register(
-            AuthenticationService.self,
+            GithubAuthenticationService.self,
             name: "GithubAuthenticationService"
         ) {
             GithubAuthenticationServiceImpl()
         }
 
         container.register(
-            AuthenticationService.self,
+            GoogleAuthenticationService.self,
             name: "GoogleAuthenticationService"
         ) {
             GoogleAuthenticationServiceImpl()

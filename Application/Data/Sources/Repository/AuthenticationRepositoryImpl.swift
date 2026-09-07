@@ -9,17 +9,17 @@ import Domain
 
 final class AuthenticationRepositoryImpl: AuthenticationRepository {
     private let authService: AuthService
-    private let appleAuthService: AuthenticationService
-    private let githubAuthService: AuthenticationService
-    private let googleAuthService: AuthenticationService
+    private let appleAuthService: AppleAuthenticationService
+    private let githubAuthService: GithubAuthenticationService
+    private let googleAuthService: GoogleAuthenticationService
     private let userService: UserService
     private let widgetSnapshotUpdater: WidgetSnapshotUpdater
 
     init(
         authService: AuthService,
-        appleAuthService: AuthenticationService,
-        githubAuthService: AuthenticationService,
-        googleAuthService: AuthenticationService,
+        appleAuthService: AppleAuthenticationService,
+        githubAuthService: GithubAuthenticationService,
+        googleAuthService: GoogleAuthenticationService,
         userService: UserService,
         widgetSnapshotUpdater: WidgetSnapshotUpdater
     ) {

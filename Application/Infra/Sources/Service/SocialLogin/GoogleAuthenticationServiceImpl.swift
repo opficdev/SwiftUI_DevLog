@@ -11,7 +11,7 @@ import GoogleSignIn
 import Core
 import Data
 
-final class GoogleAuthenticationServiceImpl: AuthenticationService {
+final class GoogleAuthenticationServiceImpl: GoogleAuthenticationService {
     private enum CrashlyticsError {
         static let domain = "DevLogInfra.GoogleAuthenticationServiceImpl"
 

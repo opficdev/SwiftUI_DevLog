@@ -11,7 +11,7 @@ import Foundation
 import Core
 import Data
 
-final class AppleAuthenticationServiceImpl: AuthenticationService {
+final class AppleAuthenticationServiceImpl: AppleAuthenticationService {
     private enum CrashlyticsError {
         static let domain = "DevLogInfra.AppleAuthenticationServiceImpl"
 

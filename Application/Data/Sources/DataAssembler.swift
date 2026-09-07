@@ -16,15 +16,15 @@ public final class DataAssembler: Assembler {
             AuthenticationRepositoryImpl(
                 authService: container.resolve(AuthService.self),
                 appleAuthService: container.resolve(
-                    AuthenticationService.self,
+                    AppleAuthenticationService.self,
                     name: "AppleAuthenticationService"
                 ),
                 githubAuthService: container.resolve(
-                    AuthenticationService.self,
+                    GithubAuthenticationService.self,
                     name: "GithubAuthenticationService"
                 ),
                 googleAuthService: container.resolve(
-                    AuthenticationService.self,
+                    GoogleAuthenticationService.self,
                     name: "GoogleAuthenticationService"
                 ),
                 userService: container.resolve(UserService.self),
@@ -95,15 +95,15 @@ public final class DataAssembler: Assembler {
             AuthDataRepositoryImpl(
                 authService: container.resolve(AuthService.self),
                 appleAuthService: container.resolve(
-                    AuthenticationService.self,
+                    AppleAuthenticationService.self,
                     name: "AppleAuthenticationService"
                 ),
                 githubAuthService: container.resolve(
-                    AuthenticationService.self,
+                    GithubAuthenticationService.self,
                     name: "GithubAuthenticationService"
                 ),
                 googleAuthService: container.resolve(
-                    AuthenticationService.self,
+                    GoogleAuthenticationService.self,
                     name: "GoogleAuthenticationService"
                 )
             )

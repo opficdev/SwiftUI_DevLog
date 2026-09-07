@@ -9,7 +9,7 @@ import FirebaseAuth
 import Core
 import Data
 
-final class GithubAuthenticationServiceImpl: AuthenticationService {
+final class GithubAuthenticationServiceImpl: GithubAuthenticationService {
     private enum CrashlyticsError {
         static let domain = "DevLogInfra.GithubAuthenticationServiceImpl"
 
