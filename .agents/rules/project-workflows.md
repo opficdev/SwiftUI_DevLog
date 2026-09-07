@@ -72,7 +72,7 @@ This reference holds DevLog-specific working rules that should live with the pro
 ## Layer-internal dependency injection
 
 - Do not inject dependencies between types that belong to the same layer.
-- This includes initializer injection, stored-property injection, environment injection, and resolving same-layer types through `DIContainer`.
+- This includes initializer injection, stored-property injection, environment injection, and resolving same-layer types through a runtime resolver.
 - The only allowed exception is a SwiftUI `View` file in `Application/Presentation` receiving same-layer presentation objects such as a ViewModel, Coordinator, or Store for UI composition.
 - The exception does not apply to non-View files in Presentation, and does not apply to Core, Domain, Data, Infra, Persistence, Widget, App, WidgetCore, or WidgetExtension.
 
@@ -100,7 +100,7 @@ This reference holds DevLog-specific working rules that should live with the pro
 
 - Widget UI should consume snapshot data, not app/domain services.
 - `WidgetCore` should stay free of Domain, Data, Infra, Persistence, Presentation, and App dependencies unless the user explicitly approves a boundary change.
-- `Widget` owns the app-side widget bridge: sync event bus implementation, sync event handlers, session sync handler, auth-session sync provider, snapshot generation/persistence orchestration, WidgetKit reload bridge, and `WidgetAssembler`.
+- `Widget` owns the app-side widget bridge: sync event bus implementation, sync event handlers, session sync handler, auth-session sync provider, snapshot generation/persistence orchestration, WidgetKit reload bridge, and provider graph.
 - `Data` owns widget-related contracts and repository implementations, including `WidgetSyncEventBus`, `WidgetSnapshotUpdater`, and `WidgetTodoSnapshotRepository`. Data should not own concrete widget handlers, WidgetCore snapshot model/factory usage, or WidgetKit reload behavior.
 - `Persistence` owns local persistence, user defaults, image store, and non-widget app persistence.
 - Prefer an app-driven snapshot flow: app/runtime event, Widget sync handler, Data snapshot input fetch, Widget snapshot update, App Group storage through WidgetCore contracts, WidgetExtension rendering.

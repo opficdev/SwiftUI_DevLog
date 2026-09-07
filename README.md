@@ -239,8 +239,8 @@ DevLog_iOS/
 ├── Tuist/
 │	└── ProjectDescriptionHelpers/ # Tuist 공통 패키지, 설정, 타깃 템플릿
 ├── Application/
-│	├── App/                   # 앱 진입점, 앱 생명주기, 라우팅, Assembler 구성
-│	├── Core/                  # DI, Logger, Query, 공통 값 타입
+│	├── App/                   # 앱 진입점, 앱 생명주기, 라우팅, Cradle graph 조립
+│	├── Core/                  # Logger, Query, 공통 값 타입
 │	├── Domain/                # Entity, Repository Protocol, UseCase
 │	├── Data/                  # Repository 구현, DTO, Mapper, Data 계층 Protocol
 │	├── Infra/                 # Firebase, 소셜 로그인, 네트워크, 메타데이터 서비스 구현
