@@ -18,7 +18,6 @@ struct TodoMarkdownContentView: View {
         MarkdownRendererView(
             markdown: content,
             references: rendererReferences,
-            obscuredBottomInset: .zero,
             onOpenReferenceID: onOpenTodoID
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
