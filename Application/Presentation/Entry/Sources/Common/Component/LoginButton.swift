@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct LoginButton: View {
-    @State private var logo: Image?
-    @State private var text = ""
     @ScaledMetric(relativeTo: .body) private var height = CGFloat(22)
+    private var logo: Image?
+    private var text = ""
     private let showsProgressView: Bool
     private let action: () -> Void
 
@@ -20,8 +20,8 @@ struct LoginButton: View {
         showsProgressView: Bool = false,
         action: @escaping () -> Void = {}
     ) {
-        self._logo = State(initialValue: logo)
-        self._text = State(initialValue: text)
+        self.logo = logo
+        self.text = text
         self.showsProgressView = showsProgressView
         self.action = action
     }
@@ -30,28 +30,30 @@ struct LoginButton: View {
         Button {
             action()
         } label: {
-            ZStack {
-                Text(text)
-                    .opacity(showsProgressView ? 0 : 1)
+            Group {
                 if showsProgressView {
                     ProgressView()
+                        .tint(Color(asset: .accentColor))
+                } else {
+                    Text(text)
+                        .foregroundStyle(Color(asset: .textPrimary))
                 }
             }
-            .foregroundStyle(Color.primary)
             .font(.system(.body))
-            .contentShape(.capsule)
-            .frame(width: 300, height: height + 16)
-            .overlay {
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .stroke(Color.gray, lineWidth: 1)
-                    if let logo, !showsProgressView {
-                        logo
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: height, height: height)
-                            .padding(.leading)
-                    }
+            .contentShape(.rect(cornerRadius: 12))
+            .frame(width: 300, height: height + 24)
+            .background {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(asset: .border), lineWidth: 3)
+                    .fill(Color(asset: .surface))
+            }
+            .overlay(alignment: .leading) {
+                if let logo, !showsProgressView {
+                    logo
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: height, height: height)
+                        .padding(.leading)
                 }
             }
         }

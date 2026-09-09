@@ -26,27 +26,41 @@ struct LoginView: View {
     var body: some View {
         VStack {
             Spacer()
-            Image("Primary")
+            Spacer()
+            Image("Primary", bundle: PresentationResources.bundle)
                 .resizable()
                 .scaledToFit()
-                .frame(width: sceneWidth / 5)
+                .frame(width: sceneWidth / 4)
             Spacer()
+
+            VStack(spacing: 24) {
+                Text(String(localized: "login_intro_title"))
+                    .font(.title)
+                    .fontWeight(.heavy)
+                    .multilineTextAlignment(.center)
+                Text(String(localized: "login_intro_description"))
+                    .padding(.horizontal)
+                    .foregroundStyle(Color(asset: .textTertiary))
+                    .multilineTextAlignment(.center)
+            }
+            Spacer()
+
             VStack(spacing: 20) {
                 signInButton(
                     provider: .google,
-                    logo: Image("Google"),
+                    logo: Image("Google", bundle: PresentationResources.bundle),
                     text: String(localized: "login_google_sign_in")
                 )
 
                 signInButton(
                     provider: .github,
-                    logo: Image("Github"),
+                    logo: Image("Github", bundle: PresentationResources.bundle),
                     text: String(localized: "login_github_sign_in")
                 )
 
                 signInButton(
                     provider: .apple,
-                    logo: Image("Apple"),
+                    logo: Image("Apple", bundle: PresentationResources.bundle),
                     text: String(localized: "login_apple_sign_in")
                 )
             }
