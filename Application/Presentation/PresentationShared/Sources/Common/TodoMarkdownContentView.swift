@@ -10,8 +10,6 @@ import Domain
 import MarkdownRenderer
 
 struct TodoMarkdownContentView: View {
-    @State private var tabBarHeight = CGFloat.zero
-
     let content: String
     let referenceItems: [Int: TodoReferenceItem]
     var onOpenTodoID: ((String) -> Void)?
@@ -20,18 +18,10 @@ struct TodoMarkdownContentView: View {
         MarkdownRendererView(
             markdown: content,
             references: rendererReferences,
-            obscuredBottomInset: tabBarHeight,
+            obscuredBottomInset: .zero,
             onOpenReferenceID: onOpenTodoID
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.container, edges: ignoredSafeAreaEdges)
-        .onAppear { updateTabBarHeight() }
-    }
-
-    private var ignoredSafeAreaEdges: Edge.Set {
-        if #available(iOS 26.0, *) { return .bottom }
-
-        return []
     }
 
     private var rendererReferences: [Int: MarkdownRendererReference] {
@@ -62,17 +52,5 @@ struct TodoMarkdownContentView: View {
         }
 
         return "data:image/png;base64,\(data.base64EncodedString())"
-    }
-
-    @MainActor
-    private func updateTabBarHeight() {
-        guard #available(iOS 26.0, *) else { return }
-
-        let window = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first { $0.isKeyWindow }
-
-        tabBarHeight = window?.rootViewController?.visibleTabBarHeight ?? .zero
     }
 }

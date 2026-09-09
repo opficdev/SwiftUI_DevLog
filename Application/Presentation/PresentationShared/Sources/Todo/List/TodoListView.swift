@@ -12,6 +12,7 @@ import Core
 import Domain
 
 public struct TodoListView: View {
+    @Environment(\.isExposableTabContentActive) private var isTabContentActive
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
@@ -70,6 +71,7 @@ public struct TodoListView: View {
         .navigationTitle(TodoCategoryItem(from: store.category).localizedName)
         .fullScreenCover(
             item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover)
+                .activePresentation(when: isTabContentActive)
         ) { coverStore in
             fullScreenCoverContent(coverStore)
         }

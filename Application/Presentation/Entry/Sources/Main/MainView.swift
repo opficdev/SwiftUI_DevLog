@@ -29,75 +29,42 @@ struct MainView: View {
     }
 
     var body: some View {
-        tabView
-            .onAppear { store.send(.view(.onAppear)) }
-            .onChange(of: selectedTab, initial: true) { _, tab in
-                store.send(.view(.selectedTabChanged(tab)))
-            }
-            .prominentAlert(store, state: \.alert, action: \.alert)
-            .toastHost()
+        ExposableTabContent(
+            selection: $selectedTab,
+            items: MainTab.allCases,
+            content: tabContent
+        )
+        .toastHost()
+        .exposableTabBar(isPresented: true) {
+            MainTabBar(
+                selectedTab: $selectedTab,
+                unreadPushCount: store.unreadPushCount
+            )
+        }
+        .onAppear { store.send(.view(.onAppear)) }
+        .onChange(of: selectedTab, initial: true) { _, tab in
+            store.send(.view(.selectedTabChanged(tab)))
+        }
+        .prominentAlert(store, state: \.alert, action: \.alert)
     }
 
-    private var tabView: some View {
-        TabView(selection: $selectedTab) {
+    @ViewBuilder
+    private func tabContent(_ tab: MainTab, isSelected: Bool) -> some View {
+        switch tab {
+        case .home:
             HomeView(
-                isSelected: selectedTab == .home,
+                isSelected: isSelected,
                 windowEvent: windowEvent
             )
-            .tabItem { tabLabel(.home) }
-            .tag(MainTab.home)
-
+        case .today:
             TodayView(
-                isSelected: selectedTab == .today,
+                isSelected: isSelected,
                 windowEvent: windowEvent
             )
-            .tabItem { tabLabel(.today) }
-            .tag(MainTab.today)
-
-            PushNotificationListView(isSelected: selectedTab == .notification)
-                .tabItem { tabLabel(.notification) }
-                .badge(store.unreadPushCount)
-                .tag(MainTab.notification)
-
-            ProfileView(isSelected: selectedTab == .profile)
-                .tabItem { tabLabel(.profile) }
-                .tag(MainTab.profile)
-        }
-    }
-
-    private func tabLabel(_ tab: MainTab) -> some View {
-        Label {
-            Text(tab.title)
-        } icon: {
-            Image(systemName: tab.symbolName)
-        }
-    }
-}
-
-private extension MainTab {
-    var title: String {
-        switch self {
-        case .home:
-            String(localized: "nav_home", bundle: PresentationResources.bundle)
-        case .today:
-            String(localized: "nav_today", bundle: PresentationResources.bundle)
         case .notification:
-            String(localized: "nav_notifications", bundle: PresentationResources.bundle)
+            PushNotificationListView(isSelected: isSelected)
         case .profile:
-            String(localized: "nav_profile", bundle: PresentationResources.bundle)
-        }
-    }
-
-    var symbolName: String {
-        switch self {
-        case .home:
-            "house.fill"
-        case .today:
-            "sun.max.fill"
-        case .notification:
-            "bell.fill"
-        case .profile:
-            "person.crop.circle.fill"
+            ProfileView(isSelected: isSelected)
         }
     }
 }

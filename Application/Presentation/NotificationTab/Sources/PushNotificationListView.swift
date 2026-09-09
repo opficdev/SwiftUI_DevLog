@@ -49,7 +49,7 @@ public struct PushNotificationListView: View {
                 .navigationTitle(String(localized: "nav_push_notifications", bundle: PresentationResources.bundle))
         }
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .sheet(item: sheetStore) { store in
+        .sheet(item: sheetStore.activePresentation(when: isSelected)) { store in
             sheetContent(store)
         }
         .onChange(of: isSelected, initial: true) { _, isSelected in

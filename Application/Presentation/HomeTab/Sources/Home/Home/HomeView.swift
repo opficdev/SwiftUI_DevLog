@@ -62,8 +62,16 @@ public struct HomeView: View {
             store.send(.view(.todoEditorCreated))
         }
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .sheet(item: $store.scope(state: \.sheet, action: \.sheet), content: sheetContent)
-        .fullScreenCover(item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover), content: coverContent)
+        .sheet(
+            item: $store.scope(state: \.sheet, action: \.sheet)
+                .activePresentation(when: isSelected),
+            content: sheetContent
+        )
+        .fullScreenCover(
+            item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover)
+                .activePresentation(when: isSelected),
+            content: coverContent
+        )
     }
 
     private var todoSection: some View {

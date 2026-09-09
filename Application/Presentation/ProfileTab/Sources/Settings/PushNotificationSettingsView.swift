@@ -9,6 +9,7 @@ import SwiftUI
 import PresentationShared
 
 struct PushNotificationSettingsView: View {
+    @Environment(\.isExposableTabContentActive) private var isTabContentActive
     @State var store: StoreOf<PushNotificationSettingsFeature>
 
     var body: some View {
@@ -71,7 +72,10 @@ struct PushNotificationSettingsView: View {
         .navigationTitle(String(localized: "nav_push_settings", bundle: PresentationResources.bundle))
         .onAppear { store.send(.fetchSettings) }
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .sheet(item: $store.scope(state: \.timePicker, action: \.timePicker)) { timePickerStore in
+        .sheet(
+            item: $store.scope(state: \.timePicker, action: \.timePicker)
+                .activePresentation(when: isTabContentActive)
+        ) { timePickerStore in
             TimePickerView(
                 store: timePickerStore,
                 showsProgressView: store.isLoading && store.activeLoadingRow == .customTime

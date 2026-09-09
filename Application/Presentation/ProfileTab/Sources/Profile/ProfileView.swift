@@ -38,6 +38,8 @@ public struct ProfileView: View {
         .onChange(of: isSelected, initial: true) { _, isSelected in
             if isSelected {
                 store.send(.fetchData)
+            } else {
+                focused = false
             }
         }
         .onAppear {
@@ -48,7 +50,9 @@ public struct ProfileView: View {
             store.send(.updateStatusTextFieldFocus(newValue), animation: .default)
         }
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .sheet(isPresented: $store.showQuarterPicker) { quarterPickerSheet }
+        .sheet(
+            isPresented: $store.showQuarterPicker.activePresentation(when: isSelected)
+        ) { quarterPickerSheet }
         .overlay {
             if store.isLoading {
                 LoadingView()

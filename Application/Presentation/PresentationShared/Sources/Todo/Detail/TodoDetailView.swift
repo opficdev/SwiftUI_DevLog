@@ -12,6 +12,7 @@ import Core
 import Domain
 
 public struct TodoDetailView: View {
+    @Environment(\.isExposableTabContentActive) private var isTabContentActive
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @State var store: StoreOf<TodoDetailFeature>
@@ -48,11 +49,15 @@ public struct TodoDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .sheet(item: $store.scope(state: \.sheet, action: \.sheet)) { store in
+        .sheet(
+            item: $store.scope(state: \.sheet, action: \.sheet)
+                .activePresentation(when: isTabContentActive)
+        ) { store in
             sheetContent(store)
         }
         .fullScreenCover(
             item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover)
+                .activePresentation(when: isTabContentActive)
         ) { store in
             fullScreenCoverContent(store)
         }
