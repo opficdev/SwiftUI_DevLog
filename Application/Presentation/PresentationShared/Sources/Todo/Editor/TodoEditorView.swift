@@ -34,13 +34,7 @@ public struct TodoEditorView: View {
 
     public var body: some View {
         NavigationStack {
-            Group {
-                if store.tabViewTag == .editor {
-                    editorContent
-                } else {
-                    previewContent
-                }
-            }
+            selectedContent
             .onTapGesture {
                 field = .content
             }
@@ -54,32 +48,44 @@ public struct TodoEditorView: View {
             .sheet(item: $store.scope(state: \.sheet, action: \.sheet)) { store in
                 sheetContent(store)
             }
-            .toolbar {
-                if !isiOSAppOnMac {
-                    ToolbarLeadingButton { close() }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        store.send(.setSheet(.info))
-                    } label: {
-                        Image(systemName: "info.circle")
-                    }
-                }
-                if store.isLoading {
-                    if #available(iOS 26.0, *) {
-                        ToolbarSpacer(.fixed, placement: .topBarTrailing)
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        ProgressView()
-                    }
-                } else {
-                    ToolbarTrailingButton {
-                        submit()
-                    }
-                    .disabled(!store.isReadyToSubmit)
-                }
-            }
+            .toolbar { toolbarContent }
             .prominentAlert(store, state: \.alert, action: \.alert)
+        }
+    }
+
+    @ViewBuilder
+    private var selectedContent: some View {
+        if store.tabViewTag == .editor {
+            editorContent
+        } else {
+            previewContent
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        if !isiOSAppOnMac {
+            ToolbarLeadingButton { close() }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                store.send(.setSheet(.info))
+            } label: {
+                Image(systemName: "info.circle")
+            }
+        }
+        if store.isLoading {
+            if #available(iOS 26.0, *) {
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                ProgressView()
+            }
+        } else {
+            ToolbarTrailingButton {
+                submit()
+            }
+            .disabled(!store.isReadyToSubmit)
         }
     }
 

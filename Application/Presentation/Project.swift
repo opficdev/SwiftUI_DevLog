@@ -34,6 +34,7 @@ let project = Project(
             bundleId: "com.opfic.DevLog.PresentationShared",
             infoPlist: .file(path: frameworkInfoPlistPath),
             sources: ["PresentationShared/Sources/**/*.swift"],
+            resources: ["PresentationShared/Resources/Assets.xcassets"],
             scripts: [
                 DevLogScripts.swiftLint(
                     sourcePath: "PresentationShared/Sources",
