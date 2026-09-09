@@ -30,7 +30,6 @@ public struct HomeView: View {
         List {
             todoSection
             recentTodoSection
-            webPageSection
         }
         .listStyle(.insetGrouped)
         .navigationTitle(String(localized: "nav_home", bundle: PresentationResources.bundle))
@@ -97,49 +96,6 @@ public struct HomeView: View {
         }
     }
 
-    private var webPageSection: some View {
-        Section {
-            let webPages = store.webPages.filter { !$0.isHidden }
-            if store.isWebPageLoading {
-                LoadingView()
-                    .id(UUID()) //  id 부여를 통해 렌더링 강제
-            } else if store.needsWebPageRefresh {
-                Button {
-                    store.send(.view(.refreshWebPages))
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text(String(localized: "home_web_refresh_required", bundle: PresentationResources.bundle))
-                            .font(.callout)
-                            .multilineTextAlignment(.center)
-                        Spacer()
-                    }
-                }
-                .buttonStyle(.plain)
-            } else if webPages.isEmpty {
-                HStack {
-                    Spacer()
-                    Text(String(localized: "home_web_empty", bundle: PresentationResources.bundle))
-                        .font(.callout)
-                    Spacer()
-                }
-            } else {
-                ForEach(webPages, id: \.id) { page in
-                    webResultRow(page)
-                }
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-            }
-        } header: {
-            HStack {
-                Text("Web Page", bundle: PresentationResources.bundle)
-                    .foregroundStyle(Color.primary)
-                    .font(.title2.bold())
-                Spacer()
-            }
-            .listRowInsets(EdgeInsets())
-        }
-    }
-
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
@@ -164,8 +120,7 @@ public struct HomeView: View {
 
     @ViewBuilder
     private func sheetContent(_ sheetStore: Store<HomeFeature.SheetState, HomeFeature.Sheet>) -> some View {
-        if let pickerStore = sheetStore.scope(state: \.contentPickerState, action: \.contentPicker) {
-            @Bindable var pickerStore = pickerStore
+        if case .contentPicker = sheetStore.state {
             NavigationStack {
                 List {
                     Section {
@@ -191,66 +146,8 @@ public struct HomeView: View {
                             .foregroundStyle(Color(.label))
                     }
 
-                    Section {
-                        Button {
-                            pickerStore.send(.tapWebPageInput)
-                        } label: {
-                            labelImage(
-                                text: "URL",
-                                systemName: "globe",
-                                imageColor: .blue
-                            )
-                        }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    } header: {
-                        Text("Web Page", bundle: PresentationResources.bundle)
-                            .foregroundStyle(Color(.label))
-                    }
                 }
-                .navigationDestination(
-                    item: $pickerStore.scope(state: \.webPageInput, action: \.webPageInput)
-                ) { _ in
-                    Form {
-                        Section {
-                            TextField(
-                                "",
-                                text: $store.webPageURLInput,
-                                prompt: Text("https://", bundle: PresentationResources.bundle)
-                            )
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.URL)
-                        } footer: {
-                            Text(String(localized: "home_webpage_input_message", bundle: PresentationResources.bundle))
-                        }
-                    }
-                    .scrollDisabled(true)
-                    .navigationTitle(
-                        Text(
-                            String(
-                                localized: "home_webpage_input_title",
-                                bundle: PresentationResources.bundle
-                            )
-                        )
-                    )
-                    .navigationBarTitleDisplayMode(.inline) //  설정 안하면 섹션 위에 내비게이션 large 만큼 영역 먹음
-                    .toolbar {
-                        if store.isAppending {
-                            if #available(iOS 26.0, *) {
-                                ToolbarSpacer(.fixed, placement: .topBarTrailing)
-                            }
-                            ToolbarItem(placement: .topBarTrailing) {
-                                ProgressView()
-                            }
-                        } else {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button(String(localized: "home_add", bundle: PresentationResources.bundle)) {
-                                    store.send(.view(.addWebPage))
-                                }
-                            }
-                        }
-                    }
-                }
-                .navigationTitle(Text(String(localized: "nav_home_content", bundle: PresentationResources.bundle)))
+                .navigationTitle(Text("TODO"))
                 .navigationBarTitleDisplayMode(.inline)  //  설정 안하면 섹션 위에 내비게이션 large 만큼 영역 먹음
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -327,34 +224,6 @@ public struct HomeView: View {
         .todoDetailPreview(todoId: item.id)
     }
 
-    @ViewBuilder
-    private func webResultRow(_ item: WebPageItem) -> some View {
-        Group {
-            if isCompactLayout {
-                NavigationLink(value: HomeRoute.webPage(item)) {
-                    WebItemRow(item: item, showsChevron: false)
-                }
-            } else {
-                Button {
-                    coordinator.router.replace(with: .webPage(item))
-                } label: {
-                    WebItemRow(item: item, showsChevron: false)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                store.send(.view(.deleteWebPage(item)))
-                presentDeleteWebPageToast(item.url.absoluteString)
-            } label: {
-                Label(String(localized: "common_delete", bundle: PresentationResources.bundle), systemImage: "trash")
-            }
-        }
-    }
-
     private func labelImage(
         text: String,
         systemName: String,
@@ -388,28 +257,11 @@ public struct HomeView: View {
         }
     }
 
-    private func presentDeleteWebPageToast(_ urlString: String) {
-        ToastPresenter.present(
-            message: String(localized: "common_undo", bundle: PresentationResources.bundle),
-            systemImage: "arrow.uturn.left",
-            duration: 5,
-            font: .caption,
-            multilineTextAlignment: .center,
-            action: {
-                store.send(.view(.undoDeleteWebPage))
-            },
-            onDismiss: {
-                store.send(.view(.finishDeleteWebPageToast(urlString)))
-            }
-        )
-    }
-
 }
 
 public enum HomeRoute: Hashable {
     case category(TodoCategoryItem)
     case todo(TodoIdItem)
-    case webPage(WebPageItem)
 }
 
 private struct RecentTodoRow: View {

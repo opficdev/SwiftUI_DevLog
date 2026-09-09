@@ -18,15 +18,14 @@ struct HomeFeature {
         @Presents var fullScreenCover: FullScreenCoverState?
         var preferences = [TodoCategoryItem]()
         var recentTodos = [RecentTodoItem]()
-        var webPages = [WebPageItem]()
-        var needsWebPageRefresh = false
         var isNetworkConnected = true
-        var webPageURLInput = "https://"
         var selectedTodoCategory: TodoCategory?
-        var deletedWebPage: DeletedWebPage?
         var loading = LoadingFeature.State()
 
-        var showContentPicker: Bool { sheet?.contentPickerState != nil }
+        var showContentPicker: Bool {
+            if case .contentPicker? = sheet { return true }
+            return false
+        }
 
         var showTodoEditor: Bool { fullScreenCover?.todoEditor != nil }
 
@@ -42,18 +41,6 @@ struct HomeFeature {
             loading.visibleTargets.contains(LoadingTarget.recentTodos.target)
         }
 
-        var isWebPageLoading: Bool {
-            loading.visibleTargets.contains(LoadingTarget.webPage.target)
-        }
-
-        var isAppending: Bool {
-            loading.visibleTargets.contains(LoadingTarget.overlay.target)
-        }
-    }
-
-    struct DeletedWebPage: Equatable {
-        let id: String
-        let urlString: String
     }
 
     enum Action: BindableAction, Equatable {
@@ -69,49 +56,26 @@ struct HomeFeature {
             case startObserving
             case fetchData
             case refreshRecentTodos
-            case refreshWebPages
-            case finishDeleteWebPageToast(String)
             case todoEditorCreated
             case tapManageTodoCategory
             case tapTodoCategory(TodoCategory)
-            case addWebPage
-            case deleteWebPage(WebPageItem)
-            case undoDeleteWebPage
         }
 
         enum StoreAction: Equatable {
             case networkStatusChanged(Bool)
             case setSheet(SheetState?)
             case setPresentation(Presentation, Bool)
-            case setAlert(isPresented: Bool, type: AlertType? = nil)
-            case setWebPageHidden(String, Bool)
-            case handleWebPageDeleteFailure(String)
+            case setAlert(isPresented: Bool)
             case setTodoCategory([TodoCategoryItem])
             case updateRecentTodos([RecentTodoItem])
-            case updateWebPages([WebPageItem])
         }
-    }
-
-    enum AlertType: Equatable {
-        case invalidURL
-        case error
-    }
-
-    @ObservableState
-    struct ContentPickerState: Equatable {
-        @Presents var webPageInput: WebPageInputState?
-    }
-
-    @ObservableState
-    struct WebPageInputState: Equatable, Identifiable {
-        let id = UUID()
     }
 
     @ObservableState
     @CasePathable
     enum SheetState: Equatable {
         case reorderTodo(CategoryManageFeature.State)
-        case contentPicker(ContentPickerState)
+        case contentPicker
 
         var categoryManageState: CategoryManageFeature.State? {
             get {
@@ -123,30 +87,12 @@ struct HomeFeature {
                 self = .reorderTodo(newValue)
             }
         }
-
-        var contentPickerState: ContentPickerState? {
-            get {
-                guard case .contentPicker(let state) = self else { return nil }
-                return state
-            }
-            set {
-                guard let newValue else { return }
-                self = .contentPicker(newValue)
-            }
-        }
     }
 
     @CasePathable
     enum Sheet: Equatable {
         case tapCloseButton
         case categoryManage(CategoryManageFeature.Action)
-        case contentPicker(ContentPicker)
-
-        @CasePathable
-        enum ContentPicker: Equatable {
-            case tapWebPageInput
-            case webPageInput(PresentationAction<Never>)
-        }
     }
 
     @ObservableState
@@ -183,8 +129,6 @@ struct HomeFeature {
     enum LoadingTarget: Hashable {
         case preferences
         case recentTodos
-        case webPage
-        case overlay
 
         var target: LoadingFeature.Target {
             switch self {
@@ -192,21 +136,13 @@ struct HomeFeature {
                 return LoadingFeature.Target("home.preferences")
             case .recentTodos:
                 return LoadingFeature.Target("home.recentTodos")
-            case .webPage:
-                return LoadingFeature.Target("home.webPage")
-            case .overlay:
-                return LoadingFeature.Target("home.overlay")
             }
         }
     }
 
     @Dependency(\.fetchTodoCategoryPreferencesUseCase) var fetchPreferencesUseCase
     @Dependency(\.homeUpdateTodoCategoryPreferencesUseCase) var updatePreferencesUseCase
-    @Dependency(\.homeAddWebPageUseCase) var addWebPageUseCase
-    @Dependency(\.homeDeleteWebPageUseCase) var deleteWebPageUseCase
-    @Dependency(\.homeUndoDeleteWebPageUseCase) var undoDeleteWebPageUseCase
     @Dependency(\.homeFetchTodosUseCase) var fetchTodosUseCase
-    @Dependency(\.homeFetchWebPagesUseCase) var fetchWebPagesUseCase
     @Dependency(\.homeNetworkConnectivityUseCase) var networkConnectivityUseCase
     @Dependency(\.trackAnalyticsEventUseCase) var trackAnalyticsEventUseCase
     @Dependency(\.continuousClock) var clock
@@ -278,18 +214,10 @@ private extension HomeFeature {
         case .fetchData:
             return .merge(
                 fetchTodoCategoryPreferencesEffect(),
-                fetchRecentTodosEffect(),
-                fetchWebPagesEffect()
+                fetchRecentTodosEffect()
             )
         case .refreshRecentTodos:
             return fetchRecentTodosEffect()
-        case .refreshWebPages:
-            return fetchWebPagesEffect()
-        case .finishDeleteWebPageToast(let urlString):
-            state.webPages.removeAll { $0.url.absoluteString == urlString && $0.isHidden }
-            if state.deletedWebPage?.urlString == urlString {
-                state.deletedWebPage = nil
-            }
         case .todoEditorCreated:
             state.fullScreenCover = nil
             state.selectedTodoCategory = nil
@@ -303,30 +231,6 @@ private extension HomeFeature {
             state.selectedTodoCategory = category
             state.sheet = nil
             return delayedTodoEditorEffect()
-        case .addWebPage:
-            guard let normalizedURL = Self.normalizedWebPageURL(state.webPageURLInput) else {
-                Self.setAlert(&state, isPresented: true, type: .invalidURL)
-                return .none
-            }
-            Self.setAlert(&state, isPresented: false, type: nil)
-            return addWebPageEffect(normalizedURL)
-        case .deleteWebPage(let page):
-            guard let index = state.webPages.firstIndex(where: { $0.id == page.id }) else {
-                return .none
-            }
-            state.deletedWebPage = DeletedWebPage(
-                id: page.id,
-                urlString: page.url.absoluteString
-            )
-            state.webPages[index].isHidden = true
-            return deleteWebPageEffect(page)
-        case .undoDeleteWebPage:
-            guard let webPage = state.deletedWebPage else { return .none }
-            if let index = state.webPages.firstIndex(where: { $0.id == webPage.id }) {
-                state.webPages[index].isHidden = false
-            }
-            state.deletedWebPage = nil
-            return undoDeleteWebPageEffect(webPage)
         }
 
         return .none
@@ -353,26 +257,13 @@ private extension HomeFeature {
             state.sheet = sheet
         case .setPresentation(let presentation, let isPresented):
             Self.setPresentation(&state, presentation: presentation, isPresented: isPresented)
-        case .setAlert(let isPresented, let type):
-            Self.setAlert(&state, isPresented: isPresented, type: type)
-        case .setWebPageHidden(let id, let isHidden):
-            if let index = state.webPages.firstIndex(where: { $0.id == id }) {
-                state.webPages[index].isHidden = isHidden
-            }
-        case .handleWebPageDeleteFailure(let id):
-            if let index = state.webPages.firstIndex(where: { $0.id == id }) {
-                state.webPages[index].isHidden = false
-            } else {
-                state.needsWebPageRefresh = true
-            }
+        case .setAlert(let isPresented):
+            Self.setAlert(&state, isPresented: isPresented)
         case .setTodoCategory(let preferences):
             state.preferences = preferences
             state.recentTodos = Self.syncRecentTodos(state.recentTodos, preferences: preferences)
         case .updateRecentTodos(let todos):
             state.recentTodos = todos
-        case .updateWebPages(let pages):
-            state.webPages = pages
-            state.needsWebPageRefresh = false
         }
 
         return .none
@@ -388,40 +279,5 @@ private struct HomeSheetFeature: Reducer {
         .ifCaseLet(\.reorderTodo, action: \.categoryManage) {
             CategoryManageFeature()
         }
-        .ifCaseLet(\.contentPicker, action: \.contentPicker) {
-            HomeContentPickerFeature()
-        }
-    }
-}
-
-private struct HomeContentPickerFeature: Reducer {
-    typealias State = HomeFeature.ContentPickerState
-    typealias Action = HomeFeature.Sheet.ContentPicker
-
-    var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            switch action {
-            case .tapWebPageInput:
-                state.webPageInput = .init()
-            case .webPageInput(.dismiss):
-                state.webPageInput = nil
-            case .webPageInput:
-                break
-            }
-
-            return .none
-        }
-        .ifLet(\.$webPageInput, action: \.webPageInput) {
-            HomeWebPageInputFeature()
-        }
-    }
-}
-
-private struct HomeWebPageInputFeature: Reducer {
-    typealias State = HomeFeature.WebPageInputState
-    typealias Action = Never
-
-    var body: some ReducerOf<Self> {
-        EmptyReducer()
     }
 }

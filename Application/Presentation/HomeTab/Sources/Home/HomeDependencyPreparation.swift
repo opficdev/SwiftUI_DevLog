@@ -18,19 +18,6 @@ public enum HomeDependencyPreparation {
         dependencies.homeTodoMutationEventBus = todoMutationEventBus
     }
 
-    public static func prepareWebPage(
-        _ dependencies: inout DependencyValues,
-        addWebPageUseCase: AddWebPageUseCase,
-        deleteWebPageUseCase: DeleteWebPageUseCase,
-        undoDeleteWebPageUseCase: UndoDeleteWebPageUseCase,
-        fetchWebPagesUseCase: FetchWebPagesUseCase
-    ) {
-        dependencies.homeAddWebPageUseCase = addWebPageUseCase
-        dependencies.homeDeleteWebPageUseCase = deleteWebPageUseCase
-        dependencies.homeUndoDeleteWebPageUseCase = undoDeleteWebPageUseCase
-        dependencies.homeFetchWebPagesUseCase = fetchWebPagesUseCase
-    }
-
     public static func prepareTodo(
         _ dependencies: inout DependencyValues,
         fetchTodosUseCase: FetchTodosUseCase,
@@ -44,12 +31,10 @@ public enum HomeDependencyPreparation {
         _ dependencies: inout DependencyValues,
         fetchRecentSearchQueriesUseCase: FetchRecentSearchQueriesUseCase,
         fetchTodosUseCase: FetchTodosUseCase,
-        fetchWebPagesUseCase: FetchWebPagesUseCase,
         updateRecentSearchQueriesUseCase: UpdateRecentSearchQueriesUseCase
     ) {
         dependencies.homeFetchRecentSearchQueriesUseCase = fetchRecentSearchQueriesUseCase
         dependencies.searchFetchTodosUseCase = fetchTodosUseCase
-        dependencies.searchFetchWebPagesUseCase = fetchWebPagesUseCase
         dependencies.searchUpdateRecentQueriesUseCase = updateRecentSearchQueriesUseCase
     }
 }

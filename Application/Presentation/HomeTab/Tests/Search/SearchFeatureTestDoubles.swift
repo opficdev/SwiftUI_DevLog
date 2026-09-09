@@ -19,27 +19,22 @@ struct SearchStoreTestAdapter {
     var isSearching: Bool { store.state.isSearching }
     var isLoading: Bool { store.state.isLoading }
     var todos: [TodoListItem] { store.state.todos }
-    var webPages: [WebPageItem] { store.state.webPages }
     var recentQueries: [String] { Array(store.state.recentQueries) }
     var showAllTodos: Bool { store.state.showAllTodos }
-    var showAllWebPages: Bool { store.state.showAllWebPages }
     var isHashOnlyQuery: Bool { store.state.isHashOnlyQuery }
     var alert: AlertState<Never>? { store.state.alert }
 
     init(
         recentQueries: [String] = [],
         initialTodos: [TodoListItem] = [],
-        initialWebPages: [WebPageItem] = [],
         isSearching: Bool = false,
         isLoading: Bool = false,
-        fetchWebPagesUseCase: FetchWebPagesUseCase = SearchFetchWebPagesUseCaseSpy(),
         fetchTodosUseCase: FetchTodosUseCase = SearchFetchTodosUseCaseSpy(),
         updateRecentQueriesUseCase: UpdateRecentSearchQueriesUseCase = SearchUpdateRecentQueriesUseCaseSpy(),
         configureDependencies: ((inout DependencyValues) -> Void)? = nil
     ) {
         var state = SearchFeature.State(recentQueries: recentQueries)
         state.todos = initialTodos
-        state.webPages = initialWebPages
         state.isSearching = isSearching
         if isLoading {
             state.loading.setImmediateLoading()
@@ -47,7 +42,6 @@ struct SearchStoreTestAdapter {
         store = TestStore(initialState: state) {
             SearchFeature()
         } withDependencies: {
-            $0.searchFetchWebPagesUseCase = fetchWebPagesUseCase
             $0.searchFetchTodosUseCase = fetchTodosUseCase
             $0.searchUpdateRecentQueriesUseCase = updateRecentQueriesUseCase
             $0.continuousClock = ContinuousClock()
@@ -94,22 +88,14 @@ struct SearchStoreTestAdapter {
         }
     }
 
-    func setShowAllWebPages(_ value: Bool) async {
-        await store.send(.setShowAllWebPages(value)) {
-            $0.showAllWebPages = value
-        }
-    }
-
     func setSearchQuery(_ query: String) async {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let wasLoading = store.state.isLoading
         await store.send(.binding(.set(\.searchQuery, query))) {
             $0.searchQuery = query
             $0.showAllTodos = false
-            $0.showAllWebPages = false
             if trimmed.isEmpty || $0.isHashOnlyQuery {
                 $0.todos = []
-                $0.webPages = []
             }
         }
         if wasLoading {
@@ -138,16 +124,10 @@ struct SearchStoreTestAdapter {
         await store.receive(.store(.applySearchQuery(query)))
     }
 
-    func receiveSearchResults(
-        todos: [TodoListItem],
-        webPages: [WebPageItem]
-    ) async {
+    func receiveSearchResults(todos: [TodoListItem]) async {
         let wasLoading = store.state.isLoading
         await store.receive(.store(.fetchTodos(todos))) {
             $0.todos = todos
-        }
-        await store.receive(.store(.fetchWebPage(webPages))) {
-            $0.webPages = webPages
         }
         if wasLoading {
             await receiveEndLoading()
@@ -213,26 +193,6 @@ final class SearchFetchTodosUseCaseSpy: FetchTodosUseCase {
     }
 }
 
-final class SearchFetchWebPagesUseCaseSpy: FetchWebPagesUseCase {
-    var webPages: [WebPage]
-    var error: Error?
-    private(set) var queries = [String]()
-
-    init(webPages: [WebPage] = []) {
-        self.webPages = webPages
-    }
-
-    func execute(_ query: String) async throws -> [WebPage] {
-        queries.append(query)
-
-        if let error {
-            throw error
-        }
-
-        return webPages
-    }
-}
-
 final class SearchUpdateRecentQueriesUseCaseSpy: UpdateRecentSearchQueriesUseCase {
     private(set) var queries = [[String]]()
 
@@ -264,21 +224,6 @@ func makeSearchTodo(
         dueDate: nil,
         tags: [],
         category: .system(.feature)
-    )
-}
-
-func makeSearchWebPage(
-    id: String = "web-page-id",
-    title: String? = "Web",
-    urlString: String = "https://example.com"
-) -> WebPage {
-    let url = URL(string: urlString)!
-    return WebPage(
-        id: id,
-        title: title,
-        url: url,
-        displayURL: url,
-        imageURL: nil
     )
 }
 

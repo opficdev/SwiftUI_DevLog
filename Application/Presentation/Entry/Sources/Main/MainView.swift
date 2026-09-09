@@ -235,17 +235,6 @@ struct MainView: View {
         case .todo(let item):
             TodoDetailView(store: todoWindowCoordinator.makeDetailStore(todoId: item.id))
             .id(item.id)
-        case .webPage(let item):
-            WebView(url: item.url)
-                .navigationBarTitleDisplayMode(.inline)
-                .ignoresSafeArea()
-                .toolbar(.hidden, for: .tabBar)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text(item.title)
-                            .bold()
-                    }
-            }
         }
     }
 
@@ -381,7 +370,6 @@ private extension MainView {
             set: { todayViewCoordinator.router.detailPath = $0 }
         )
     }
-
 }
 private extension MainTab {
     var title: String {

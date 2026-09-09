@@ -87,13 +87,6 @@ private extension AppGraph {
                 .updateTodoCategoryPreferencesUseCase,
             todoMutationEventBus: todoGraphSet.todoMutationEventBusGraph.todoMutationEventBus
         )
-        HomePresentationDependencyPreparation.prepareWebPage(
-            &dependencies,
-            addWebPageUseCase: webPageGraphSet.webPageUseCaseGraph.addWebPageUseCase,
-            deleteWebPageUseCase: webPageGraphSet.webPageUseCaseGraph.deleteWebPageUseCase,
-            undoDeleteWebPageUseCase: webPageGraphSet.webPageUseCaseGraph.undoDeleteWebPageUseCase,
-            fetchWebPagesUseCase: webPageGraphSet.webPageUseCaseGraph.fetchWebPagesUseCase
-        )
         HomePresentationDependencyPreparation.prepareTodo(
             &dependencies,
             fetchTodosUseCase: todoGraphSet.todoUseCaseGraph.fetchTodosUseCase,
@@ -107,7 +100,6 @@ private extension AppGraph {
                 .userPreferencesUseCaseGraph
                 .fetchRecentSearchQueriesUseCase,
             fetchTodosUseCase: todoGraphSet.todoUseCaseGraph.fetchTodosUseCase,
-            fetchWebPagesUseCase: webPageGraphSet.webPageUseCaseGraph.fetchWebPagesUseCase,
             updateRecentSearchQueriesUseCase: userPreferencesGraphSet
                 .userPreferencesUseCaseGraph
                 .updateRecentSearchQueriesUseCase

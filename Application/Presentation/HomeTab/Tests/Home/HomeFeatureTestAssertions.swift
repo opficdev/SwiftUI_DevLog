@@ -14,46 +14,21 @@ import PresentationShared
 @MainActor
 func verifyHomeFetchData(
     adapter: HomeStoreTestAdapter,
-    fetchTodosUseCaseSpy: FetchTodosUseCaseSpy,
-    fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy
+    fetchTodosUseCaseSpy: FetchTodosUseCaseSpy
 ) async throws {
     await adapter.fetchData()
 
     await waitUntil {
         adapter.preferences.count == 2
             && adapter.recentTodos.count == 2
-            && adapter.webPages.count == 1
     }
 
     #expect(adapter.preferences.map(\.id) == ["feature", "custom"])
     #expect(adapter.recentTodos.map(\.id) == ["todo-1", "todo-2"])
-    #expect(adapter.webPages.map(\.url.absoluteString) == ["https://openai.com"])
     #expect(fetchTodosUseCaseSpy.queries.count == 1)
     #expect(fetchTodosUseCaseSpy.queries.first?.sortTarget == .updatedAt)
     #expect(fetchTodosUseCaseSpy.queries.first?.sortOrder == .latest)
     #expect(fetchTodosUseCaseSpy.queries.first?.pageSize == 100)
-    #expect(fetchWebPagesUseCaseSpy.calledQueries == [""])
-}
-
-@MainActor
-func verifyHomeWebPageInputAlert(
-    adapter: HomeStoreTestAdapter
-) async throws {
-    await adapter.setPresentation(.contentPicker, true)
-
-    #expect(adapter.showContentPicker)
-
-    await adapter.openWebPageInput()
-
-    #expect(adapter.showContentPicker)
-    #expect(!adapter.showAlert)
-
-    await waitUntil {
-        adapter.showWebPageInputNavigation
-    }
-
-    #expect(adapter.showWebPageInputNavigation)
-    #expect(adapter.webPageURLInput == "https://")
 }
 
 @MainActor
@@ -100,55 +75,9 @@ func verifyHomeOrderTodoCategory(
     #expect(!adapter.showCategoryManage)
 }
 
-@MainActor
-func verifyHomeAddWebPage(
-    adapter: HomeStoreTestAdapter,
-    addWebPageUseCaseSpy: AddWebPageUseCaseSpy,
-    fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy,
-    trackAnalyticsEventUseCaseSpy: HomeTrackAnalyticsEventUseCaseSpy
-) async throws {
-    await adapter.setPresentation(.contentPicker, true)
-    await adapter.updateWebPageURLInput("openai.com")
-    await adapter.addWebPage()
-
-    await waitUntil {
-        addWebPageUseCaseSpy.calledUrlStrings == ["https://openai.com"]
-            && adapter.webPages.count == 2
-    }
-
-    #expect(addWebPageUseCaseSpy.calledUrlStrings == ["https://openai.com"])
-    #expect(fetchWebPagesUseCaseSpy.calledQueries == [""])
-    #expect(trackAnalyticsEventUseCaseSpy.events.count == 1)
-    #expect(adapter.webPages.map(\.url.absoluteString) == [
-        "https://openai.com",
-        "https://developer.apple.com"
-    ])
-    #expect(!adapter.showContentPicker)
-    #expect(!adapter.showAlert)
-}
-
-@MainActor
-func verifyHomeAddWebPageFailureKeepsSheet(
-    adapter: HomeStoreTestAdapter,
-    addWebPageUseCaseSpy: AddWebPageUseCaseSpy
-) async throws {
-    await adapter.setPresentation(.contentPicker, true)
-    await adapter.updateWebPageURLInput("openai.com")
-    await adapter.addWebPage()
-
-    await waitUntil {
-        addWebPageUseCaseSpy.calledUrlStrings == ["https://openai.com"]
-            && adapter.showAlert
-    }
-
-    #expect(adapter.showContentPicker)
-    #expect(adapter.alertType == .error)
-}
-
 struct HomeFetchDataContext {
     let fetchPreferencesUseCaseSpy: FetchTodoCategoryPreferencesUseCaseSpy
     let fetchTodosUseCaseSpy: FetchTodosUseCaseSpy
-    let fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy
 }
 
 func makeHomeFetchDataContext() -> HomeFetchDataContext {
@@ -193,14 +122,9 @@ func makeHomeFetchDataContext() -> HomeFetchDataContext {
         nextCursor: nil
     )
 
-    let fetchWebPagesUseCaseSpy = FetchWebPagesUseCaseSpy(
-        webPages: [makeHomeWebPage()]
-    )
-
     return HomeFetchDataContext(
         fetchPreferencesUseCaseSpy: fetchPreferencesUseCaseSpy,
-        fetchTodosUseCaseSpy: fetchTodosUseCaseSpy,
-        fetchWebPagesUseCaseSpy: fetchWebPagesUseCaseSpy
+        fetchTodosUseCaseSpy: fetchTodosUseCaseSpy
     )
 }
 
@@ -216,43 +140,5 @@ func makeHomeOrderContext() -> HomeOrderContext {
         fetchPreferencesUseCaseSpy: fetchContext.fetchPreferencesUseCaseSpy,
         updatePreferencesUseCaseSpy: UpdateTodoCategoryPreferencesUseCaseSpy(),
         fetchTodosUseCaseSpy: fetchContext.fetchTodosUseCaseSpy
-    )
-}
-
-struct HomeAddWebPageContext {
-    let addWebPageUseCaseSpy: AddWebPageUseCaseSpy
-    let fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy
-    let trackAnalyticsEventUseCaseSpy: HomeTrackAnalyticsEventUseCaseSpy
-}
-
-func makeHomeAddWebPageContext() -> HomeAddWebPageContext {
-    HomeAddWebPageContext(
-        addWebPageUseCaseSpy: AddWebPageUseCaseSpy(),
-        fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy(
-            webPages: [
-                makeHomeWebPage(),
-                makeHomeWebPage(
-                    title: "Apple",
-                    urlString: "https://developer.apple.com"
-                )
-            ]
-        ),
-        trackAnalyticsEventUseCaseSpy: HomeTrackAnalyticsEventUseCaseSpy()
-    )
-}
-
-struct HomeDeleteContext {
-    let addWebPageUseCaseSpy: AddWebPageUseCaseSpy
-    let fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy
-    let deleteWebPageUseCaseSpy: DeleteWebPageUseCaseSpy
-    let undoDeleteWebPageUseCaseSpy: UndoDeleteWebPageUseCaseSpy
-}
-
-func makeHomeDeleteContext() -> HomeDeleteContext {
-    HomeDeleteContext(
-        addWebPageUseCaseSpy: AddWebPageUseCaseSpy(),
-        fetchWebPagesUseCaseSpy: FetchWebPagesUseCaseSpy(webPages: [makeHomeWebPage()]),
-        deleteWebPageUseCaseSpy: DeleteWebPageUseCaseSpy(),
-        undoDeleteWebPageUseCaseSpy: UndoDeleteWebPageUseCaseSpy()
     )
 }
