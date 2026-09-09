@@ -33,7 +33,7 @@ public struct RootView: View {
 
     public var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+            Color(asset: .appBackground).ignoresSafeArea()
             if let signIn = store.signIn {
                 if signIn {
                     MainView(

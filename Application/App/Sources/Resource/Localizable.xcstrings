@@ -641,6 +641,40 @@
         }
       }
     },
+    "login_intro_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Set goals and manage implementation records and todos in one place."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목표를 세우고 구현 기록과 Todo를 한곳에서 관리하세요."
+          }
+        }
+      }
+    },
+    "login_intro_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document Your Development Journey"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개발 과정을 기록하세요"
+          }
+        }
+      }
+    },
     "login_terms_notice" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1644,6 +1678,40 @@
         }
       }
     },
+    "search_hash_guide_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type like #123 to find that Todo directly."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "#123처럼 입력하면 해당 Todo를 바로 찾을 수 있습니다."
+          }
+        }
+      }
+    },
+    "search_hash_guide_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a Todo number"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo 번호를 입력해주세요"
+          }
+        }
+      }
+    },
     "search_instruction" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1708,40 +1776,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "더보기"
-          }
-        }
-      }
-    },
-    "search_hash_guide_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type like #123 to find that Todo directly."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "#123처럼 입력하면 해당 Todo를 바로 찾을 수 있습니다."
-          }
-        }
-      }
-    },
-    "search_hash_guide_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter a Todo number"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todo 번호를 입력해주세요"
           }
         }
       }
