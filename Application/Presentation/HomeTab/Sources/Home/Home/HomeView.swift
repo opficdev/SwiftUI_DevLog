@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import Domain
 import PresentationShared
 
@@ -13,27 +14,53 @@ public struct HomeView: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @ScaledMetric(relativeTo: .largeTitle) private var labelWidth = CGFloat(34)
-    @Bindable var store: StoreOf<HomeFeature>
-    let coordinator: HomeViewCoordinator
-    let isCompactLayout: Bool
+    @State private var path = [HomeRoute]()
+    @State private var searchStore: StoreOf<SearchFeature>
+    @State private var store: StoreOf<HomeFeature>
+    private let isSelected: Bool
+    private let windowEvent: TodoEditorWindowEvent
 
     public init(
-        coordinator: HomeViewCoordinator,
-        isCompactLayout: Bool
+        isSelected: Bool,
+        windowEvent: TodoEditorWindowEvent
     ) {
-        self.coordinator = coordinator
-        self.isCompactLayout = isCompactLayout
-        self.store = coordinator.store
+        @Dependency(\.homeFetchRecentSearchQueriesUseCase) var fetchRecentSearchQueriesUseCase
+        self._store = State(initialValue: Store(initialState: HomeFeature.State()) {
+            HomeFeature()
+        })
+        self._searchStore = State(initialValue: Store(
+            initialState: SearchFeature.State(
+                recentQueries: fetchRecentSearchQueriesUseCase.execute()
+            )
+        ) {
+            SearchFeature()
+        })
+        self.isSelected = isSelected
+        self.windowEvent = windowEvent
     }
 
     public var body: some View {
-        List {
-            todoSection
-            recentTodoSection
+        NavigationStack(path: $path) {
+            List {
+                todoSection
+                recentTodoSection
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle(String(localized: "nav_home", bundle: PresentationResources.bundle))
+            .navigationDestination(for: HomeRoute.self, destination: destinationView)
+            .toolbar { toolbar }
         }
-        .listStyle(.insetGrouped)
-        .navigationTitle(String(localized: "nav_home", bundle: PresentationResources.bundle))
-        .toolbar { toolbar }
+        .onAppear { store.send(.view(.startObserving)) }
+        .onChange(of: isSelected, initial: true) { _, isSelected in
+            if isSelected {
+                store.send(.view(.fetchData))
+            }
+        }
+        .onReceive(windowEvent.submits) { submit in
+            guard case .create(let value) = submit,
+                  value.matchesCreate(source: .home) else { return }
+            store.send(.view(.todoEditorCreated))
+        }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .sheet(item: $store.scope(state: \.sheet, action: \.sheet), content: sheetContent)
         .fullScreenCover(item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover), content: coverContent)
@@ -175,51 +202,50 @@ public struct HomeView: View {
                 TodoEditorView(store: todoEditorStore)
             }
         case .search:
-            SearchView(store: coordinator.makeSearchStore())
+            SearchView(store: searchStore)
+        }
+    }
+
+    @ViewBuilder
+    private func destinationView(_ route: HomeRoute) -> some View {
+        switch route {
+        case .category(let item):
+            TodoListView(
+                store: Store(initialState: TodoListFeature.State(category: item.todoCategory)) {
+                    TodoListFeature()
+                },
+                windowEvent: windowEvent,
+                onSelectTodo: { path.append(.todo(TodoIdItem(id: $0))) }
+            )
+            .id(item.id)
+        case .todo(let item):
+            TodoDetailView(
+                store: Store(
+                    initialState: TodoDetailFeature.State(todoId: item.id, showEditButton: true)
+                ) {
+                    TodoDetailFeature()
+                },
+                windowEvent: windowEvent
+            )
+            .id(item.id)
         }
     }
 
     @ViewBuilder
     private func todoCategoryRow(_ item: TodoCategoryItem) -> some View {
-        if isCompactLayout {
-            NavigationLink(value: HomeRoute.category(item)) {
-                labelImage(
-                    text: item.localizedName,
-                    systemName: item.symbolName,
-                    imageColor: item.color
-                )
-            }
-        } else {
-            Button {
-                coordinator.router.replace(with: .category(item))
-            } label: {
-                labelImage(
-                    text: item.localizedName,
-                    systemName: item.symbolName,
-                    imageColor: item.color
-                )
-            }
-            .buttonStyle(.plain)
+        NavigationLink(value: HomeRoute.category(item)) {
+            labelImage(
+                text: item.localizedName,
+                systemName: item.symbolName,
+                imageColor: item.color
+            )
         }
     }
 
     @ViewBuilder
     private func recentTodoRow(_ item: RecentTodoItem) -> some View {
-        Group {
-            if isCompactLayout {
-                NavigationLink(value: HomeRoute.todo(TodoIdItem(id: item.id))) {
-                    RecentTodoRow(todo: item)
-                }
-            } else {
-                Button {
-                    coordinator.router.replace(with: .todo(TodoIdItem(id: item.id)))
-                } label: {
-                    RecentTodoRow(todo: item)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-            }
+        NavigationLink(value: HomeRoute.todo(TodoIdItem(id: item.id))) {
+            RecentTodoRow(todo: item)
         }
         .todoDetailPreview(todoId: item.id)
     }

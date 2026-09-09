@@ -15,6 +15,7 @@ extension HomeFeature {
     private enum CancelID: Hashable {
         case delayedTodoEditor
         case networkConnectivity
+        case todoMutation
     }
 
     func observeNetworkConnectivityEffect() -> Effect<Action> {
@@ -23,6 +24,15 @@ extension HomeFeature {
                 .map { .store(.networkStatusChanged($0)) }
         }
         .cancellable(id: CancelID.networkConnectivity, cancelInFlight: true)
+    }
+
+    func observeTodoMutationEffect() -> Effect<Action> {
+        .publisher { [todoMutationEventBus] in
+            todoMutationEventBus.observe()
+                .receive(on: DispatchQueue.main)
+                .map { _ in .view(.refreshRecentTodos) }
+        }
+        .cancellable(id: CancelID.todoMutation, cancelInFlight: true)
     }
 
     func fetchTodoCategoryPreferencesEffect() -> Effect<Action> {

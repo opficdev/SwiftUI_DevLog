@@ -307,8 +307,8 @@ struct PushNotificationListFeatureTests {
         #expect(adapter.notifications.first?.isRead == true)
     }
 
-    @Test("syncSheetPresentation은 layout에 따라 시트 상태를 동기화한다")
-    func syncSheetPresentation은_layout에_따라_시트_상태를_동기화한다() async throws {
+    @Test("syncSheetPresentation은 선택한 Todo를 시트로 표시한다")
+    func syncSheetPresentation은_선택한_Todo를_시트로_표시한다() async throws {
         let fetchSpy = PushNotificationListFetchUseCaseSpy(pages: [
             PushNotificationPage(
                 items: [
@@ -322,17 +322,7 @@ struct PushNotificationListFeatureTests {
         await adapter.fetchNotifications()
         await adapter.selectNotification("notification-1")
 
-        await adapter.syncSheetPresentation(isCompactLayout: true)
-
-        #expect(adapter.sheetTodoId == "todo-1")
-
-        await adapter.syncSheetPresentation(isCompactLayout: false)
-
-        #expect(adapter.sheetTodoId == nil)
-        #expect(adapter.selectedNotificationId == "notification-1")
-        #expect(adapter.selectedTodoId?.id == "todo-1")
-
-        await adapter.syncSheetPresentation(isCompactLayout: true)
+        await adapter.syncSheetPresentation()
 
         #expect(adapter.sheetTodoId == "todo-1")
 

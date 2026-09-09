@@ -15,17 +15,19 @@ public struct PushNotificationListView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var labelWidth = 34
     @State private var headerOffset: CGFloat = 0
     @State private var isScrollTrackingEnabled = false
-    @Bindable var store: StoreOf<PushNotificationListFeature>
-    let coordinator: PushNotificationListViewCoordinator
-    let isCompactLayout: Bool
+    @State private var store: StoreOf<PushNotificationListFeature>
+    private let isSelected: Bool
 
-    public init(
-        coordinator: PushNotificationListViewCoordinator,
-        isCompactLayout: Bool
-    ) {
-        self.coordinator = coordinator
-        self.isCompactLayout = isCompactLayout
-        self.store = coordinator.store
+    public init(isSelected: Bool) {
+        @Dependency(\.fetchPushNotificationQueryUseCase) var fetchQueryUseCase
+        self._store = State(initialValue: Store(
+            initialState: PushNotificationListFeature.State(
+                query: fetchQueryUseCase.execute()
+            )
+        ) {
+            PushNotificationListFeature()
+        })
+        self.isSelected = isSelected
     }
 
     public var body: some View {
@@ -50,11 +52,13 @@ public struct PushNotificationListView: View {
         .sheet(item: sheetStore) { store in
             sheetContent(store)
         }
-        .task(id: isCompactLayout) {
-            store.send(.view(.syncSheetPresentation(isCompactLayout: isCompactLayout)))
+        .onChange(of: isSelected, initial: true) { _, isSelected in
+            if isSelected {
+                store.send(.view(.fetchNotifications))
+            }
         }
         .onChange(of: store.selectedTodoId?.id, initial: true) {
-            store.send(.view(.syncSheetPresentation(isCompactLayout: isCompactLayout)))
+            store.send(.view(.syncSheetPresentation))
         }
         .overlay {
             if store.isLoading {
@@ -98,23 +102,12 @@ public struct PushNotificationListView: View {
         index: Int,
         notifications: [PushNotificationItem]
     ) -> some View {
-        if isCompactLayout {
-            Button {
-                store.send(.view(.selectNotification(notification.id)))
-            } label: {
-                notificationRowContent(notification, index: index, notifications: notifications)
-            }
-            .buttonStyle(.plain)
-        } else {
+        Button {
+            store.send(.view(.selectNotification(notification.id)))
+        } label: {
             notificationRowContent(notification, index: index, notifications: notifications)
-                .onTapGesture {
-                    store.send(.view(.selectNotification(notification.id)))
-                }
-                .accessibilityAddTraits(.isButton)
-                .accessibilityAction {
-                    store.send(.view(.selectNotification(notification.id)))
-                }
         }
+        .buttonStyle(.plain)
     }
 
     private func notificationRowContent(
@@ -124,7 +117,7 @@ public struct PushNotificationListView: View {
     ) -> some View {
         notificationRow(
             notification,
-            isSelected: !isCompactLayout && store.selectedNotificationId == notification.id
+            isSelected: false
         )
         .onAppear {
             let lastId = notifications.last?.id
@@ -364,7 +357,14 @@ public struct PushNotificationListView: View {
         _ sheetStore: Store<PushNotificationListFeature.SheetState, PushNotificationListFeature.Action.Sheet>
     ) -> some View {
         NavigationStack {
-            TodoDetailView(store: coordinator.makeTodoDetailStore(todoId: sheetStore.todoId))
+            TodoDetailView(store: Store(
+                initialState: TodoDetailFeature.State(
+                    todoId: sheetStore.todoId,
+                    showEditButton: false
+                )
+            ) {
+                TodoDetailFeature()
+            })
                 .id(sheetStore.todoId)
                 .toolbar {
                     ToolbarLeadingButton {
@@ -379,11 +379,7 @@ public struct PushNotificationListView: View {
     private var sheetStore: Binding<
         Store<PushNotificationListFeature.SheetState,
               PushNotificationListFeature.Action.Sheet>?> {
-        if isCompactLayout {
-            $store.scope(state: \.sheet, action: \.sheet)
-        } else {
-            .constant(nil)
-        }
+        $store.scope(state: \.sheet, action: \.sheet)
     }
 
     private func presentDeleteNotificationToast(_ notificationId: String) {

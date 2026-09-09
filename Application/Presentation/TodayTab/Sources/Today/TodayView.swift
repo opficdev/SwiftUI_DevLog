@@ -11,40 +11,71 @@ import Domain
 import PresentationShared
 
 public struct TodayView: View {
-    @Bindable var store: StoreOf<TodayFeature>
-    let coordinator: TodayViewCoordinator
-    let isCompactLayout: Bool
+    @State private var path = [TodayRoute]()
+    @State private var store: StoreOf<TodayFeature>
+    private let isSelected: Bool
+    private let windowEvent: TodoEditorWindowEvent
 
     public init(
-        coordinator: TodayViewCoordinator,
-        isCompactLayout: Bool
+        isSelected: Bool,
+        windowEvent: TodoEditorWindowEvent
     ) {
-        self.coordinator = coordinator
-        self.isCompactLayout = isCompactLayout
-        self.store = coordinator.store
+        @Dependency(\.todayFetchDisplayOptionsUseCase) var fetchDisplayOptionsUseCase
+        self._store = State(initialValue: Store(
+            initialState: TodayFeature.State(
+                displayOptions: fetchDisplayOptionsUseCase.execute()
+            )
+        ) {
+            TodayFeature()
+        })
+        self.isSelected = isSelected
+        self.windowEvent = windowEvent
     }
 
     public var body: some View {
-        List {
-            summarySection
-            if store.sections.isEmpty, !store.isLoading {
-                emptySection
-            } else {
-                ForEach(store.sections) { section in
-                    todoSection(section.title, items: section.items)
+        NavigationStack(path: $path) {
+            List {
+                summarySection
+                if store.sections.isEmpty, !store.isLoading {
+                    emptySection
+                } else {
+                    ForEach(store.sections) { section in
+                        todoSection(section.title, items: section.items)
+                    }
                 }
             }
+            .listStyle(.insetGrouped)
+            .navigationTitle(String(localized: "nav_today", bundle: PresentationResources.bundle))
+            .navigationDestination(for: TodayRoute.self, destination: destinationView)
+            .toolbar { toolbarContent }
+            .background(NavigationBarConfigurator())
+            .refreshable { await store.send(.refresh).finish() }
         }
-        .listStyle(.insetGrouped)
-        .navigationTitle(String(localized: "nav_today", bundle: PresentationResources.bundle))
-        .toolbar { toolbarContent }
-        .background(NavigationBarConfigurator())
-        .refreshable { await store.send(.refresh).finish() }
+        .onChange(of: isSelected, initial: true) { _, isSelected in
+            if isSelected {
+                store.send(.fetchData)
+            }
+        }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .overlay {
             if store.isLoading {
                 LoadingView()
             }
+        }
+    }
+
+    private func destinationView(_ route: TodayRoute) -> some View {
+        switch route {
+        case .todo(let item):
+            TodoDetailView(
+                store: Store(
+                    initialState: TodoDetailFeature.State(todoId: item.id, showEditButton: true)
+                ) {
+                    TodoDetailFeature()
+                },
+                windowEvent: windowEvent
+            )
+            .id(item.id)
         }
     }
 
@@ -161,21 +192,8 @@ public struct TodayView: View {
 
     @ViewBuilder
     private func todoRow(_ item: TodayTodoItem) -> some View {
-        Group {
-            if isCompactLayout {
-                NavigationLink(value: TodayRoute.todo(TodoIdItem(id: item.id))) {
-                    TodayTodoRow(item: item)
-                }
-            } else {
-                Button {
-                    coordinator.router.replace(with: .todo(TodoIdItem(id: item.id)))
-                } label: {
-                    TodayTodoRow(item: item)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-            }
+        NavigationLink(value: TodayRoute.todo(TodoIdItem(id: item.id))) {
+            TodayTodoRow(item: item)
         }
         .todoDetailPreview(todoId: item.id)
     }

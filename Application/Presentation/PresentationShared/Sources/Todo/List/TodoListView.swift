@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import ComposableArchitecture
 import Core
 import Domain
@@ -18,13 +19,16 @@ public struct TodoListView: View {
     @State private var headerOffset: CGFloat = .zero
     @State private var isScrollTrackingEnabled = false
     @State var store: StoreOf<TodoListFeature>
+    private let windowEvent: TodoEditorWindowEvent?
     private let onSelectTodo: (String) -> Void
 
     public init(
         store: StoreOf<TodoListFeature>,
+        windowEvent: TodoEditorWindowEvent? = nil,
         onSelectTodo: @escaping (String) -> Void = { _ in }
     ) {
         self.store = store
+        self.windowEvent = windowEvent
         self.onSelectTodo = onSelectTodo
     }
 
@@ -58,6 +62,11 @@ public struct TodoListView: View {
             }
         }
         .prominentAlert(store, state: \.alert, action: \.alert)
+        .onReceive(windowSubmits) { submit in
+            guard case .create(let value) = submit,
+                  value.matchesCreate(category: store.category, source: .list) else { return }
+            store.send(.view(.windowTodoCreated))
+        }
         .navigationTitle(TodoCategoryItem(from: store.category).localizedName)
         .fullScreenCover(
             item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover)
@@ -88,6 +97,10 @@ public struct TodoListView: View {
         .background(NavigationBarConfigurator())
         .background(Color(.systemGroupedBackground))
         .task { store.send(.view(.onAppear)) }
+    }
+
+    private var windowSubmits: AnyPublisher<TodoEditorWindowSubmit, Never> {
+        windowEvent?.submits ?? Empty().eraseToAnyPublisher()
     }
 
     @ViewBuilder

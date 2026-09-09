@@ -70,7 +70,7 @@ struct PushNotificationListFeature {
             case toggleUnreadOnly
             case resetFilters
             case selectNotification(String?)
-            case syncSheetPresentation(isCompactLayout: Bool)
+            case syncSheetPresentation
         }
 
         enum Sheet: Equatable {
@@ -88,6 +88,7 @@ struct PushNotificationListFeature {
 
     enum CancelID: Hashable {
         case fetchNotifications
+        case fetchNotificationsAndObserve
         case observeNotifications
         case toggleRead
     }
@@ -172,7 +173,12 @@ private extension PushNotificationListFeature {
             )
         case .fetchNotifications:
             state.nextCursor = nil
-            return fetchNotificationsPageEffect(query: state.query, cursor: nil)
+            return .concatenate(
+                .cancel(id: CancelID.observeNotifications),
+                fetchNotificationsPageEffect(query: state.query, cursor: nil),
+                .send(.view(.startObserving))
+            )
+            .cancellable(id: CancelID.fetchNotificationsAndObserve, cancelInFlight: true)
         case .loadNextPage:
             guard state.nextCursor != nil, !state.isLoading else { return .none }
             return fetchNotificationsPageEffect(
@@ -231,8 +237,8 @@ private extension PushNotificationListFeature {
             guard !item.isRead else { return .none }
             state.notifications[index].isRead = true
             return toggleReadEffect(notificationId: item.id, todoId: item.todoId, rollbackRead: false)
-        case .syncSheetPresentation(let isCompactLayout):
-            if let todoId = state.selectedTodoId?.id, isCompactLayout {
+        case .syncSheetPresentation:
+            if let todoId = state.selectedTodoId?.id {
                 state.sheet = .init(todoId: todoId)
             } else {
                 state.sheet = nil
@@ -280,6 +286,7 @@ private extension PushNotificationListFeature {
                 fetchNotificationsPageEffect(query: query, cursor: nil),
                 .send(.view(.startObserving))
             )
+            .cancellable(id: CancelID.fetchNotificationsAndObserve, cancelInFlight: true)
         )
     }
 

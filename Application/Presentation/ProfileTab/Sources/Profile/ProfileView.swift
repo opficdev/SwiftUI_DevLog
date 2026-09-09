@@ -12,32 +12,37 @@ import Domain
 import PresentationShared
 
 public struct ProfileView: View {
-    @Bindable var store: StoreOf<ProfileFeature>
+    @State private var settingsStore: StoreOf<SettingsFeature>
+    @State private var store: StoreOf<ProfileFeature>
     @FocusState private var focused: Bool
-    let coordinator: ProfileViewCoordinator
-    let isCompactLayout: Bool
+    @State private var path = [ProfileRoute]()
+    private let isSelected: Bool
 
-    public init(
-        coordinator: ProfileViewCoordinator,
-        isCompactLayout: Bool
-    ) {
-        self.store = coordinator.store
-        self.coordinator = coordinator
-        self.isCompactLayout = isCompactLayout
+    public init(isSelected: Bool) {
+        let store = Store(initialState: ProfileFeature.State()) {
+            ProfileFeature()
+        }
+        let settingsStore = Store(initialState: SettingsFeature.State()) {
+            SettingsFeature()
+        }
+        self._store = State(initialValue: store)
+        self._settingsStore = State(initialValue: settingsStore)
+        self.isSelected = isSelected
     }
 
     public var body: some View {
-        Group {
-            if isCompactLayout {
-                NavigationStack(path: navigationPath) {
-                    profileContentView
-                        .navigationDestination(for: ProfileRoute.self) { route in
-                            ProfileDestinationView(route: route, coordinator: coordinator)
-                        }
-                }
-            } else {
-                profileContentView
+        NavigationStack(path: $path) {
+            profileContentView
+                .navigationDestination(for: ProfileRoute.self, destination: destinationView)
+        }
+        .onChange(of: isSelected, initial: true) { _, isSelected in
+            if isSelected {
+                store.send(.fetchData)
             }
+        }
+        .onAppear {
+            store.send(.startObserving)
+            settingsStore.send(.startObserving)
         }
         .onChange(of: focused) { _, newValue in
             store.send(.updateStatusTextFieldFocus(newValue), animation: .default)
@@ -48,6 +53,32 @@ public struct ProfileView: View {
             if store.isLoading {
                 LoadingView()
             }
+        }
+    }
+
+    @ViewBuilder
+    private func destinationView(_ route: ProfileRoute) -> some View {
+        switch route {
+        case .settings:
+            SettingsView(store: settingsStore) { path.append($0) }
+        case .activity(let todoId):
+            TodoDetailView(store: Store(
+                initialState: TodoDetailFeature.State(todoId: todoId, showEditButton: false)
+            ) {
+                TodoDetailFeature()
+            })
+        case .theme:
+            ThemeView(theme: $settingsStore.theme)
+        case .pushNotification:
+            PushNotificationSettingsView(store: Store(
+                initialState: PushNotificationSettingsFeature.State()
+            ) {
+                PushNotificationSettingsFeature()
+            })
+        case .account:
+            AccountView(store: Store(initialState: AccountFeature.State()) {
+                AccountFeature()
+            })
         }
     }
 
@@ -231,11 +262,7 @@ public struct ProfileView: View {
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             Button {
-                if isCompactLayout {
-                    coordinator.router.push(.settings)
-                } else {
-                    coordinator.router.replace(with: .settings)
-                }
+                path.append(.settings)
             } label: {
                 Image(systemName: "gearshape")
             }
@@ -375,21 +402,9 @@ public struct ProfileView: View {
         .padding(.top, 4)
     }
 
-    private var navigationPath: Binding<[ProfileRoute]> {
-        Binding(
-            get: { coordinator.router.path },
-            set: { coordinator.router.path = $0 }
-        )
-    }
-
     private func selectActivity(_ activity: HeatmapActivityItem) {
         guard !activity.isDeleted else { return }
-
-        if isCompactLayout {
-            coordinator.router.push(.activity(activity.todoId))
-        } else {
-            coordinator.router.replace(with: .activity(activity.todoId))
-        }
+        path.append(.activity(activity.todoId))
     }
 }
 

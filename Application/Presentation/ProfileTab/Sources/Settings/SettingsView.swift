@@ -10,15 +10,15 @@ import Domain
 import PresentationShared
 
 struct SettingsView: View {
-    @Environment(NavigationRouter<ProfileRoute>.self) private var router
     @Bindable var store: StoreOf<SettingsFeature>
+    let onNavigate: (ProfileRoute) -> Void
 
     var body: some View {
         let connected = store.isNetworkConnected
         Form {
             Section {
                 Button {
-                    router.push(.theme)
+                    onNavigate(.theme)
                 } label: {
                     HStack {
                         Text(String(localized: "settings_theme", bundle: PresentationResources.bundle))
@@ -30,7 +30,7 @@ struct SettingsView: View {
                 }
 
                 Button {
-                    router.push(.pushNotification)
+                    onNavigate(.pushNotification)
                 } label: {
                     Text(String(localized: "settings_notifications", bundle: PresentationResources.bundle))
                         .foregroundStyle(connected ? Color.primary : Color.secondary)
@@ -87,7 +87,7 @@ struct SettingsView: View {
             
             Section {
                 Button {
-                    router.push(.account)
+                    onNavigate(.account)
                 } label: {
                     Text(String(localized: "settings_account", bundle: PresentationResources.bundle))
                 }

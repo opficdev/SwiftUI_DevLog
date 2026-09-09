@@ -144,6 +144,7 @@ struct HomeFeature {
     @Dependency(\.homeUpdateTodoCategoryPreferencesUseCase) var updatePreferencesUseCase
     @Dependency(\.homeFetchTodosUseCase) var fetchTodosUseCase
     @Dependency(\.homeNetworkConnectivityUseCase) var networkConnectivityUseCase
+    @Dependency(\.homeTodoMutationEventBus) var todoMutationEventBus
     @Dependency(\.trackAnalyticsEventUseCase) var trackAnalyticsEventUseCase
     @Dependency(\.continuousClock) var clock
 
@@ -210,7 +211,10 @@ private extension HomeFeature {
     ) -> Effect<Action> {
         switch action {
         case .startObserving:
-            return observeNetworkConnectivityEffect()
+            return .merge(
+                observeNetworkConnectivityEffect(),
+                observeTodoMutationEffect()
+            )
         case .fetchData:
             return .merge(
                 fetchTodoCategoryPreferencesEffect(),

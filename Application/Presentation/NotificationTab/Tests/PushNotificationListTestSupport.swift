@@ -146,8 +146,8 @@ struct PushNotificationListStoreTestAdapter: PushNotificationListStateDriving {
         await store.send(.view(.finishDeleteToast(notificationId)))
     }
 
-    func syncSheetPresentation(isCompactLayout: Bool) async {
-        await store.send(.view(.syncSheetPresentation(isCompactLayout: isCompactLayout)))
+    func syncSheetPresentation() async {
+        await store.send(.view(.syncSheetPresentation))
     }
 
     func dismissSheet() async {
