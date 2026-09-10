@@ -33,7 +33,7 @@ struct LoginButton: View {
             Group {
                 if showsProgressView {
                     ProgressView()
-                        .tint(Color(asset: .accentColor))
+                        .tint(Color.accent)
                 } else {
                     Text(text)
                         .foregroundStyle(.primary)
@@ -44,8 +44,8 @@ struct LoginButton: View {
             .frame(width: 300, height: height + 24)
             .background {
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(asset: .border), lineWidth: 3)
-                    .fill(Color(asset: .surface))
+                    .stroke(Color.border, lineWidth: 3)
+                    .fill(Color.surface)
             }
             .overlay(alignment: .leading) {
                 if let logo, !showsProgressView {

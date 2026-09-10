@@ -13,6 +13,12 @@ let frameworkBuildSettings = Settings.devlog(
     ]
 )
 
+let presentationSharedBuildSettings = {
+    var settings = frameworkBuildSettings
+    settings.base["ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS"] = "NO"
+    return settings
+}()
+
 let thirdPartyDependency: TargetDependency = .project(
     target: "ThirdParty",
     path: "../../Libraries/ThirdParty"
@@ -53,7 +59,7 @@ let project = Project(
                 ),
                 thirdPartyDependency,
             ],
-            settings: frameworkBuildSettings
+            settings: presentationSharedBuildSettings
         ),
         .target(
             name: "PresentationSharedTests",

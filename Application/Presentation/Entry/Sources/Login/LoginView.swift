@@ -40,7 +40,7 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
                 Text(String(localized: "login_intro_description", bundle: PresentationResources.bundle))
                     .padding(.horizontal)
-                    .foregroundStyle(Color(asset: .textTertiary))
+                    .foregroundStyle(Color.textTertiary)
                     .multilineTextAlignment(.center)
             }
             Spacer()

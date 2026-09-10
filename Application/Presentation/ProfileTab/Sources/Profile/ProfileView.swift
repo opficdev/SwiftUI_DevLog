@@ -50,7 +50,7 @@ public struct ProfileView: View {
             .refreshable { await store.send(.refresh).finish() }
             .toolbarVisibility(.hidden, for: .navigationBar)
             .frame(maxWidth: .infinity)
-            .background(Color(asset: .appBackground))
+            .background(Color.appBackground)
             .navigationDestination(for: ProfileRoute.self, destination: destinationView)
         }
         .onChange(of: isSelected, initial: true) { _, isSelected in
@@ -83,12 +83,12 @@ public struct ProfileView: View {
                     path.append(.settings)
                 } label: {
                     Image(systemName: "gearshape")
-                        .foregroundStyle(Color(asset: .textTertiary))
+                        .foregroundStyle(Color.textTertiary)
                 }
                 .adaptiveButtonStyle()
             }
             Text("꾸준히 쌓아온 개발 기록을 확인하세요")
-                .foregroundStyle(Color(asset: .textSecondary))
+                .foregroundStyle(Color.textSecondary)
                 .font(.caption)
         }
     }
@@ -370,7 +370,7 @@ private struct ProfileCard: View {
                             .resizable()
                             .scaledToFill()
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color(asset: .onPrimaryContainer), Color(asset: .primaryContainer))
+                            .foregroundStyle(Color.onPrimaryContainer, Color.primaryContainer)
                     }
                 }
                 .frame(width: 60, height: 60)
@@ -413,7 +413,7 @@ private struct ProfileCard: View {
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(asset: .primaryContainer))
+                        .fill(Color.primaryContainer)
                 )
                 if store.showDoneButton {
                     Button {
@@ -474,7 +474,7 @@ private struct RecentActivityCard: View {
                 } else if store.recentTodos.isEmpty {
                     Text(String(localized: "profile_recent_empty", bundle: PresentationResources.bundle))
                         .font(.callout)
-                        .foregroundStyle(Color(asset: .textSecondary))
+                        .foregroundStyle(Color.textSecondary)
                         .frame(maxWidth: .infinity, minHeight: 80)
                 } else {
                     VStack(spacing: 0) {
@@ -487,7 +487,7 @@ private struct RecentActivityCard: View {
                                     Spacer(minLength: 0)
                                     Image(systemName: "chevron.right")
                                         .font(.caption.weight(.semibold))
-                                        .foregroundStyle(Color(asset: .textTertiary))
+                                        .foregroundStyle(Color.textTertiary)
                                 }
                                 .contentShape(.rect)
                             }
