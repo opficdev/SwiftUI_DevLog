@@ -36,7 +36,7 @@ struct LoginButton: View {
                         .tint(Color(asset: .accentColor))
                 } else {
                     Text(text)
-                        .foregroundStyle(Color(asset: .textPrimary))
+                        .foregroundStyle(.primary)
                 }
             }
             .font(.system(.body))

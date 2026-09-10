@@ -21,7 +21,6 @@ public enum ColorAsset {
     case successContainer
     case surface
     case surfaceSecondary
-    case textPrimary
     case textSecondary
     case textTertiary
     case warning
