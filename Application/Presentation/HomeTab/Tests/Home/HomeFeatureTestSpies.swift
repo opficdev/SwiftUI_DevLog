@@ -24,10 +24,12 @@ func waitUntil(
 }
 
 final class FetchTodoCategoryPreferencesUseCaseSpy: FetchTodoCategoryPreferencesUseCase {
+    private(set) var executeCount = 0
     var todoCategoryPreferences: [TodoCategoryPreference] = []
 
     func execute() async throws -> [TodoCategoryPreference] {
-        todoCategoryPreferences
+        executeCount += 1
+        return todoCategoryPreferences
     }
 }
 
@@ -36,16 +38,6 @@ final class UpdateTodoCategoryPreferencesUseCaseSpy: UpdateTodoCategoryPreferenc
 
     func execute(_ preferences: [TodoCategoryPreference]) async throws {
         updates.append(preferences)
-    }
-}
-
-final class FetchTodosUseCaseSpy: FetchTodosUseCase {
-    var todoPage = TodoPage(items: [], nextCursor: nil)
-    private(set) var queries: [TodoQuery] = []
-
-    func execute(_ query: TodoQuery, cursor: TodoCursor?) async throws -> TodoPage {
-        queries.append(query)
-        return todoPage
     }
 }
 

@@ -383,7 +383,7 @@
         }
       }
     },
-    "home_recent_empty" : {
+    "profile_recent_empty" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -400,19 +400,19 @@
         }
       }
     },
-    "home_recent_title" : {
+    "profile_recent_title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Recently Updated"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "최근 수정"
+            "value" : "최근 활동"
           }
         }
       }

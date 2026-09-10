@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PresentationShared
 
 public enum MainTab: Hashable, CaseIterable {
     case home
@@ -16,13 +17,13 @@ public enum MainTab: Hashable, CaseIterable {
     var title: String {
         switch self {
         case .home:
-            String(localized: "nav_home")
+            String(localized: "nav_home", bundle: PresentationResources.bundle)
         case .today:
-            String(localized: "nav_today")
+            String(localized: "nav_today", bundle: PresentationResources.bundle)
         case .notification:
-            String(localized: "nav_notifications")
+            String(localized: "nav_notifications", bundle: PresentationResources.bundle)
         case .profile:
-            String(localized: "nav_profile")
+            String(localized: "nav_profile", bundle: PresentationResources.bundle)
         }
     }
 

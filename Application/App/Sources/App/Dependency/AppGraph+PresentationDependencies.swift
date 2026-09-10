@@ -84,12 +84,10 @@ private extension AppGraph {
             &dependencies,
             updateTodoCategoryPreferencesUseCase: todoGraphSet
                 .todoCategoryUseCaseGraph
-                .updateTodoCategoryPreferencesUseCase,
-            todoMutationEventBus: todoGraphSet.todoMutationEventBusGraph.todoMutationEventBus
+                .updateTodoCategoryPreferencesUseCase
         )
         HomePresentationDependencyPreparation.prepareTodo(
             &dependencies,
-            fetchTodosUseCase: todoGraphSet.todoUseCaseGraph.fetchTodosUseCase,
             networkConnectivityUseCase: networkConnectivityGraphSet
                 .networkConnectivityUseCaseGraph
                 .observeNetworkConnectivityUseCase
@@ -172,6 +170,10 @@ private extension AppGraph {
             updateHeatmapActivityTypesUseCase: userPreferencesGraphSet
                 .userPreferencesUseCaseGraph
                 .updateHeatmapActivityTypesUseCase
+        )
+        ProfilePresentationDependencyPreparation.prepareRecentTodos(
+            &dependencies,
+            todoMutationEventBus: todoGraphSet.todoMutationEventBusGraph.todoMutationEventBus
         )
         ProfilePresentationDependencyPreparation.prepareSettingsSession(
             &dependencies,

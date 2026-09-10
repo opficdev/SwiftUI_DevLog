@@ -14,11 +14,6 @@ extension DependencyValues {
         set { self[HomeUpdatePreferencesUseCaseKey.self] = newValue }
     }
 
-    var homeFetchTodosUseCase: FetchTodosUseCase {
-        get { self[HomeFetchTodosUseCaseKey.self] }
-        set { self[HomeFetchTodosUseCaseKey.self] = newValue }
-    }
-
     var homeNetworkConnectivityUseCase: ObserveNetworkConnectivityUseCase {
         get { self[HomeNetworkConnectivityUseCaseKey.self] }
         set { self[HomeNetworkConnectivityUseCaseKey.self] = newValue }
@@ -31,16 +26,6 @@ private enum HomeUpdatePreferencesUseCaseKey: DependencyKey {
     }
 
     static var testValue: UpdateTodoCategoryPreferencesUseCase {
-        liveValue
-    }
-}
-
-private enum HomeFetchTodosUseCaseKey: DependencyKey {
-    static var liveValue: FetchTodosUseCase {
-        preconditionFailure("FetchTodosUseCase must be provided.")
-    }
-
-    static var testValue: FetchTodosUseCase {
         liveValue
     }
 }

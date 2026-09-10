@@ -43,7 +43,6 @@ public struct HomeView: View {
         NavigationStack(path: $path) {
             List {
                 todoSection
-                recentTodoSection
             }
             .listStyle(.insetGrouped)
             .navigationTitle(String(localized: "nav_home", bundle: PresentationResources.bundle))
@@ -102,33 +101,6 @@ public struct HomeView: View {
             }
             .listRowInsets(EdgeInsets())    //  헤더의 padding 제거
         })
-    }
-
-    private var recentTodoSection: some View {
-        Section {
-            if store.isRecentTodosLoading && store.recentTodos.isEmpty {
-                LoadingView()
-            } else if store.recentTodos.isEmpty {
-                HStack {
-                    Spacer()
-                    Text(String(localized: "home_recent_empty", bundle: PresentationResources.bundle))
-                        .font(.callout)
-                    Spacer()
-                }
-            } else {
-                ForEach(store.recentTodos, id: \.id) { todo in
-                    recentTodoRow(todo)
-                }
-            }
-        } header: {
-            HStack {
-                Text(String(localized: "home_recent_title", bundle: PresentationResources.bundle))
-                    .foregroundStyle(Color.primary)
-                    .font(.title2.bold())
-                Spacer()
-            }
-            .listRowInsets(EdgeInsets())
-        }
     }
 
     @ToolbarContentBuilder
@@ -250,14 +222,6 @@ public struct HomeView: View {
         }
     }
 
-    @ViewBuilder
-    private func recentTodoRow(_ item: RecentTodoItem) -> some View {
-        NavigationLink(value: HomeRoute.todo(TodoIdItem(id: item.id))) {
-            RecentTodoRow(todo: item)
-        }
-        .todoDetailPreview(todoId: item.id)
-    }
-
     private func labelImage(
         text: String,
         systemName: String,
@@ -296,53 +260,4 @@ public struct HomeView: View {
 public enum HomeRoute: Hashable {
     case category(TodoCategoryItem)
     case todo(TodoIdItem)
-}
-
-private struct RecentTodoRow: View {
-    @ScaledMetric(relativeTo: .largeTitle) private var labelWidth = CGFloat(34)
-    let todo: RecentTodoItem
-
-    var body: some View {
-        let category = TodoCategoryItem(from: todo.category)
-        HStack(alignment: .top, spacing: 12) {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(category.color)
-                .frame(width: labelWidth, height: labelWidth)
-                .overlay {
-                    Image(systemName: category.symbolName)
-                        .foregroundStyle(Color.white)
-                        .font(.title3)
-                }
-
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    if todo.isPinned {
-                        Image(systemName: "star.fill")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.orange)
-                    }
-                    Text(todo.title)
-                        .foregroundStyle(Color.primary)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Text("#\(todo.number)")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.gray)
-                        .fixedSize(horizontal: true, vertical: false)
-                }
-
-                HStack(spacing: 6) {
-                    Text(category.localizedName)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(category.color)
-
-                    RelativeTimeText(date: todo.updatedAt)
-                }
-
-                if !todo.tags.isEmpty {
-                    TagList(todo.tags, lineLimit: 1)
-                }
-            }
-        }
-    }
 }

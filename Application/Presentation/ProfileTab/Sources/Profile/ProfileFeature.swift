@@ -17,6 +17,17 @@ struct ProfileFeature {
         case networkConnectivity
     }
 
+    enum LoadingTarget: Hashable {
+        case recentTodos
+
+        var target: LoadingFeature.Target {
+            switch self {
+            case .recentTodos:
+                return LoadingFeature.Target("profile.recentTodos")
+            }
+        }
+    }
+
     @ObservableState
     struct State: Equatable {
         @Presents var alert: AlertState<Never>?
@@ -26,6 +37,7 @@ struct ProfileFeature {
         var statusMessage = ""
         var avatarURL: URL?
         var avatarImageData: ProfileAvatarImageData?
+        var recentTodos = [RecentTodoItem]()
         var earliestQuarterStart: Date?
         var selectedQuarterStart: Date?
         var showQuarterPicker = false
@@ -44,6 +56,7 @@ struct ProfileFeature {
         case startObserving
         case fetchData
         case refresh
+        case refreshRecentTodos
         case networkStatusChanged(Bool)
         case setAlert(Bool)
         case tapResetStatusMessageButton
@@ -66,12 +79,15 @@ struct ProfileFeature {
                 quarter: HeatmapQuarter,
                 dayActivitiesByDate: [Date: [HeatmapActivityItem]]
             )
+            case updateRecentTodos([RecentTodoItem])
         }
     }
 
     @Dependency(\.profileFetchUserDataUseCase) var fetchUserDataUseCase
     @Dependency(\.profileFetchImageDataUseCase) var fetchProfileImageDataUseCase
     @Dependency(\.profileFetchTodosUseCase) var fetchTodosUseCase
+    @Dependency(\.fetchTodoCategoryPreferencesUseCase) var fetchPreferencesUseCase
+    @Dependency(\.profileTodoMutationEventBus) var todoMutationEventBus
     @Dependency(\.profileUpsertStatusMessageUseCase) var upsertStatusMessageUseCase
     @Dependency(\.profileNetworkConnectivityUseCase) var networkConnectivityUseCase
     @Dependency(\.profileFetchHeatmapActivityTypesUseCase) var fetchHeatmapActivityTypesUseCase
@@ -97,7 +113,10 @@ struct ProfileFeature {
             case .binding:
                 break
             case .startObserving:
-                return observeNetworkConnectivityEffect()
+                return .merge(
+                    observeNetworkConnectivityEffect(),
+                    observeTodoMutationEffect()
+                )
             case .fetchData, .refresh:
                 if state.selectedQuarterStart == nil,
                    let quarterStart = ProfileHeatmapBuilder.quarterStart(for: Date()) {
@@ -112,10 +131,16 @@ struct ProfileFeature {
                 if let selectedQuarterStart = state.selectedQuarterStart {
                     return .merge(
                         fetchUserDataEffect(),
-                        fetchActivityQuarterEffect(selectedQuarterStart, showsIndicator: showsIndicator)
+                        fetchActivityQuarterEffect(selectedQuarterStart, showsIndicator: showsIndicator),
+                        fetchRecentTodosEffect()
                     )
                 }
-                return fetchUserDataEffect()
+                return .merge(
+                    fetchUserDataEffect(),
+                    fetchRecentTodosEffect()
+                )
+            case .refreshRecentTodos:
+                return fetchRecentTodosEffect()
             case .networkStatusChanged(let isConnected):
                 state.isNetworkConnected = isConnected
             case .setAlert(let isPresented):
@@ -182,6 +207,8 @@ struct ProfileFeature {
                 guard state.selectedQuarterStart == quarterStart else { break }
                 state.activityQuarter = quarter
                 state.dayActivitiesByDate = dayActivitiesByDate
+            case .store(.updateRecentTodos(let todos)):
+                state.recentTodos = todos
             case .loading:
                 break
             }
@@ -310,4 +337,5 @@ private extension ProfileFeature {
             TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
         }
     }
+
 }

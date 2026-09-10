@@ -16,14 +16,10 @@ struct HomeFeatureTests {
     func HomeFeature_fetchData는_홈_상태를_갱신한다() async throws {
         let context = makeHomeFetchDataContext()
         let adapter = HomeStoreTestAdapter(
-            fetchPreferencesUseCase: context.fetchPreferencesUseCaseSpy,
-            fetchTodosUseCase: context.fetchTodosUseCaseSpy
+            fetchPreferencesUseCase: context.fetchPreferencesUseCaseSpy
         )
 
-        try await verifyHomeFetchData(
-            adapter: adapter,
-            fetchTodosUseCaseSpy: context.fetchTodosUseCaseSpy
-        )
+        try await verifyHomeFetchData(adapter: adapter)
     }
 
     @Test("HomeFeature tapTodoCategory는 editor를 지연 표시한다")
@@ -39,7 +35,6 @@ struct HomeFeatureTests {
         let trackSpy = HomeTrackAnalyticsEventUseCaseSpy()
         let adapter = HomeStoreTestAdapter(
             fetchPreferencesUseCase: context.fetchPreferencesUseCaseSpy,
-            fetchTodosUseCase: context.fetchTodosUseCaseSpy,
             trackAnalyticsEventUseCase: trackSpy
         )
 
@@ -47,21 +42,19 @@ struct HomeFeatureTests {
         await adapter.todoEditorCreated()
 
         await waitUntil {
-            context.fetchTodosUseCaseSpy.queries.count == 1
+            context.fetchPreferencesUseCaseSpy.executeCount == 1
                 && trackSpy.hasTrackedTodoCreate
         }
 
         #expect(!adapter.showTodoEditor)
-        #expect(adapter.recentTodos.map(\.id) == ["todo-1", "todo-2"])
     }
 
-    @Test("HomeFeature orderTodoCategory는 recentTodos category를 동기화하고 저장한다")
-    func HomeFeature_orderTodoCategory는_recentTodos_category를_동기화하고_저장한다() async throws {
+    @Test("HomeFeature orderTodoCategory는 카테고리 설정을 저장한다")
+    func HomeFeature_orderTodoCategory는_카테고리_설정을_저장한다() async throws {
         let context = makeHomeOrderContext()
         let adapter = HomeStoreTestAdapter(
             fetchPreferencesUseCase: context.fetchPreferencesUseCaseSpy,
-            updatePreferencesUseCase: context.updatePreferencesUseCaseSpy,
-            fetchTodosUseCase: context.fetchTodosUseCaseSpy
+            updatePreferencesUseCase: context.updatePreferencesUseCaseSpy
         )
 
         try await verifyHomeOrderTodoCategory(

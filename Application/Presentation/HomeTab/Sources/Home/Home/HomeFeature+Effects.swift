@@ -15,7 +15,6 @@ extension HomeFeature {
     private enum CancelID: Hashable {
         case delayedTodoEditor
         case networkConnectivity
-        case todoMutation
     }
 
     func observeNetworkConnectivityEffect() -> Effect<Action> {
@@ -24,15 +23,6 @@ extension HomeFeature {
                 .map { .store(.networkStatusChanged($0)) }
         }
         .cancellable(id: CancelID.networkConnectivity, cancelInFlight: true)
-    }
-
-    func observeTodoMutationEffect() -> Effect<Action> {
-        .publisher { [todoMutationEventBus] in
-            todoMutationEventBus.observe()
-                .receive(on: DispatchQueue.main)
-                .map { _ in .view(.refreshRecentTodos) }
-        }
-        .cancellable(id: CancelID.todoMutation, cancelInFlight: true)
     }
 
     func fetchTodoCategoryPreferencesEffect() -> Effect<Action> {
@@ -45,23 +35,6 @@ extension HomeFeature {
                 await send(.store(.setAlert(isPresented: true)))
             }
             await send(.loading(.end(target: LoadingTarget.preferences.target, mode: .immediate)))
-        }
-    }
-
-    func fetchRecentTodosEffect() -> Effect<Action> {
-        .run { [fetchTodosUseCase] send in
-            await send(.loading(.begin(target: LoadingTarget.recentTodos.target, mode: .immediate)))
-            do {
-                let page = try await fetchRecentTodos(fetchTodosUseCase: fetchTodosUseCase)
-                let items = page.items
-                    .filter { $0.createdAt != $0.updatedAt }
-                    .prefix(5)
-                    .compactMap(RecentTodoItem.init(from:))
-                await send(.store(.updateRecentTodos(Array(items))))
-            } catch {
-                await send(.store(.setAlert(isPresented: true)))
-            }
-            await send(.loading(.end(target: LoadingTarget.recentTodos.target, mode: .immediate)))
         }
     }
 
@@ -88,17 +61,6 @@ extension HomeFeature {
             await send(.store(.setPresentation(.todoEditor, true)))
         }
         .cancellable(id: CancelID.delayedTodoEditor, cancelInFlight: true)
-    }
-
-    func fetchRecentTodos(fetchTodosUseCase: FetchTodosUseCase) async throws -> TodoPage {
-        try await fetchTodosUseCase.execute(
-            TodoQuery(
-                sortTarget: .updatedAt,
-                sortOrder: .latest,
-                pageSize: 100
-            ),
-            cursor: nil
-        )
     }
 
     static func setPresentation(
@@ -140,23 +102,6 @@ extension HomeFeature {
             }
         } message: {
             TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
-        }
-    }
-
-    static func syncRecentTodos(
-        _ recentTodos: [RecentTodoItem],
-        preferences: [TodoCategoryItem]
-    ) -> [RecentTodoItem] {
-        recentTodos.map { recentTodo in
-            guard let item = preferences.first(where: {
-                $0.category.storageValue == recentTodo.category.storageValue
-            }) else {
-                return recentTodo
-            }
-
-            var recentTodo = recentTodo
-            recentTodo.category = item.category
-            return recentTodo
         }
     }
 

@@ -33,6 +33,13 @@ public enum ProfileDependencyPreparation {
         dependencies.profileUpdateHeatmapActivityTypesUseCase = updateHeatmapActivityTypesUseCase
     }
 
+    public static func prepareRecentTodos(
+        _ dependencies: inout DependencyValues,
+        todoMutationEventBus: TodoMutationEventBus
+    ) {
+        dependencies.profileTodoMutationEventBus = todoMutationEventBus
+    }
+
     public static func prepareSettingsSession(
         _ dependencies: inout DependencyValues,
         deleteAuthUseCase: DeleteAuthUseCase,

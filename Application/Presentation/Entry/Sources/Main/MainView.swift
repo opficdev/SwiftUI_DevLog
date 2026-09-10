@@ -88,7 +88,10 @@ struct MainView: View {
         case .notification:
             PushNotificationListView(isSelected: isSelected)
         case .profile:
-            ProfileView(isSelected: isSelected)
+            ProfileView(
+                isSelected: isSelected,
+                windowEvent: windowEvent
+            )
         }
     }
 }

@@ -17,7 +17,6 @@ struct HomeFeature {
         @Presents var sheet: SheetState?
         @Presents var fullScreenCover: FullScreenCoverState?
         var preferences = [TodoCategoryItem]()
-        var recentTodos = [RecentTodoItem]()
         var isNetworkConnected = true
         var selectedTodoCategory: TodoCategory?
         var loading = LoadingFeature.State()
@@ -37,10 +36,6 @@ struct HomeFeature {
             loading.visibleTargets.contains(LoadingTarget.preferences.target)
         }
 
-        var isRecentTodosLoading: Bool {
-            loading.visibleTargets.contains(LoadingTarget.recentTodos.target)
-        }
-
     }
 
     enum Action: BindableAction, Equatable {
@@ -55,7 +50,6 @@ struct HomeFeature {
         enum ViewAction: Equatable {
             case startObserving
             case fetchData
-            case refreshRecentTodos
             case todoEditorCreated
             case tapManageTodoCategory
             case tapTodoCategory(TodoCategory)
@@ -67,7 +61,6 @@ struct HomeFeature {
             case setPresentation(Presentation, Bool)
             case setAlert(isPresented: Bool)
             case setTodoCategory([TodoCategoryItem])
-            case updateRecentTodos([RecentTodoItem])
         }
     }
 
@@ -128,23 +121,18 @@ struct HomeFeature {
 
     enum LoadingTarget: Hashable {
         case preferences
-        case recentTodos
 
         var target: LoadingFeature.Target {
             switch self {
             case .preferences:
                 return LoadingFeature.Target("home.preferences")
-            case .recentTodos:
-                return LoadingFeature.Target("home.recentTodos")
             }
         }
     }
 
     @Dependency(\.fetchTodoCategoryPreferencesUseCase) var fetchPreferencesUseCase
     @Dependency(\.homeUpdateTodoCategoryPreferencesUseCase) var updatePreferencesUseCase
-    @Dependency(\.homeFetchTodosUseCase) var fetchTodosUseCase
     @Dependency(\.homeNetworkConnectivityUseCase) var networkConnectivityUseCase
-    @Dependency(\.homeTodoMutationEventBus) var todoMutationEventBus
     @Dependency(\.trackAnalyticsEventUseCase) var trackAnalyticsEventUseCase
     @Dependency(\.continuousClock) var clock
 
@@ -211,17 +199,9 @@ private extension HomeFeature {
     ) -> Effect<Action> {
         switch action {
         case .startObserving:
-            return .merge(
-                observeNetworkConnectivityEffect(),
-                observeTodoMutationEffect()
-            )
+            return observeNetworkConnectivityEffect()
         case .fetchData:
-            return .merge(
-                fetchTodoCategoryPreferencesEffect(),
-                fetchRecentTodosEffect()
-            )
-        case .refreshRecentTodos:
-            return fetchRecentTodosEffect()
+            return fetchTodoCategoryPreferencesEffect()
         case .todoEditorCreated:
             state.fullScreenCover = nil
             state.selectedTodoCategory = nil
@@ -245,7 +225,6 @@ private extension HomeFeature {
         state: inout State
     ) -> Effect<Action> {
         state.preferences = preferences
-        state.recentTodos = Self.syncRecentTodos(state.recentTodos, preferences: preferences)
         state.sheet = nil
         return updateTodoCategoryPreferencesEffect(preferences)
     }
@@ -265,9 +244,6 @@ private extension HomeFeature {
             Self.setAlert(&state, isPresented: isPresented)
         case .setTodoCategory(let preferences):
             state.preferences = preferences
-            state.recentTodos = Self.syncRecentTodos(state.recentTodos, preferences: preferences)
-        case .updateRecentTodos(let todos):
-            state.recentTodos = todos
         }
 
         return .none
