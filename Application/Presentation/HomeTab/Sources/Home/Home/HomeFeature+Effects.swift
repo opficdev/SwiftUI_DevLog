@@ -32,55 +32,9 @@ extension HomeFeature {
                 let preferences = try await fetchPreferencesUseCase.execute()
                 await send(.store(.setTodoCategory(preferences.map(TodoCategoryItem.init(from:)))))
             } catch {
-                await send(.store(.setAlert(isPresented: true, type: .error)))
+                await send(.store(.setAlert(isPresented: true)))
             }
             await send(.loading(.end(target: LoadingTarget.preferences.target, mode: .immediate)))
-        }
-    }
-
-    func fetchRecentTodosEffect() -> Effect<Action> {
-        .run { [fetchTodosUseCase] send in
-            await send(.loading(.begin(target: LoadingTarget.recentTodos.target, mode: .immediate)))
-            do {
-                let page = try await fetchRecentTodos(fetchTodosUseCase: fetchTodosUseCase)
-                let items = page.items
-                    .filter { $0.createdAt != $0.updatedAt }
-                    .prefix(5)
-                    .compactMap(RecentTodoItem.init(from:))
-                await send(.store(.updateRecentTodos(Array(items))))
-            } catch {
-                await send(.store(.setAlert(isPresented: true, type: .error)))
-            }
-            await send(.loading(.end(target: LoadingTarget.recentTodos.target, mode: .immediate)))
-        }
-    }
-
-    func fetchWebPagesEffect() -> Effect<Action> {
-        .run { [fetchWebPagesUseCase] send in
-            await send(.loading(.begin(target: LoadingTarget.webPage.target, mode: .immediate)))
-            do {
-                let pages = try await fetchWebPagesUseCase.execute("")
-                await send(.store(.updateWebPages(pages.map(WebPageItem.init(from:)))))
-            } catch {
-                await send(.store(.setAlert(isPresented: true, type: .error)))
-            }
-            await send(.loading(.end(target: LoadingTarget.webPage.target, mode: .immediate)))
-        }
-    }
-
-    func addWebPageEffect(_ urlString: String) -> Effect<Action> {
-        .run { [addWebPageUseCase, fetchWebPagesUseCase, trackAnalyticsEventUseCase] send in
-            await send(.loading(.begin(target: LoadingTarget.overlay.target, mode: .delayed)))
-            do {
-                try await addWebPageUseCase.execute(urlString)
-                trackAnalyticsEventUseCase.execute(.webPageCreate)
-                let pages = try await fetchWebPagesUseCase.execute("")
-                await send(.store(.updateWebPages(pages.map(WebPageItem.init(from:)))))
-                await send(.store(.setSheet(nil)))
-            } catch {
-                await send(.store(.setAlert(isPresented: true, type: .error)))
-            }
-            await send(.loading(.end(target: LoadingTarget.overlay.target, mode: .delayed)))
         }
     }
 
@@ -90,38 +44,12 @@ extension HomeFeature {
         }
     }
 
-    func deleteWebPageEffect(_ page: WebPageItem) -> Effect<Action> {
-        .run { [deleteWebPageUseCase] send in
-            do {
-                try await deleteWebPageUseCase.execute(
-                    id: page.id,
-                    urlString: page.url.absoluteString
-                )
-            } catch {
-                await send(.store(.handleWebPageDeleteFailure(page.id)))
-                await send(.store(.setAlert(isPresented: true, type: .error)))
-            }
-        }
-    }
-
-    func undoDeleteWebPageEffect(_ webPage: DeletedWebPage) -> Effect<Action> {
-        .run { [undoDeleteWebPageUseCase, addWebPageUseCase] send in
-            do {
-                try await undoDeleteWebPageUseCase.execute(webPage.id)
-                try await addWebPageUseCase.execute(webPage.urlString)
-            } catch {
-                await send(.store(.setWebPageHidden(webPage.id, true)))
-                await send(.store(.setAlert(isPresented: true, type: .error)))
-            }
-        }
-    }
-
     func updateTodoCategoryPreferencesEffect(_ items: [TodoCategoryItem]) -> Effect<Action> {
         .run { [updatePreferencesUseCase] send in
             do {
                 try await updatePreferencesUseCase.execute(items.map(\.preference))
             } catch {
-                await send(.store(.setAlert(isPresented: true, type: .error)))
+                await send(.store(.setAlert(isPresented: true)))
             }
         }
     }
@@ -133,17 +61,6 @@ extension HomeFeature {
             await send(.store(.setPresentation(.todoEditor, true)))
         }
         .cancellable(id: CancelID.delayedTodoEditor, cancelInFlight: true)
-    }
-
-    func fetchRecentTodos(fetchTodosUseCase: FetchTodosUseCase) async throws -> TodoPage {
-        try await fetchTodosUseCase.execute(
-            TodoQuery(
-                sortTarget: .updatedAt,
-                sortOrder: .latest,
-                pageSize: 100
-            ),
-            cursor: nil
-        )
     }
 
     static func setPresentation(
@@ -158,7 +75,7 @@ extension HomeFeature {
                 state.selectedTodoCategory = nil
             }
         case .contentPicker:
-            state.sheet = isPresented ? .contentPicker(.init()) : state.showContentPicker ? nil : state.sheet
+            state.sheet = isPresented ? .contentPicker : state.showContentPicker ? nil : state.sheet
         case .searchView:
             state.fullScreenCover = isPresented ? .search : nil
         }
@@ -166,67 +83,26 @@ extension HomeFeature {
 
     static func setAlert(
         _ state: inout State,
-        isPresented: Bool,
-        type: AlertType?
+        isPresented: Bool
     ) {
-        guard isPresented, let type else {
+        guard isPresented else {
             state.alert = nil
             return
         }
 
-        state.alert = alertState(for: type)
+        state.alert = alertState()
     }
 
-    static func alertState(for type: AlertType) -> AlertState<Never> {
-        let title: String
-        let message: String
-
-        switch type {
-        case .invalidURL:
-            title = String(localized: "home_invalid_url_title", bundle: PresentationResources.bundle)
-            message = String(localized: "home_invalid_url_message", bundle: PresentationResources.bundle)
-        case .error:
-            title = String(localized: "common_error_title", bundle: PresentationResources.bundle)
-            message = String(localized: "common_error_message", bundle: PresentationResources.bundle)
-        }
-
+    static func alertState() -> AlertState<Never> {
         return AlertState<Never> {
-            TextState(title)
+            TextState(String(localized: "common_error_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
                 TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(message)
+            TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
         }
     }
 
-    static func syncRecentTodos(
-        _ recentTodos: [RecentTodoItem],
-        preferences: [TodoCategoryItem]
-    ) -> [RecentTodoItem] {
-        recentTodos.map { recentTodo in
-            guard let item = preferences.first(where: {
-                $0.category.storageValue == recentTodo.category.storageValue
-            }) else {
-                return recentTodo
-            }
-
-            var recentTodo = recentTodo
-            recentTodo.category = item.category
-            return recentTodo
-        }
-    }
-
-    static func normalizedWebPageURL(_ input: String) -> String? {
-        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        if trimmed == "https://" || trimmed == "http://" {
-            return nil
-        }
-        if trimmed.lowercased().hasPrefix("http://") || trimmed.lowercased().hasPrefix("https://") {
-            return trimmed
-        }
-        return "https://" + trimmed
-    }
 }

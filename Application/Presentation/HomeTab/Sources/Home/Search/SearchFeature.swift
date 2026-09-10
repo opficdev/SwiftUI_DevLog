@@ -18,11 +18,9 @@ struct SearchFeature {
         var loading = LoadingFeature.State()
         var isSearching = false
         var searchQuery = ""
-        var webPages: [WebPageItem] = []
         var todos: [TodoListItem] = []
         var recentQueries = OrderedSet<String>()
         var showAllTodos = false
-        var showAllWebPages = false
         let contentsLimit = 5
 
         init(recentQueries: [String] = []) {
@@ -41,20 +39,8 @@ struct SearchFeature {
             return Array(todos.prefix(contentsLimit))
         }
 
-        var visibleWebPages: [WebPageItem] {
-            if showAllWebPages {
-                return webPages
-            }
-
-            return Array(webPages.prefix(contentsLimit))
-        }
-
         var shouldShowMoreTodos: Bool {
             !showAllTodos && contentsLimit < todos.count
-        }
-
-        var shouldShowMoreWebPages: Bool {
-            !showAllWebPages && contentsLimit < webPages.count
         }
 
         var isHashOnlyQuery: Bool {
@@ -70,12 +56,10 @@ struct SearchFeature {
         case removeRecentQuery(String)
         case clearRecentQueries
         case setShowAllTodos(Bool)
-        case setShowAllWebPages(Bool)
         case store(StoreAction)
         case loading(LoadingFeature.Action)
 
         enum StoreAction: Equatable {
-            case fetchWebPage([WebPageItem])
             case fetchTodos([TodoListItem])
             case applySearchQuery(String)
             case setAlert(Bool)
@@ -89,7 +73,6 @@ struct SearchFeature {
 
     @Dependency(\.continuousClock) var clock
     @Dependency(\.searchFetchTodosUseCase) var fetchTodosUseCase
-    @Dependency(\.searchFetchWebPagesUseCase) var fetchWebPagesUseCase
     @Dependency(\.searchUpdateRecentQueriesUseCase) var updateRecentSearchQueriesUseCase
 
     private let maxRecentQueries = 20
@@ -118,10 +101,8 @@ struct SearchFeature {
                 }
             case .binding(\.searchQuery):
                 state.showAllTodos = false
-                state.showAllWebPages = false
                 let trimmed = state.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
                 if trimmed.isEmpty || trimmed == "#" {
-                    state.webPages = []
                     state.todos = []
                     return Self.cancelSearchEffect(isLoading: state.isLoading)
                 } else {
@@ -132,8 +113,6 @@ struct SearchFeature {
                 }
             case .binding:
                 break
-            case .store(.fetchWebPage(let items)):
-                state.webPages = items
             case .store(.fetchTodos(let items)):
                 state.todos = items
             case .addRecentQuery(let query):
@@ -154,7 +133,6 @@ struct SearchFeature {
             case .store(.applySearchQuery(let query)):
                 let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
                 if trimmed.isEmpty || trimmed == "#" {
-                    state.webPages = []
                     state.todos = []
                     return Self.cancelSearchEffect(isLoading: state.isLoading)
                 } else {
@@ -164,8 +142,6 @@ struct SearchFeature {
                 state.alert = isPresented ? Self.alertState() : nil
             case .setShowAllTodos(let shouldShowAll):
                 state.showAllTodos = shouldShowAll
-            case .setShowAllWebPages(let shouldShowAll):
-                state.showAllWebPages = shouldShowAll
             case .loading:
                 break
             }
@@ -182,11 +158,6 @@ extension DependencyValues {
         set { self[SearchFetchTodosUseCaseKey.self] = newValue }
     }
 
-    var searchFetchWebPagesUseCase: FetchWebPagesUseCase {
-        get { self[SearchFetchWebPagesUseCaseKey.self] }
-        set { self[SearchFetchWebPagesUseCaseKey.self] = newValue }
-    }
-
     var searchUpdateRecentQueriesUseCase: UpdateRecentSearchQueriesUseCase {
         get { self[SearchUpdateRecentQueriesUseCaseKey.self] }
         set { self[SearchUpdateRecentQueriesUseCaseKey.self] = newValue }
@@ -199,16 +170,6 @@ private enum SearchFetchTodosUseCaseKey: DependencyKey {
     }
 
     static var testValue: FetchTodosUseCase {
-        liveValue
-    }
-}
-
-private enum SearchFetchWebPagesUseCaseKey: DependencyKey {
-    static var liveValue: FetchWebPagesUseCase {
-        preconditionFailure("FetchWebPagesUseCase must be provided.")
-    }
-
-    static var testValue: FetchWebPagesUseCase {
         liveValue
     }
 }
@@ -244,16 +205,11 @@ private extension SearchFeature {
     }
 
     func fetchEffect(_ query: String, isLoading: Bool) -> Effect<Action> {
-        let skipsWebPages = query.hasPrefix("#")
-
-        return .run { [fetchTodosUseCase, fetchWebPagesUseCase] send in
+        .run { [fetchTodosUseCase] send in
             do {
-                async let todos = fetchTodosUseCase.execute(TodoQuery(keyword: query), cursor: nil)
-                let webPages = skipsWebPages ? [] : try await fetchWebPagesUseCase.execute(query)
-                let todoItems = try await todos.items.compactMap { TodoListItem(from: $0) }
-                let webPageItems = webPages.map { WebPageItem(from: $0) }
+                let todos = try await fetchTodosUseCase.execute(TodoQuery(keyword: query), cursor: nil)
+                let todoItems = todos.items.compactMap { TodoListItem(from: $0) }
                 await send(.store(.fetchTodos(todoItems)))
-                await send(.store(.fetchWebPage(webPageItems)))
                 if isLoading {
                     await send(.loading(.end(target: .default, mode: .immediate)))
                 }

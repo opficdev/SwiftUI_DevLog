@@ -6,17 +6,24 @@
 //
 
 import SwiftUI
+import Combine
 import ComposableArchitecture
 import Core
 import Domain
 
 public struct TodoDetailView: View {
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @State var store: StoreOf<TodoDetailFeature>
+    private let windowEvent: TodoEditorWindowEvent?
 
-    public init(store: StoreOf<TodoDetailFeature>) {
+    public init(
+        store: StoreOf<TodoDetailFeature>,
+        windowEvent: TodoEditorWindowEvent? = nil
+    ) {
         self.store = store
+        self.windowEvent = windowEvent
     }
 
     public var body: some View {
@@ -35,17 +42,30 @@ public struct TodoDetailView: View {
             }
         }
         .onAppear { store.send(.onAppear) }
+        .onReceive(windowSubmits) { submit in
+            guard case .update(let value, let todo) = submit,
+                  value.matchesEdit(todoId: store.todoId) else { return }
+            store.send(.setTodo(todo))
+        }
         .navigationBarTitleDisplayMode(.inline)
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .sheet(item: $store.scope(state: \.sheet, action: \.sheet)) { store in
+        .sheet(
+            item: $store.scope(state: \.sheet, action: \.sheet)
+                .activePresentation(when: isTabContentActive)
+        ) { store in
             sheetContent(store)
         }
         .fullScreenCover(
             item: $store.scope(state: \.fullScreenCover, action: \.fullScreenCover)
+                .activePresentation(when: isTabContentActive)
         ) { store in
             fullScreenCoverContent(store)
         }
         .toolbar { toolbarContent }
+    }
+
+    private var windowSubmits: AnyPublisher<TodoEditorWindowSubmit, Never> {
+        windowEvent?.submits ?? Empty().eraseToAnyPublisher()
     }
 
     @ToolbarContentBuilder

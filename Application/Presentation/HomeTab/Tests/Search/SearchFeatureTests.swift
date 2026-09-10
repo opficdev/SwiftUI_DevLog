@@ -82,12 +82,9 @@ struct SearchFeatureTests {
     @Test("setSearchQuery는 표시 범위를 초기화하고 디바운스 후 검색 결과를 반영한다")
     func setSearchQuery는_표시_범위를_초기화하고_디바운스_후_검색_결과를_반영한다() async {
         let todo = makeSearchTodo(id: "todo-1", title: "Swift")
-        let webPage = makeSearchWebPage(title: "Swift", urlString: "https://swift.org")
         let todoSpy = SearchFetchTodosUseCaseSpy(page: TodoPage(items: [todo], nextCursor: nil))
-        let webSpy = SearchFetchWebPagesUseCaseSpy(webPages: [webPage])
         let clock = TestClock()
         let adapter = SearchStoreTestAdapter(
-            fetchWebPagesUseCase: webSpy,
             fetchTodosUseCase: todoSpy,
             configureDependencies: {
                 $0.continuousClock = clock
@@ -95,53 +92,39 @@ struct SearchFeatureTests {
         )
 
         await adapter.setShowAllTodos(true)
-        await adapter.setShowAllWebPages(true)
         await adapter.setSearchQuery(" swift ")
         await clock.advance(by: .milliseconds(400))
         await adapter.receiveAppliedSearchQuery("swift")
-        await adapter.receiveSearchResults(
-            todos: [TodoListItem(from: todo)!],
-            webPages: [WebPageItem(from: webPage)]
-        )
+        await adapter.receiveSearchResults(todos: [TodoListItem(from: todo)!])
 
         #expect(adapter.searchQuery == " swift ")
         #expect(!adapter.showAllTodos)
-        #expect(!adapter.showAllWebPages)
         #expect(todoSpy.queries.map(\.keyword) == ["swift"])
-        #expect(webSpy.queries == ["swift"])
         #expect(adapter.todos == [TodoListItem(from: todo)])
-        #expect(adapter.webPages == [WebPageItem(from: webPage)])
         #expect(!adapter.isLoading)
     }
 
     @Test("빈 검색어는 검색 결과를 비우고 로딩을 종료한다")
     func 빈_검색어는_검색_결과를_비우고_로딩을_종료한다() async {
         let todo = TodoListItem(from: makeSearchTodo(id: "todo-1"))!
-        let webPage = WebPageItem(from: makeSearchWebPage(urlString: "https://swift.org"))
         let adapter = SearchStoreTestAdapter(
             initialTodos: [todo],
-            initialWebPages: [webPage],
             isLoading: true
         )
 
         await adapter.setSearchQuery(" ")
 
         #expect(adapter.todos.isEmpty)
-        #expect(adapter.webPages.isEmpty)
         #expect(!adapter.isLoading)
     }
 
     @Test("# 단독 검색어는 안내 상태로 전환하고 조회를 시작하지 않는다")
     func 해시_단독_검색어는_안내_상태로_전환하고_조회를_시작하지_않는다() async {
         let todo = TodoListItem(from: makeSearchTodo(id: "todo-1"))!
-        let webPage = WebPageItem(from: makeSearchWebPage(urlString: "https://swift.org"))
         let todoSpy = SearchFetchTodosUseCaseSpy()
-        let webSpy = SearchFetchWebPagesUseCaseSpy()
         let adapter = SearchStoreTestAdapter(
             initialTodos: [todo],
-            initialWebPages: [webPage],
             isLoading: true,
-            fetchWebPagesUseCase: webSpy,
             fetchTodosUseCase: todoSpy
         )
 
@@ -149,28 +132,20 @@ struct SearchFeatureTests {
 
         #expect(adapter.isHashOnlyQuery)
         #expect(adapter.todos.isEmpty)
-        #expect(adapter.webPages.isEmpty)
         #expect(!adapter.isLoading)
         #expect(todoSpy.queries.isEmpty)
-        #expect(webSpy.queries.isEmpty)
     }
 
-    @Test("# 검색어는 WebPage 조회를 생략하고 Todo만 반영한다")
-    func 해시태그_검색어는_WebPage_조회를_생략하고_Todo만_반영한다() async {
+    @Test("# 검색어는 Todo 검색 결과를 반영한다")
+    func 해시태그_검색어는_Todo_검색_결과를_반영한다() async {
         let todo = makeSearchTodo(id: "todo-1", title: "Issue")
         let todoSpy = SearchFetchTodosUseCaseSpy(page: TodoPage(items: [todo], nextCursor: nil))
-        let webSpy = SearchFetchWebPagesUseCaseSpy(webPages: [makeSearchWebPage()])
-        let adapter = SearchStoreTestAdapter(fetchWebPagesUseCase: webSpy, fetchTodosUseCase: todoSpy)
+        let adapter = SearchStoreTestAdapter(fetchTodosUseCase: todoSpy)
 
         await adapter.applySearchQuery(" #123 ")
-        await adapter.receiveSearchResults(
-            todos: [TodoListItem(from: todo)!],
-            webPages: []
-        )
+        await adapter.receiveSearchResults(todos: [TodoListItem(from: todo)!])
 
         #expect(todoSpy.queries.map(\.keyword) == ["#123"])
-        #expect(webSpy.queries.isEmpty)
-        #expect(adapter.webPages.isEmpty)
         #expect(adapter.todos == [TodoListItem(from: todo)])
     }
 

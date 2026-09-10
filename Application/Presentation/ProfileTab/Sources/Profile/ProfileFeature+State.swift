@@ -11,7 +11,11 @@ import PresentationShared
 
 extension ProfileFeature.State {
     var isLoading: Bool {
-        loading.isLoading
+        loading.visibleTargets.contains(.default)
+    }
+
+    var isRecentTodosLoading: Bool {
+        loading.visibleTargets.contains(ProfileFeature.LoadingTarget.recentTodos.target)
     }
 
     var quarterTitle: String {

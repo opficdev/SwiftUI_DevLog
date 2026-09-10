@@ -2,7 +2,7 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let deploymentSettings: SettingsDictionary = [
-    "IPHONEOS_DEPLOYMENT_TARGET": "17.0",
+    "IPHONEOS_DEPLOYMENT_TARGET": "18.0",
     "MARKETING_VERSION": "1.0.0",
 ]
 

@@ -84,19 +84,10 @@ private extension AppGraph {
             &dependencies,
             updateTodoCategoryPreferencesUseCase: todoGraphSet
                 .todoCategoryUseCaseGraph
-                .updateTodoCategoryPreferencesUseCase,
-            todoMutationEventBus: todoGraphSet.todoMutationEventBusGraph.todoMutationEventBus
-        )
-        HomePresentationDependencyPreparation.prepareWebPage(
-            &dependencies,
-            addWebPageUseCase: webPageGraphSet.webPageUseCaseGraph.addWebPageUseCase,
-            deleteWebPageUseCase: webPageGraphSet.webPageUseCaseGraph.deleteWebPageUseCase,
-            undoDeleteWebPageUseCase: webPageGraphSet.webPageUseCaseGraph.undoDeleteWebPageUseCase,
-            fetchWebPagesUseCase: webPageGraphSet.webPageUseCaseGraph.fetchWebPagesUseCase
+                .updateTodoCategoryPreferencesUseCase
         )
         HomePresentationDependencyPreparation.prepareTodo(
             &dependencies,
-            fetchTodosUseCase: todoGraphSet.todoUseCaseGraph.fetchTodosUseCase,
             networkConnectivityUseCase: networkConnectivityGraphSet
                 .networkConnectivityUseCaseGraph
                 .observeNetworkConnectivityUseCase
@@ -107,7 +98,6 @@ private extension AppGraph {
                 .userPreferencesUseCaseGraph
                 .fetchRecentSearchQueriesUseCase,
             fetchTodosUseCase: todoGraphSet.todoUseCaseGraph.fetchTodosUseCase,
-            fetchWebPagesUseCase: webPageGraphSet.webPageUseCaseGraph.fetchWebPagesUseCase,
             updateRecentSearchQueriesUseCase: userPreferencesGraphSet
                 .userPreferencesUseCaseGraph
                 .updateRecentSearchQueriesUseCase
@@ -180,6 +170,10 @@ private extension AppGraph {
             updateHeatmapActivityTypesUseCase: userPreferencesGraphSet
                 .userPreferencesUseCaseGraph
                 .updateHeatmapActivityTypesUseCase
+        )
+        ProfilePresentationDependencyPreparation.prepareRecentTodos(
+            &dependencies,
+            todoMutationEventBus: todoGraphSet.todoMutationEventBusGraph.todoMutationEventBus
         )
         ProfilePresentationDependencyPreparation.prepareSettingsSession(
             &dependencies,

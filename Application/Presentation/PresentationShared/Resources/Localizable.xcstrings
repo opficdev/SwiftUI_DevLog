@@ -383,58 +383,7 @@
         }
       }
     },
-    "home_add" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "추가"
-          }
-        }
-      }
-    },
-    "home_invalid_url_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Please enter a valid URL."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "올바른 URL을 입력해주세요."
-          }
-        }
-      }
-    },
-    "home_invalid_url_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Check URL"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL 확인"
-          }
-        }
-      }
-    },
-    "home_recent_empty" : {
+    "profile_recent_empty" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -451,19 +400,19 @@
         }
       }
     },
-    "home_recent_title" : {
+    "profile_recent_title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Recently Updated"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "최근 수정"
+            "value" : "최근 활동"
           }
         }
       }
@@ -481,85 +430,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "항목을 선택해주세요."
-          }
-        }
-      }
-    },
-    "home_web_empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved web pages appear here."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "저장한 웹 페이지가 표시돼요."
-          }
-        }
-      }
-    },
-    "home_web_refresh_required" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't update web pages. Tap to refresh."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "웹페이지를 불러오지 못했어요. 탭해서 새로고침해주세요."
-          }
-        }
-      }
-    },
-    "home_webpage_input_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter a web page URL."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "웹페이지 URL을 입력해주세요."
-          }
-        }
-      }
-    },
-    "home_webpage_input_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add URL"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL 추가"
-          }
-        }
-      }
-    },
-    "https://" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "https://"
           }
         }
       }
@@ -747,23 +617,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "홈"
-          }
-        }
-      }
-    },
-    "nav_home_content" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Content"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "컨텐츠"
           }
         }
       }
@@ -3616,45 +3469,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos"
-          }
-        }
-      }
-    },
-    "Web Page" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Web Page"
-          }
-        }
-      }
-    },
-    "Web Pages" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Web Pages"
-          }
-        }
-      }
-    },
-    "web_page_missing_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to find this web page"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "웹페이지를 찾을 수 없어요"
           }
         }
       }

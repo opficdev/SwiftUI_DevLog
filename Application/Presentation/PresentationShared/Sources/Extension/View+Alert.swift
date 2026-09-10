@@ -16,21 +16,41 @@ public extension View {
         state: KeyPath<State, AlertState<AlertAction>?>,
         action: CaseKeyPath<Action, PresentationAction<AlertAction>>
     ) -> some View where State: ObservableState {
-        @Bindable var store = store
-        let item = $store.scope(state: state, action: action)
-        let alertStore = item.wrappedValue
-        let alertState = store.state[keyPath: state]
+        modifier(
+            ProminentAlertModifier(
+                store: store,
+                alertState: state,
+                alertAction: action
+            )
+        )
+    }
+}
 
-        alert(
-            alertState.map(\.title).map(Text.init) ?? Text(verbatim: ""),
-            isPresented: Binding(item),
-            presenting: alertState,
-            actions: { alertState in
-                ForEach(alertState.buttons) { button in
-                    let usesDefaultAction = alertState.usesDefaultAction(for: button)
+private struct ProminentAlertModifier<State, Action, AlertAction>: ViewModifier
+where State: ObservableState {
+    @Environment(\.isTabContentActive) private var isTabContentActive
+
+    let store: Store<State, Action>
+    let alertState: KeyPath<State, AlertState<AlertAction>?>
+    let alertAction: CaseKeyPath<Action, PresentationAction<AlertAction>>
+
+    @preconcurrency @MainActor
+    func body(content: Content) -> some View {
+        @Bindable var store = store
+        let item = $store.scope(state: alertState, action: alertAction)
+        let alertStore = item.wrappedValue
+        let state = store.state[keyPath: alertState]
+
+        content.alert(
+            state.map(\.title).map(Text.init) ?? Text(verbatim: ""),
+            isPresented: Binding(item).activePresentation(when: isTabContentActive),
+            presenting: state,
+            actions: { state in
+                ForEach(state.buttons) { button in
+                    let usesDefaultAction = state.usesDefaultAction(for: button)
 
                     Button(
-                        role: alertState.buttonRole(for: button),
+                        role: state.buttonRole(for: button),
                         action: {
                             button.withAction { action in
                                 if let action {

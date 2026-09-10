@@ -24,6 +24,11 @@ extension DependencyValues {
         set { self[ProfileFetchTodosKey.self] = newValue }
     }
 
+    var profileTodoMutationEventBus: TodoMutationEventBus {
+        get { self[ProfileTodoMutationEventBusKey.self] }
+        set { self[ProfileTodoMutationEventBusKey.self] = newValue }
+    }
+
     var profileUpsertStatusMessageUseCase: UpsertStatusMessageUseCase {
         get { self[ProfileUpsertStatusMessageKey.self] }
         set { self[ProfileUpsertStatusMessageKey.self] = newValue }
@@ -67,6 +72,12 @@ private enum ProfileFetchTodosKey: DependencyKey {
 
     static var testValue: FetchTodosUseCase {
         liveValue
+    }
+}
+
+private enum ProfileTodoMutationEventBusKey: DependencyKey {
+    static var liveValue: TodoMutationEventBus {
+        preconditionFailure("TodoMutationEventBus must be provided.")
     }
 }
 

@@ -15,18 +15,15 @@ public struct MarkdownRendererView: View {
 
     private let markdown: String
     private let references: [Int: MarkdownRendererReference]
-    private let obscuredBottomInset: CGFloat
     private let onOpenReferenceID: ((String) -> Void)?
 
     public init(
         markdown: String,
         references: [Int: MarkdownRendererReference] = [:],
-        obscuredBottomInset: CGFloat = .zero,
         onOpenReferenceID: ((String) -> Void)? = nil
     ) {
         self.markdown = markdown
         self.references = references
-        self.obscuredBottomInset = obscuredBottomInset
         self.onOpenReferenceID = onOpenReferenceID
     }
 
@@ -37,7 +34,6 @@ public struct MarkdownRendererView: View {
             colorScheme: colorScheme,
             languageCode: locale.language.languageCode?.identifier ?? "und",
             fontSize: fontSize,
-            obscuredBottomInset: obscuredBottomInset,
             onOpenReferenceID: onOpenReferenceID,
             onOpenURL: { openURL($0) }
         )

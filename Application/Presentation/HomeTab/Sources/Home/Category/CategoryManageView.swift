@@ -9,6 +9,7 @@ import SwiftUI
 import PresentationShared
 
 struct CategoryManageView: View {
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Bindable var store: StoreOf<CategoryManageFeature>
 
     var body: some View {
@@ -52,7 +53,10 @@ struct CategoryManageView: View {
             .navigationTitle(String(localized: "nav_todo_manage", bundle: PresentationResources.bundle))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
-            .sheet(item: $store.scope(state: \.categorySheet, action: \.categorySheet)) { sheetStore in
+            .sheet(
+                item: $store.scope(state: \.categorySheet, action: \.categorySheet)
+                    .activePresentation(when: isTabContentActive)
+            ) { sheetStore in
                 sheetContent(sheetStore)
             }
             .prominentAlert(store, state: \.alert, action: \.alert)

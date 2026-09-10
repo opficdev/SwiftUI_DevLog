@@ -89,6 +89,7 @@ public struct TodoListFeature {
             case tapTogglePinned(TodoListItem)
             case undoDelete
             case onAppear
+            case windowTodoCreated
             case loadNextPage
         }
 
@@ -322,6 +323,11 @@ private extension TodoListFeature {
             return fetchEffect(query: state.query, cursor: nil, showsIndicator: false)
         case .onAppear:
             return fetchEffect(query: state.query, cursor: nil)
+        case .windowTodoCreated:
+            return .merge(
+                trackTodoCreateEffect(),
+                fetchEffect(query: state.query, cursor: nil, showsIndicator: false)
+            )
         case .swipeTodo(let todo):
             return swipeTodoEffect(todo, state: &state)
         case .resetFilters:

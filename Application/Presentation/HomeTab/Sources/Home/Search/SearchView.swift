@@ -29,15 +29,6 @@ struct SearchView: View {
                         ) {
                             TodoDetailFeature()
                         })
-                    case .web(let page):
-                        WebView(url: page.url)
-                            .ignoresSafeArea()
-                            .toolbar {
-                                ToolbarItem(placement: .principal) {
-                                    Text(page.title)
-                                        .bold()
-                                }
-                            }
                     }
                 }
                 .onAppear { store.send(.onAppear) }
@@ -65,7 +56,7 @@ struct SearchView: View {
                 hashGuide
             } else if store.isLoading {
                 LoadingView()
-            } else if store.webPages.isEmpty && store.todos.isEmpty {
+            } else if store.todos.isEmpty {
                 emptySearchResult
             } else {
                 ScrollView {
@@ -126,9 +117,6 @@ struct SearchView: View {
             if !store.todos.isEmpty {
                 todoResults
             }
-            if !store.webPages.isEmpty {
-                webPages
-            }
         }
         .padding(.vertical, 8)
     }
@@ -160,33 +148,6 @@ struct SearchView: View {
         .padding(.horizontal, 16)
     }
 
-    private var webPages: some View {
-        let pages = store.visibleWebPages
-
-        return VStack(alignment: .leading, spacing: 12) {
-            Text("Web Pages", bundle: PresentationResources.bundle)
-                .font(.headline)
-                .foregroundStyle(Color(.label))
-            Divider()
-            LazyVStack(spacing: 0) {
-                ForEach(pages, id: \.id) { page in
-                    webResultRow(page)
-                }
-            }
-            .padding(.top, -12)
-            if store.shouldShowMoreWebPages {
-                Button(String(localized: "search_show_more", bundle: PresentationResources.bundle)) {
-                    store.send(.setShowAllWebPages(true))
-                }
-                .font(.subheadline)
-                .foregroundStyle(Color.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 4)
-            }
-        }
-        .padding(.horizontal, 16)
-    }
-
     private func todoResultRow(_ item: TodoListItem) -> some View {
         Button {
             router.push(Path.todo(item.id))
@@ -197,15 +158,6 @@ struct SearchView: View {
             }
         }
         .todoDetailPreview(todoId: item.id)
-    }
-
-    private func webResultRow(_ item: WebPageItem) -> some View {
-        NavigationLink(value: Path.web(item)) {
-            VStack(spacing: 0) {
-                WebItemRow(item: item, showsChevron: true)
-                Divider()
-            }
-        }
     }
 
     private var recentQueries: some View {
@@ -251,6 +203,5 @@ struct SearchView: View {
 
     private enum Path: Hashable {
         case todo(String)
-        case web(WebPageItem)
     }
 }
