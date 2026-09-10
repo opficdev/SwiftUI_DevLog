@@ -13,6 +13,7 @@ import PresentationShared
 import TodayTab
 
 struct MainView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Binding var selectedTab: MainTab
     @State private var store: StoreOf<MainFeature>
     private let windowEvent: TodoEditorWindowEvent
@@ -35,8 +36,17 @@ struct MainView: View {
             content: tabContent
         )
         .toastHost()
-        .exposableTabBar(isPresented: true) {
+        .exposableTabBar(isPresented: !usesSidebar) {
             MainTabBar(
+                selectedTab: $selectedTab,
+                unreadPushCount: store.unreadPushCount
+            )
+        }
+        .exposableSideBar(
+            isPresented: sidebarPresentation,
+            showsToggle: usesSidebar
+        ) {
+            MainSideBar(
                 selectedTab: $selectedTab,
                 unreadPushCount: store.unreadPushCount
             )
@@ -66,5 +76,16 @@ struct MainView: View {
         case .profile:
             ProfileView(isSelected: isSelected)
         }
+    }
+
+    private var usesSidebar: Bool {
+        horizontalSizeClass == .regular
+    }
+
+    private var sidebarPresentation: Binding<Bool> {
+        Binding(
+            get: { usesSidebar && store.isSidebarPresented },
+            set: { store.send(.view(.setSidebarPresented($0))) }
+        )
     }
 }

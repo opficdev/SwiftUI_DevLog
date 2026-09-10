@@ -147,3 +147,63 @@ private struct ExposableTabBarModifier<TabBar: View>: ViewModifier {
         }
     }
 }
+
+public extension View {
+    func exposableSideBar<SideBar: View>(
+        isPresented: Binding<Bool>,
+        showsToggle: Bool,
+        @ViewBuilder content: @escaping () -> SideBar
+    ) -> some View {
+        modifier(
+            ExposableSideBarModifier(
+                isPresented: isPresented,
+                showsToggle: showsToggle,
+                sideBar: content
+            )
+        )
+    }
+}
+
+private struct ExposableSideBarModifier<SideBar: View>: ViewModifier {
+    @Binding var isPresented: Bool
+    let showsToggle: Bool
+    @ViewBuilder let sideBar: () -> SideBar
+
+    func body(content: Content) -> some View {
+        HStack(spacing: 0) {
+            sideBarArea
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .overlay(alignment: .topLeading) {
+            if showsToggle {
+                Button {
+                    isPresented.toggle()
+                } label: {
+                    Image(systemName: "sidebar.left")
+                        .font(.headline)
+                        .adaptiveButtonStyle()
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
+                .padding(.leading, 8)
+            }
+        }
+        .animation(.snappy, value: isPresented)
+    }
+
+    @ViewBuilder
+    private var sideBarArea: some View {
+        if isPresented {
+            HStack(spacing: 0) {
+                sideBar()
+                Divider()
+            }
+            .transition(.move(edge: .leading).combined(with: .opacity))
+        } else {
+            Color.clear
+                .frame(width: 0)
+                .allowsHitTesting(false)
+        }
+    }
+}
