@@ -17,8 +17,6 @@ public enum ColorAsset {
     case infoContainer
     case onPrimaryContainer
     case primaryContainer
-    case review
-    case reviewContainer
     case success
     case successContainer
     case surface
