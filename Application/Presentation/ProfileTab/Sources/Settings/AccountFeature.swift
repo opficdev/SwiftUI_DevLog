@@ -176,7 +176,12 @@ private extension AccountFeature {
                     return
                 }
 
-                await ToastPresenter.present(message: String(localized: "account_toast_link_success"))
+                await ToastPresenter.present(
+                    message: String(
+                        localized: "account_toast_link_success",
+                        bundle: PresentationResources.bundle
+                    )
+                )
                 let providers = try await fetchProvidersUseCase.execute()
                 await send(.setProviders(
                     currentProvider: providers.currentProvider,
@@ -195,7 +200,12 @@ private extension AccountFeature {
             await send(.loading(.begin(target: .default, mode: .delayed)))
             do {
                 try await unlinkProviderUseCase.execute(provider)
-                await ToastPresenter.present(message: String(localized: "account_toast_unlink_success"))
+                await ToastPresenter.present(
+                    message: String(
+                        localized: "account_toast_unlink_success",
+                        bundle: PresentationResources.bundle
+                    )
+                )
                 let providers = try await fetchProvidersUseCase.execute()
                 await send(.setProviders(
                     currentProvider: providers.currentProvider,
@@ -234,27 +244,30 @@ private extension AccountFeature {
 
         switch type {
         case .linkEmailNotFound:
-            title = String(localized: "account_alert_email_unavailable_title")
-            message = String(localized: "account_alert_email_unavailable_message")
+            title = String(localized: "account_alert_email_unavailable_title", bundle: PresentationResources.bundle)
+            message = String(localized: "account_alert_email_unavailable_message", bundle: PresentationResources.bundle)
         case .linkEmailMismatch:
-            title = String(localized: "account_alert_cannot_link_title")
-            message = String(localized: "account_alert_cannot_link_message")
+            title = String(localized: "account_alert_cannot_link_title", bundle: PresentationResources.bundle)
+            message = String(localized: "account_alert_cannot_link_message", bundle: PresentationResources.bundle)
         case .linkCredentialAlreadyInUse:
-            title = String(localized: "account_alert_already_linked_title")
-            message = String(localized: "account_alert_already_linked_message")
+            title = String(localized: "account_alert_already_linked_title", bundle: PresentationResources.bundle)
+            message = String(localized: "account_alert_already_linked_message", bundle: PresentationResources.bundle)
         case .githubEmailConflict:
-            title = String(localized: "account_alert_github_email_conflict_title")
-            message = String(localized: "account_alert_github_email_conflict_message")
+            title = String(localized: "account_alert_github_email_conflict_title", bundle: PresentationResources.bundle)
+            message = String(
+                localized: "account_alert_github_email_conflict_message",
+                bundle: PresentationResources.bundle
+            )
         case .error:
-            title = String(localized: "common_error_title")
-            message = String(localized: "common_error_message")
+            title = String(localized: "common_error_title", bundle: PresentationResources.bundle)
+            message = String(localized: "common_error_message", bundle: PresentationResources.bundle)
         }
 
         return AlertState {
             TextState(title)
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
             TextState(message)

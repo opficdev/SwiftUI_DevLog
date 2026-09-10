@@ -32,14 +32,14 @@ public struct SystemTodoCategoryItem: Identifiable, Hashable {
 
     public var localizedName: String {
         switch systemTodoCategory {
-        case .issue: return NSLocalizedString("todo_category_issue", comment: "Todo category: Issue")
-        case .feature: return NSLocalizedString("todo_category_feature", comment: "Todo category: Feature")
-        case .improvement: return NSLocalizedString("todo_category_improvement", comment: "Todo category: Improvement")
-        case .review: return NSLocalizedString("todo_category_review", comment: "Todo category: Review")
-        case .test: return NSLocalizedString("todo_category_test", comment: "Todo category: Test")
-        case .doc: return NSLocalizedString("todo_category_doc", comment: "Todo category: Documentation")
-        case .research: return NSLocalizedString("todo_category_research", comment: "Todo category: Research")
-        case .etc: return NSLocalizedString("todo_category_etc", comment: "Todo category: Etc")
+        case .issue: return String(localized: "todo_category_issue", bundle: PresentationResources.bundle)
+        case .feature: return String(localized: "todo_category_feature", bundle: PresentationResources.bundle)
+        case .improvement: return String(localized: "todo_category_improvement", bundle: PresentationResources.bundle)
+        case .review: return String(localized: "todo_category_review", bundle: PresentationResources.bundle)
+        case .test: return String(localized: "todo_category_test", bundle: PresentationResources.bundle)
+        case .doc: return String(localized: "todo_category_doc", bundle: PresentationResources.bundle)
+        case .research: return String(localized: "todo_category_research", bundle: PresentationResources.bundle)
+        case .etc: return String(localized: "todo_category_etc", bundle: PresentationResources.bundle)
         }
     }
 

@@ -7,6 +7,7 @@
 
 import Core
 import Foundation
+import PresentationShared
 
 extension ProfileFeature.State {
     var isLoading: Bool {
@@ -19,7 +20,7 @@ extension ProfileFeature.State {
         let month = Calendar.current.component(.month, from: start)
         let quarter = ((month - 1) / 3) + 1
         return String.localizedStringWithFormat(
-            String(localized: "profile_year_quarter_format"),
+            String(localized: "profile_year_quarter_format", bundle: PresentationResources.bundle),
             String(year),
             String(quarter)
         )

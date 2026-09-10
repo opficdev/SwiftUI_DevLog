@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Domain
+import PresentationShared
 
 public struct WebPageItem: Identifiable, Hashable {
     private let metadata: WebPage
@@ -17,7 +18,10 @@ public struct WebPageItem: Identifiable, Hashable {
     }
 
     public var id: String { metadata.id }
-    public var title: String { metadata.title ?? String(localized: "web_page_missing_title") }
+    public var title: String {
+        metadata.title
+            ?? String(localized: "web_page_missing_title", bundle: PresentationResources.bundle)
+    }
     public var url: URL { metadata.url }
     public var displayURL: String { metadata.displayURL.absoluteString }
     public var imageURL: URL? { metadata.imageURL }

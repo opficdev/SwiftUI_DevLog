@@ -142,7 +142,13 @@ public struct TodoEditorView: View {
         TextField(
             "",
             text: $store.title,
-            prompt: Text(String(localized: "todo_editor_title_required")).foregroundColor(Color.secondary),
+            prompt: Text(
+                String(
+                    localized: "todo_editor_title_required",
+                    bundle: PresentationResources.bundle
+                )
+            )
+            .foregroundColor(Color.secondary),
         )
         .font(.title2)
         .frame(height: 30)
@@ -164,9 +170,9 @@ public struct TodoEditorView: View {
                 }
             )
         ) {
-            Text(String(localized: "todo_write"))
+            Text(String(localized: "todo_write", bundle: PresentationResources.bundle))
                 .tag(TodoEditorFeature.EditorTab.editor)
-            Text(String(localized: "todo_preview"))
+            Text(String(localized: "todo_preview", bundle: PresentationResources.bundle))
                 .tag(TodoEditorFeature.EditorTab.preview)
         }
         .pickerStyle(.segmented)
@@ -179,7 +185,10 @@ public struct TodoEditorView: View {
                     markdownHint
                     UIKitTextEditor(
                         text: $store.content,
-                        placeholder: String(localized: "todo_editor_description_optional")
+                        placeholder: String(
+                            localized: "todo_editor_description_optional",
+                            bundle: PresentationResources.bundle
+                        )
                     )
                     .focused($field, equals: .content)
                 }
@@ -201,16 +210,16 @@ public struct TodoEditorView: View {
     }
 
     private var markdownHint: some View {
-        Text(String(localized: "todo_editor_markdown_hint"))
+        Text(String(localized: "todo_editor_markdown_hint", bundle: PresentationResources.bundle))
             .font(.caption)
             .foregroundStyle(.secondary)
     }
 
     private var previewPlaceholder: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(String(localized: "todo_editor_markdown_preview_title"))
+            Text(String(localized: "todo_editor_markdown_preview_title", bundle: PresentationResources.bundle))
                 .font(.subheadline.weight(.semibold))
-            Text(String(localized: "todo_editor_markdown_preview_message"))
+            Text(String(localized: "todo_editor_markdown_preview_message", bundle: PresentationResources.bundle))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -290,9 +299,9 @@ private struct TodoEditorInfoSheetView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(String(localized: "todo_options_section")) {
+                Section(String(localized: "todo_options_section", bundle: PresentationResources.bundle)) {
                     Picker(
-                        String(localized: "todo_category"),
+                        String(localized: "todo_category", bundle: PresentationResources.bundle),
                         selection: Binding(
                             get: { store.category.id },
                             set: { categoryId in
@@ -313,7 +322,7 @@ private struct TodoEditorInfoSheetView: View {
                     }
 
                     Toggle(
-                        String(localized: "todo_completed"),
+                        String(localized: "todo_completed", bundle: PresentationResources.bundle),
                         isOn: Binding(
                             get: { store.isCompleted },
                             set: { store.send(.setCompleted($0)) }
@@ -322,7 +331,7 @@ private struct TodoEditorInfoSheetView: View {
                     .tint(.blue)
 
                     Toggle(
-                        String(localized: "todo_pinned"),
+                        String(localized: "todo_pinned", bundle: PresentationResources.bundle),
                         isOn: Binding(
                             get: { store.isPinned },
                             set: { store.send(.binding(.set(\.isPinned, $0))) }
@@ -333,10 +342,10 @@ private struct TodoEditorInfoSheetView: View {
                     dueDateControl
                 }
 
-                Section(String(localized: "todo_tags")) {
+                Section(String(localized: "todo_tags", bundle: PresentationResources.bundle)) {
                     HStack(spacing: 12) {
                         TextField(
-                            String(localized: "todo_add"),
+                            String(localized: "todo_add", bundle: PresentationResources.bundle),
                             text: $store.tagText
                         )
                         .frame(height: UIFont.preferredFont(forTextStyle: .title2).lineHeight)
@@ -359,7 +368,7 @@ private struct TodoEditorInfoSheetView: View {
                     }
 
                     if store.tags.isEmpty {
-                        Text(String(localized: "todo_no_tags"))
+                        Text(String(localized: "todo_no_tags", bundle: PresentationResources.bundle))
                             .foregroundStyle(.secondary)
                             .padding(.vertical, 4)
                     } else {
@@ -371,7 +380,7 @@ private struct TodoEditorInfoSheetView: View {
                     }
                 }
             }
-            .navigationTitle(String(localized: "todo_details"))
+            .navigationTitle(String(localized: "todo_details", bundle: PresentationResources.bundle))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarLeadingButton {
@@ -387,7 +396,7 @@ private struct TodoEditorInfoSheetView: View {
             set: { store.send(.binding(.set(\.dueDate, $0))) }
         )) {
             HStack {
-                Text(String(localized: "todo_due_date"))
+                Text(String(localized: "todo_due_date", bundle: PresentationResources.bundle))
                     .foregroundStyle(.primary)
                 Spacer()
                 if let dueDate = store.dueDate {
@@ -396,7 +405,7 @@ private struct TodoEditorInfoSheetView: View {
                     }
                     .padding(.vertical, -4)
                 } else {
-                    Text(String(localized: "todo_none"))
+                    Text(String(localized: "todo_none", bundle: PresentationResources.bundle))
                         .foregroundStyle(.secondary)
                 }
             }

@@ -7,6 +7,7 @@
 
 import Foundation
 import Domain
+import PresentationShared
 
 public struct PushNotificationItem: Identifiable, Hashable {
     public let id: String
@@ -24,7 +25,7 @@ public struct PushNotificationItem: Identifiable, Hashable {
         if let legacy {
             return legacy.title
         }
-        return String(localized: "push_notification_todo_due_title")
+        return String(localized: "push_notification_todo_due_title", bundle: PresentationResources.bundle)
     }
 
     public var body: String {
@@ -33,10 +34,13 @@ public struct PushNotificationItem: Identifiable, Hashable {
         }
         guard let todoTitle,
               !todoTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return String(localized: "push_notification_todo_due_tomorrow_without_title")
+            return String(
+                localized: "push_notification_todo_due_tomorrow_without_title",
+                bundle: PresentationResources.bundle
+            )
         }
         return String.localizedStringWithFormat(
-            String(localized: "push_notification_todo_due_tomorrow_format"),
+            String(localized: "push_notification_todo_due_tomorrow_format", bundle: PresentationResources.bundle),
             todoTitle
         )
     }

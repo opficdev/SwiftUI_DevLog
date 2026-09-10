@@ -96,7 +96,7 @@ extension TagCopyMenuCoordinator: UIEditMenuInteractionDelegate {
         suggestedActions: [UIMenuElement]
     ) -> UIMenu? {
         let tagText = tagText
-        let copyAction = UIAction(title: String(localized: "common_copy")) { _ in
+        let copyAction = UIAction(title: String(localized: "common_copy", bundle: PresentationResources.bundle)) { _ in
             UIPasteboard.general.string = tagText
         }
         return UIMenu(children: [copyAction])

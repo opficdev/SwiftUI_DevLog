@@ -15,7 +15,7 @@ struct PushNotificationSettingsView: View {
         List {
             Section(content: {
                 HStack {
-                    Text(String(localized: "push_settings_enable"))
+                    Text(String(localized: "push_settings_enable", bundle: PresentationResources.bundle))
                     Spacer()
                     if store.isLoading && store.activeLoadingRow == .enable {
                         ProgressView()
@@ -27,7 +27,7 @@ struct PushNotificationSettingsView: View {
                     }
                 }
             }, footer: {
-                Text(String(localized: "push_settings_footer"))
+                Text(String(localized: "push_settings_footer", bundle: PresentationResources.bundle))
                     .multilineTextAlignment(.leading)
             })
             Section {
@@ -52,7 +52,7 @@ struct PushNotificationSettingsView: View {
                     }
                 }
                 HStack {
-                    Text(String(localized: "push_settings_custom"))
+                    Text(String(localized: "push_settings_custom", bundle: PresentationResources.bundle))
                     Spacer()
                     Text(formattedTimeString(store.viewPushNotificationTime))
                         .foregroundStyle(.secondary)
@@ -68,7 +68,7 @@ struct PushNotificationSettingsView: View {
             .opacity(store.pushNotificationEnable ? 1.0 : 0.2)
         }
         .listStyle(.insetGrouped)
-        .navigationTitle(String(localized: "nav_push_settings"))
+        .navigationTitle(String(localized: "nav_push_settings", bundle: PresentationResources.bundle))
         .onAppear { store.send(.fetchSettings) }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .sheet(item: $store.scope(state: \.timePicker, action: \.timePicker)) { timePickerStore in

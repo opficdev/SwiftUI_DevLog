@@ -15,14 +15,14 @@ struct AccountView: View {
 
     var body: some View {
         List {
-            Section(String(localized: "account_current_section")) {
+            Section(String(localized: "account_current_section", bundle: PresentationResources.bundle)) {
                 HStack {
                     if let provider = store.currentProvider {
                         providerContent(provider)
                     }
                 }
             }
-            Section(String(localized: "account_social_section")) {
+            Section(String(localized: "account_social_section", bundle: PresentationResources.bundle)) {
                 let providers = AuthProvider.allCases.filter { $0 != store.currentProvider }
                 ForEach(providers, id: \.self) { provider in
                     let isConnected = store.connectedProviders.contains(provider)
@@ -38,8 +38,8 @@ struct AccountView: View {
                             }
                         } label: {
                             Text(isConnected
-                                 ? String(localized: "account_disconnect")
-                                 : String(localized: "account_connect"))
+                                 ? String(localized: "account_disconnect", bundle: PresentationResources.bundle)
+                                 : String(localized: "account_connect", bundle: PresentationResources.bundle))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 12)
@@ -64,7 +64,7 @@ struct AccountView: View {
         }
         .scrollDisabled(true)
         .listStyle(.insetGrouped)
-        .navigationTitle(String(localized: "nav_account"))
+        .navigationTitle(String(localized: "nav_account", bundle: PresentationResources.bundle))
         .onAppear { store.send(.onAppear) }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .background {

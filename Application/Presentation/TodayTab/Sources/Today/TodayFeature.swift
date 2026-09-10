@@ -73,49 +73,49 @@ struct TodayFeature {
                 return
                     TodayFeature.makeSection(
                         category: .focused,
-                        title: String(localized: "today_section_focused"),
+                        title: String(localized: "today_section_focused", bundle: PresentationResources.bundle),
                         items: items.focused
                     )
                     + TodayFeature.makeSection(
                         category: .overdue,
-                        title: String(localized: "today_section_overdue"),
+                        title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
                         items: items.overdue
                     )
                     + TodayFeature.makeSection(
                         category: .dueSoon,
                         title: String.localizedStringWithFormat(
-                            String(localized: "today_section_due_soon_format"),
+                            String(localized: "today_section_due_soon_format", bundle: PresentationResources.bundle),
                             Int64(TodayFeature.upcomingWindowDays)
                         ),
                         items: items.dueSoon
                     )
                     + TodayFeature.makeSection(
                         category: .later,
-                        title: String(localized: "today_section_later"),
+                        title: String(localized: "today_section_later", bundle: PresentationResources.bundle),
                         items: items.later
                     )
                     + TodayFeature.makeSection(
                         category: .unscheduled,
-                        title: String(localized: "today_section_unscheduled"),
+                        title: String(localized: "today_section_unscheduled", bundle: PresentationResources.bundle),
                         items: items.unscheduled
                     )
             case .focused:
                 return TodayFeature.makeSection(
                     category: .focused,
-                    title: String(localized: "today_section_focused"),
+                    title: String(localized: "today_section_focused", bundle: PresentationResources.bundle),
                     items: items.focused
                 )
             case .overdue:
                 return TodayFeature.makeSection(
                     category: .overdue,
-                    title: String(localized: "today_section_overdue"),
+                    title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
                     items: items.overdue
                 )
             case .dueSoon:
                 return TodayFeature.makeSection(
                     category: .dueSoon,
                     title: String.localizedStringWithFormat(
-                        String(localized: "today_section_due_soon_format"),
+                        String(localized: "today_section_due_soon_format", bundle: PresentationResources.bundle),
                         Int64(TodayFeature.upcomingWindowDays)
                     ),
                     items: items.dueSoon
@@ -350,13 +350,13 @@ private extension TodayFeature {
 
     static func alertState() -> AlertState<Never> {
         AlertState {
-            TextState(String(localized: "common_error_title"))
+            TextState(String(localized: "common_error_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "common_error_message"))
+            TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
         }
     }
 }

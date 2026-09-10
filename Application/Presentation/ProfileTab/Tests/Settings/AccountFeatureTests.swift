@@ -153,8 +153,8 @@ struct AccountFeatureTests {
         }
 
         #expect(driver.alert == expectedAlert(
-            title: String(localized: "common_error_title"),
-            message: String(localized: "common_error_message")
+            title: String(localized: "common_error_title", bundle: PresentationResources.bundle),
+            message: String(localized: "common_error_message", bundle: PresentationResources.bundle)
         ))
     }
 
@@ -163,28 +163,46 @@ struct AccountFeatureTests {
         let scenarios = [
             AccountLinkFailureScenario(
                 error: AuthError.linkEmailNotFound,
-                title: String(localized: "account_alert_email_unavailable_title"),
-                message: String(localized: "account_alert_email_unavailable_message")
+                title: String(
+                    localized: "account_alert_email_unavailable_title",
+                    bundle: PresentationResources.bundle
+                ),
+                message: String(
+                    localized: "account_alert_email_unavailable_message",
+                    bundle: PresentationResources.bundle
+                )
             ),
             AccountLinkFailureScenario(
                 error: AuthError.linkEmailMismatch,
-                title: String(localized: "account_alert_cannot_link_title"),
-                message: String(localized: "account_alert_cannot_link_message")
+                title: String(localized: "account_alert_cannot_link_title", bundle: PresentationResources.bundle),
+                message: String(localized: "account_alert_cannot_link_message", bundle: PresentationResources.bundle)
             ),
             AccountLinkFailureScenario(
                 error: AuthError.linkCredentialAlreadyInUse,
-                title: String(localized: "account_alert_already_linked_title"),
-                message: String(localized: "account_alert_already_linked_message")
+                title: String(
+                    localized: "account_alert_already_linked_title",
+                    bundle: PresentationResources.bundle
+                ),
+                message: String(
+                    localized: "account_alert_already_linked_message",
+                    bundle: PresentationResources.bundle
+                )
             ),
             AccountLinkFailureScenario(
                 error: AuthError.githubEmailConflict,
-                title: String(localized: "account_alert_github_email_conflict_title"),
-                message: String(localized: "account_alert_github_email_conflict_message")
+                title: String(
+                    localized: "account_alert_github_email_conflict_title",
+                    bundle: PresentationResources.bundle
+                ),
+                message: String(
+                    localized: "account_alert_github_email_conflict_message",
+                    bundle: PresentationResources.bundle
+                )
             ),
             AccountLinkFailureScenario(
                 error: AccountTestError.failure,
-                title: String(localized: "common_error_title"),
-                message: String(localized: "common_error_message")
+                title: String(localized: "common_error_title", bundle: PresentationResources.bundle),
+                message: String(localized: "common_error_message", bundle: PresentationResources.bundle)
             )
         ]
 
@@ -234,8 +252,8 @@ struct AccountFeatureTests {
         }
 
         #expect(driver.alert == expectedAlert(
-            title: String(localized: "common_error_title"),
-            message: String(localized: "common_error_message")
+            title: String(localized: "common_error_title", bundle: PresentationResources.bundle),
+            message: String(localized: "common_error_message", bundle: PresentationResources.bundle)
         ))
     }
 
@@ -415,7 +433,7 @@ private func expectedAlert(
         TextState(title)
     } actions: {
         ButtonState(role: .cancel) {
-            TextState(String(localized: "common_close"))
+            TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
         }
     } message: {
         TextState(message)

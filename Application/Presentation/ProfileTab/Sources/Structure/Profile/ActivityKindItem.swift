@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Core
+import PresentationShared
 
 public struct ActivityKindItem: Identifiable, Hashable {
     private let activityKind: ActivityKind
@@ -26,11 +27,11 @@ public struct ActivityKindItem: Identifiable, Hashable {
     public var title: String {
         switch activityKind {
         case .created:
-            return String(localized: "profile_activity_created")
+            return String(localized: "profile_activity_created", bundle: PresentationResources.bundle)
         case .completed:
-            return String(localized: "profile_activity_completed")
+            return String(localized: "profile_activity_completed", bundle: PresentationResources.bundle)
         case .deleted:
-            return String(localized: "profile_activity_deleted")
+            return String(localized: "profile_activity_deleted", bundle: PresentationResources.bundle)
         }
     }
 

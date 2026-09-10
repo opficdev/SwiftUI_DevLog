@@ -65,7 +65,7 @@ public struct TodoDetailView: View {
                 Button {
                     openTodoEditor()
                 } label: {
-                    Text(String(localized: "todo_edit"))
+                    Text(String(localized: "todo_edit", bundle: PresentationResources.bundle))
                 }
             }
         }
@@ -131,28 +131,28 @@ private struct TodoDetailInfoSheetView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(String(localized: "todo_options_section")) {
+                Section(String(localized: "todo_options_section", bundle: PresentationResources.bundle)) {
                     HStack {
-                        Text(String(localized: "todo_category"))
+                        Text(String(localized: "todo_category", bundle: PresentationResources.bundle))
                         Spacer()
                         Text(TodoCategoryItem(from: todo.category).localizedName)
                             .foregroundStyle(.secondary)
                     }
 
                     statusRow(
-                        title: String(localized: "todo_completed"),
+                        title: String(localized: "todo_completed", bundle: PresentationResources.bundle),
                         systemImage: todo.isCompleted ? "checkmark.circle.fill" : "circle",
                         color: todo.isCompleted ? .green : .secondary
                     )
 
                     statusRow(
-                        title: String(localized: "todo_pinned"),
+                        title: String(localized: "todo_pinned", bundle: PresentationResources.bundle),
                         systemImage: todo.isPinned ? "star.fill" : "star",
                         color: todo.isPinned ? .orange : .secondary
                     )
 
                     HStack {
-                        Text(String(localized: "todo_due_date"))
+                        Text(String(localized: "todo_due_date", bundle: PresentationResources.bundle))
 
                         Spacer()
 
@@ -160,15 +160,15 @@ private struct TodoDetailInfoSheetView: View {
                             Tag(dueDateText(for: dueDate), isEditing: false)
                                 .padding(.vertical, -4)
                         } else {
-                            Text(String(localized: "todo_none"))
+                            Text(String(localized: "todo_none", bundle: PresentationResources.bundle))
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
 
-                Section(String(localized: "todo_tags")) {
+                Section(String(localized: "todo_tags", bundle: PresentationResources.bundle)) {
                     if todo.tags.isEmpty {
-                        Text(String(localized: "todo_no_tags"))
+                        Text(String(localized: "todo_no_tags", bundle: PresentationResources.bundle))
                             .foregroundStyle(.secondary)
                             .padding(.vertical, 4)
                     } else {
@@ -176,7 +176,7 @@ private struct TodoDetailInfoSheetView: View {
                     }
                 }
             }
-            .navigationTitle(String(localized: "todo_details"))
+            .navigationTitle(String(localized: "todo_details", bundle: PresentationResources.bundle))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarLeadingButton {

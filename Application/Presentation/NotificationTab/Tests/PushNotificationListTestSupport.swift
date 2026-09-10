@@ -161,7 +161,7 @@ struct PushNotificationListStoreTestAdapter: PushNotificationListStateDriving {
 
     private func presentDeleteNotificationToast(_ notificationId: String) {
         ToastPresenter.present(
-            message: String(localized: "common_undo"),
+            message: String(localized: "common_undo", bundle: PresentationResources.bundle),
             systemImage: "arrow.uturn.left",
             duration: 5,
             font: .caption,

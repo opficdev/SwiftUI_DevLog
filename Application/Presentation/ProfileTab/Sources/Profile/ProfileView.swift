@@ -105,7 +105,7 @@ public struct ProfileView: View {
                 TextField(
                     text: $store.statusMessage
                 ) {
-                    Text(String(localized: "profile_status_placeholder"))
+                    Text(String(localized: "profile_status_placeholder", bundle: PresentationResources.bundle))
                 }
                 .frame(height: UIFont.preferredFont(forTextStyle: .body).lineHeight)
                 .focused($focused)
@@ -132,7 +132,7 @@ public struct ProfileView: View {
                     focused = false
                     store.send(.willUpdateStatusMessage)
                 } label: {
-                    Text(String(localized: "profile_done"))
+                    Text(String(localized: "profile_done", bundle: PresentationResources.bundle))
                 }
                 .transition(.move(edge: .trailing).combined(with: .opacity))
             }
@@ -143,7 +143,7 @@ public struct ProfileView: View {
     private var activityHeatmapSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(String(localized: "profile_quarterly_activity"))
+                Text(String(localized: "profile_quarterly_activity", bundle: PresentationResources.bundle))
                     .font(.headline)
                 Spacer()
                 if !store.isViewingCurrentQuarter {
@@ -246,7 +246,7 @@ public struct ProfileView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
-                    Text(String(localized: "profile_year"))
+                    Text(String(localized: "profile_year", bundle: PresentationResources.bundle))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -272,7 +272,7 @@ public struct ProfileView: View {
                 Spacer(minLength: 0)
             }
             .padding(20)
-            .navigationTitle(String(localized: "profile_select_quarter"))
+            .navigationTitle(String(localized: "profile_select_quarter", bundle: PresentationResources.bundle))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarTrailingButton {
@@ -296,7 +296,7 @@ public struct ProfileView: View {
         } label: {
             Text(
                 String.localizedStringWithFormat(
-                    String(localized: "profile_quarter_format"),
+                    String(localized: "profile_quarter_format", bundle: PresentationResources.bundle),
                     Int64(quarter)
                 )
             )
@@ -323,7 +323,7 @@ public struct ProfileView: View {
                 .bold()
 
             if activities.isEmpty {
-                Text(String(localized: "profile_activity_none"))
+                Text(String(localized: "profile_activity_none", bundle: PresentationResources.bundle))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)

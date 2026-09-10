@@ -28,13 +28,13 @@ struct CategoryManageFeature {
         }
         var navigationTitle: String {
             isEditing
-                ? String(localized: "todo_manage_edit_category_title")
-                : String(localized: "todo_manage_add_category_title")
+                ? String(localized: "todo_manage_edit_category_title", bundle: PresentationResources.bundle)
+                : String(localized: "todo_manage_add_category_title", bundle: PresentationResources.bundle)
         }
         var submitTitle: String {
             isEditing
-                ? String(localized: "todo_manage_save")
-                : String(localized: "todo_add")
+                ? String(localized: "todo_manage_save", bundle: PresentationResources.bundle)
+                : String(localized: "todo_add", bundle: PresentationResources.bundle)
         }
         var placeholder: String {
             category.name
@@ -213,16 +213,16 @@ private struct CategoryManageSheetFeature: Reducer {
 private extension CategoryManageFeature {
     static func deleteAlertState(for item: TodoCategoryItem) -> AlertState<Action.Alert> {
         AlertState {
-            TextState(String(localized: "todo_manage_delete_category_title"))
+            TextState(String(localized: "todo_manage_delete_category_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_cancel"))
+                TextState(String(localized: "common_cancel", bundle: PresentationResources.bundle))
             }
             ButtonState(role: .destructive, action: .confirmDeleteUserCategory(item)) {
-                TextState(String(localized: "common_delete"))
+                TextState(String(localized: "common_delete", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "todo_manage_delete_category_message"))
+            TextState(String(localized: "todo_manage_delete_category_message", bundle: PresentationResources.bundle))
         }
     }
 }

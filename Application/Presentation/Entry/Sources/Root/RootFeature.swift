@@ -292,25 +292,25 @@ private extension RootFeature {
 
     static func appUpdateAlertState() -> AlertState<Action.Alert> {
         AlertState {
-            TextState(String(localized: "root_app_update_title"))
+            TextState(String(localized: "root_app_update_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(action: .tapUpdateButton) {
-                TextState(String(localized: "root_app_update_action"))
+                TextState(String(localized: "root_app_update_action", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "root_app_update_message"))
+            TextState(String(localized: "root_app_update_message", bundle: PresentationResources.bundle))
         }
     }
 
     static func networkDisconnectedAlertState() -> AlertState<Action.Alert> {
         AlertState {
-            TextState(String(localized: "root_network_disconnected_title"))
+            TextState(String(localized: "root_network_disconnected_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "root_network_disconnected_message"))
+            TextState(String(localized: "root_network_disconnected_message", bundle: PresentationResources.bundle))
         }
     }
 }

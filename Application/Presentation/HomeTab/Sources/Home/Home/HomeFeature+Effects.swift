@@ -183,18 +183,18 @@ extension HomeFeature {
 
         switch type {
         case .invalidURL:
-            title = String(localized: "home_invalid_url_title")
-            message = String(localized: "home_invalid_url_message")
+            title = String(localized: "home_invalid_url_title", bundle: PresentationResources.bundle)
+            message = String(localized: "home_invalid_url_message", bundle: PresentationResources.bundle)
         case .error:
-            title = String(localized: "common_error_title")
-            message = String(localized: "common_error_message")
+            title = String(localized: "common_error_title", bundle: PresentationResources.bundle)
+            message = String(localized: "common_error_message", bundle: PresentationResources.bundle)
         }
 
         return AlertState<Never> {
             TextState(title)
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
             TextState(message)

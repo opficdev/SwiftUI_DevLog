@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 public enum SystemTheme: String, Identifiable {
     case automatic
@@ -17,13 +18,17 @@ public enum SystemTheme: String, Identifiable {
     }
     
     public var localizedName: String {
+        localizedName(in: .main)
+    }
+
+    public func localizedName(in bundle: Bundle) -> String {
         switch self {
         case .automatic:
-            return NSLocalizedString("system_theme_automatic", comment: "System theme: automatic")
+            return String(localized: "system_theme_automatic", bundle: bundle)
         case .light:
-            return NSLocalizedString("system_theme_light", comment: "System theme: light")
+            return String(localized: "system_theme_light", bundle: bundle)
         case .dark:
-            return NSLocalizedString("system_theme_dark", comment: "System theme: dark")
+            return String(localized: "system_theme_dark", bundle: bundle)
         }
     }
     

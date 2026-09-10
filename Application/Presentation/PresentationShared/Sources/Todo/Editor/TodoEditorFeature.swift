@@ -46,12 +46,12 @@ public struct TodoEditorFeature {
         var navigationTitle: String {
             if originalDraft == nil {
                 return String.localizedStringWithFormat(
-                    String(localized: "todo_editor_new_format"),
+                    String(localized: "todo_editor_new_format", bundle: PresentationResources.bundle),
                     category.localizedName
                 )
             }
 
-            return String(localized: "todo_edit")
+            return String(localized: "todo_edit", bundle: PresentationResources.bundle)
         }
         public var hasChanges: Bool {
             guard let originalDraft else { return true }
@@ -344,13 +344,13 @@ private extension TodoEditorFeature {
 
     static func alertState() -> AlertState<Never> {
         AlertState {
-            TextState(String(localized: "common_error_title"))
+            TextState(String(localized: "common_error_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "common_error_message"))
+            TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
         }
     }
 }

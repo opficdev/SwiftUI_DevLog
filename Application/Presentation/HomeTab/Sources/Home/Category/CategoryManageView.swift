@@ -49,7 +49,7 @@ struct CategoryManageView: View {
                 .listRowInsets(EdgeInsets())
             }
             .environment(\.editMode, .constant(.active))
-            .navigationTitle(String(localized: "nav_todo_manage"))
+            .navigationTitle(String(localized: "nav_todo_manage", bundle: PresentationResources.bundle))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden()
             .sheet(item: $store.scope(state: \.categorySheet, action: \.categorySheet)) { sheetStore in
@@ -69,7 +69,7 @@ struct CategoryManageView: View {
                     Button {
                         store.send(.tapDoneButton, animation: .default)
                     } label: {
-                        Text(String(localized: "profile_done"))
+                        Text(String(localized: "profile_done", bundle: PresentationResources.bundle))
                     }
                 }
             }
@@ -127,7 +127,7 @@ private struct CategoryManageSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(String(localized: "common_close")) {
+                    Button(String(localized: "common_close", bundle: PresentationResources.bundle)) {
                         store.send(.tapCloseButton)
                     }
                 }

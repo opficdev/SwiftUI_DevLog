@@ -148,8 +148,14 @@ func verifyNetworkDisconnectedAlert(adapter: some RootStateDriving) async {
     #expect(
         adapter.snapshot
             == RootStateSnapshot(
-                alertTitle: String(localized: "root_network_disconnected_title"),
-                alertMessage: String(localized: "root_network_disconnected_message"),
+                alertTitle: String(
+                    localized: "root_network_disconnected_title",
+                    bundle: PresentationResources.bundle
+                ),
+                alertMessage: String(
+                    localized: "root_network_disconnected_message",
+                    bundle: PresentationResources.bundle
+                ),
                 isNetworkConnected: false,
                 signIn: nil,
                 theme: .automatic,
@@ -221,14 +227,21 @@ func verifyObservedInitialValues(adapter: some RootStateDriving) async {
         return snapshot.signIn == false
             && !snapshot.isNetworkConnected
             && snapshot.theme == .dark
-            && snapshot.alertTitle == String(localized: "root_network_disconnected_title")
+            && snapshot.alertTitle
+                == String(localized: "root_network_disconnected_title", bundle: PresentationResources.bundle)
     }
 
     #expect(
         adapter.snapshot
             == RootStateSnapshot(
-                alertTitle: String(localized: "root_network_disconnected_title"),
-                alertMessage: String(localized: "root_network_disconnected_message"),
+                alertTitle: String(
+                    localized: "root_network_disconnected_title",
+                    bundle: PresentationResources.bundle
+                ),
+                alertMessage: String(
+                    localized: "root_network_disconnected_message",
+                    bundle: PresentationResources.bundle
+                ),
                 isNetworkConnected: false,
                 signIn: false,
                 theme: .dark,

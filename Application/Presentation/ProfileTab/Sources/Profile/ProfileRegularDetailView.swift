@@ -26,7 +26,7 @@ public struct ProfileRegularDetailView: View {
                     )
                 } else {
                     ContentUnavailableView(
-                        String(localized: "profile_select_detail"),
+                        String(localized: "profile_select_detail", bundle: PresentationResources.bundle),
                         systemImage: "person.crop.circle"
                     )
                 }

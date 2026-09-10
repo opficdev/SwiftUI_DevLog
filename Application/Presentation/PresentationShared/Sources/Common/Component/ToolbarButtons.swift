@@ -25,7 +25,7 @@ public struct ToolbarLeadingButton: ToolbarContent {
                 Button {
                     action?()
                 } label: {
-                    Text(String(localized: "common_cancel"))
+                    Text(String(localized: "common_cancel", bundle: PresentationResources.bundle))
                 }
             }
         }
@@ -57,7 +57,7 @@ public struct ToolbarTrailingButton: ToolbarContent {
                 Button {
                     action?()
                 } label: {
-                    Text(String(localized: "common_confirm"))
+                    Text(String(localized: "common_confirm", bundle: PresentationResources.bundle))
                         .bold()
                 }
                 .disabled(isDisabled)
