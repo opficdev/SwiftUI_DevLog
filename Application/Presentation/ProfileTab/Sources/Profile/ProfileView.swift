@@ -14,7 +14,6 @@ import PresentationShared
 public struct ProfileView: View {
     @State private var settingsStore: StoreOf<SettingsFeature>
     @State private var store: StoreOf<ProfileFeature>
-    @FocusState private var focused: Bool
     @State private var path = [ProfileRoute]()
     private let isSelected: Bool
 
@@ -32,22 +31,30 @@ public struct ProfileView: View {
 
     public var body: some View {
         NavigationStack(path: $path) {
-            profileContentView
-                .navigationDestination(for: ProfileRoute.self, destination: destinationView)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 16, pinnedViews: [.sectionHeaders]) {
+                    Section {
+                        ProfileCard(store: store, isSelected: isSelected)
+                    } header: {
+                        titleBar
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+            .refreshable { await store.send(.refresh).finish() }
+            .toolbarVisibility(.hidden, for: .navigationBar)
+            .frame(maxWidth: .infinity)
+            .background(Color(asset: .appBackground))
+            .navigationDestination(for: ProfileRoute.self, destination: destinationView)
         }
         .onChange(of: isSelected, initial: true) { _, isSelected in
             if isSelected {
                 store.send(.fetchData)
-            } else {
-                focused = false
             }
         }
         .onAppear {
             store.send(.startObserving)
             settingsStore.send(.startObserving)
-        }
-        .onChange(of: focused) { _, newValue in
-            store.send(.updateStatusTextFieldFocus(newValue), animation: .default)
         }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .sheet(
@@ -57,6 +64,26 @@ public struct ProfileView: View {
             if store.isLoading {
                 LoadingView()
             }
+        }
+    }
+
+    private var titleBar: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text("프로필")
+                    .font(.largeTitle.bold())
+                Spacer()
+                Button {
+                    path.append(.settings)
+                } label: {
+                    Image(systemName: "gearshape")
+                        .foregroundStyle(Color(asset: .textTertiary))
+                }
+                .adaptiveButtonStyle()
+            }
+            Text("꾸준히 쌓아온 개발 기록을 확인하세요")
+                .foregroundStyle(Color(asset: .textSecondary))
+                .font(.caption)
         }
     }
 
@@ -84,95 +111,6 @@ public struct ProfileView: View {
                 AccountFeature()
             })
         }
-    }
-
-    private var profileContentView: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 16) {
-                profileHeader
-                statusMessageSection
-                activityHeatmapSection
-            }
-            .padding(.horizontal, 16)
-        }
-        .refreshable { await store.send(.refresh).finish() }
-        .frame(maxWidth: .infinity)
-        .background(Color(.systemGroupedBackground))
-        .toolbar { toolbar }
-    }
-
-    private var profileHeader: some View {
-        HStack {
-            Group {
-                if let data = store.avatarImageData?.data,
-                   let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    Image(systemName: "person.crop.circle.fill")
-                        .resizable()
-                        .scaledToFill()
-                        .foregroundStyle(Color(.systemGray2))
-                }
-            }
-            .frame(width: 60, height: 60)
-            .cornerRadius(30)
-            .transaction { $0.animation = nil }
-
-            VStack(alignment: .leading) {
-                Text(store.name)
-                    .font(.title2)
-                    .bold()
-                Text(store.email)
-                    .font(.caption2)
-                    .foregroundStyle(Color.gray)
-            }
-        }
-    }
-
-    private var statusMessageSection: some View {
-        let connected = store.isNetworkConnected
-
-        return HStack {
-            HStack {
-                Image(systemName: "face.smiling")
-                TextField(
-                    text: $store.statusMessage
-                ) {
-                    Text(String(localized: "profile_status_placeholder", bundle: PresentationResources.bundle))
-                }
-                .frame(height: UIFont.preferredFont(forTextStyle: .body).lineHeight)
-                .focused($focused)
-                .disabled(!connected)
-
-                if !store.statusMessage.isEmpty,
-                   store.showDoneButton {
-                    Button {
-                        store.send(.tapResetStatusMessageButton)
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                    }
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-                }
-            }
-            .foregroundStyle(Color.gray)
-            .padding(8)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(.secondarySystemGroupedBackground))
-            )
-            if store.showDoneButton {
-                Button {
-                    focused = false
-                    store.send(.willUpdateStatusMessage)
-                } label: {
-                    Text(String(localized: "profile_done", bundle: PresentationResources.bundle))
-                }
-                .transition(.move(edge: .trailing).combined(with: .opacity))
-            }
-        }
-        .opacity(connected ? 1 : 0.7)
     }
 
     private var activityHeatmapSection: some View {
@@ -260,17 +198,6 @@ public struct ProfileView: View {
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color(.secondarySystemGroupedBackground))
         )
-    }
-
-    @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                path.append(.settings)
-            } label: {
-                Image(systemName: "gearshape")
-            }
-        }
     }
 
     private var quarterPickerSheet: some View {
@@ -409,6 +336,93 @@ public struct ProfileView: View {
     private func selectActivity(_ activity: HeatmapActivityItem) {
         guard !activity.isDeleted else { return }
         path.append(.activity(activity.todoId))
+    }
+}
+
+private struct ProfileCard: View {
+    @Bindable var store: StoreOf<ProfileFeature>
+    @FocusState private var focused: Bool
+    let isSelected: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Group {
+                    if let data = store.avatarImageData?.data,
+                       let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        Image(systemName: "person.crop.circle.fill")
+                            .resizable()
+                            .scaledToFill()
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color(asset: .onPrimaryContainer), Color(asset: .primaryContainer))
+                    }
+                }
+                .frame(width: 60, height: 60)
+                .cornerRadius(30)
+                .transaction { $0.animation = nil }
+
+                VStack(alignment: .leading) {
+                    Text(store.name)
+                        .font(.title2)
+                        .bold()
+                    Text(store.email)
+                        .font(.caption2)
+                        .foregroundStyle(Color.gray)
+                }
+            }
+
+            HStack {
+                HStack {
+                    Image(systemName: "face.smiling")
+                    TextField(
+                        text: $store.statusMessage
+                    ) {
+                        Text(String(localized: "profile_status_placeholder", bundle: PresentationResources.bundle))
+                    }
+                    .frame(height: UIFont.preferredFont(forTextStyle: .body).lineHeight)
+                    .focused($focused)
+                    .disabled(!store.isNetworkConnected)
+
+                    if !store.statusMessage.isEmpty,
+                       store.showDoneButton {
+                        Button {
+                            store.send(.tapResetStatusMessageButton)
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                        }
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    }
+                }
+                .foregroundStyle(Color.gray)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(asset: .primaryContainer))
+                )
+                if store.showDoneButton {
+                    Button {
+                        focused = false
+                        store.send(.willUpdateStatusMessage)
+                    } label: {
+                        Text(String(localized: "profile_done", bundle: PresentationResources.bundle))
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+            }
+            .opacity(store.isNetworkConnected ? 1 : 0.7)
+        }
+        .onChange(of: isSelected, initial: true) { _, isSelected in
+            if !isSelected {
+                focused = false
+            }
+        }
+        .onChange(of: focused) { _, focused in
+            store.send(.updateStatusTextFieldFocus(focused), animation: .default)
+        }
     }
 }
 
