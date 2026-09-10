@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PresentationShared
 import Testing
 @testable import NotificationTab
 
@@ -19,10 +20,13 @@ struct PushNotificationItemTests {
         )
         let item = PushNotificationItem(from: notification)
 
-        #expect(item.title == String(localized: "push_notification_todo_due_title"))
+        #expect(
+            item.title
+                == String(localized: "push_notification_todo_due_title", bundle: PresentationResources.bundle)
+        )
         #expect(
             item.body == String.localizedStringWithFormat(
-                String(localized: "push_notification_todo_due_tomorrow_format"),
+                String(localized: "push_notification_todo_due_tomorrow_format", bundle: PresentationResources.bundle),
                 "테스트 작성"
             )
         )
@@ -33,8 +37,17 @@ struct PushNotificationItemTests {
         let notification = makePushNotification(id: "notification-1", number: 1)
         let item = PushNotificationItem(from: notification)
 
-        #expect(item.title == String(localized: "push_notification_todo_due_title"))
-        #expect(item.body == String(localized: "push_notification_todo_due_tomorrow_without_title"))
+        #expect(
+            item.title
+                == String(localized: "push_notification_todo_due_title", bundle: PresentationResources.bundle)
+        )
+        #expect(
+            item.body
+                == String(
+                    localized: "push_notification_todo_due_tomorrow_without_title",
+                    bundle: PresentationResources.bundle
+                )
+        )
     }
 
     @Test("공백으로만 구성된 Todo 제목을 제목 없는 알림으로 표시한다")
@@ -46,7 +59,13 @@ struct PushNotificationItemTests {
         )
         let item = PushNotificationItem(from: notification)
 
-        #expect(item.body == String(localized: "push_notification_todo_due_tomorrow_without_title"))
+        #expect(
+            item.body
+                == String(
+                    localized: "push_notification_todo_due_tomorrow_without_title",
+                    bundle: PresentationResources.bundle
+                )
+        )
     }
 
     @Test("기존 알림 문서의 저장 문구를 유지한다")

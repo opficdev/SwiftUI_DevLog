@@ -50,7 +50,7 @@ public struct TodoListView: View {
                     placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(
                         String.localizedStringWithFormat(
-                            String(localized: "todo_list_search_prompt_format"),
+                            String(localized: "todo_list_search_prompt_format", bundle: PresentationResources.bundle),
                             TodoCategoryItem(from: store.category).localizedName
                         )
                     )
@@ -100,7 +100,7 @@ public struct TodoListView: View {
                     if visibleTodos.isEmpty, !store.state.isLoading {
                         HStack {
                             Spacer()
-                            Text(String(localized: "todo_list_empty"))
+                            Text(String(localized: "todo_list_empty", bundle: PresentationResources.bundle))
                                 .foregroundStyle(Color.gray)
                             Spacer()
                         }
@@ -197,7 +197,7 @@ public struct TodoListView: View {
                 placement: .navigationBarDrawer(displayMode: .always),
                 prompt: Text(
                     String.localizedStringWithFormat(
-                        String(localized: "todo_list_search_prompt_format"),
+                        String(localized: "todo_list_search_prompt_format", bundle: PresentationResources.bundle),
                         TodoCategoryItem(from: store.category).localizedName
                     )
                 )
@@ -231,7 +231,7 @@ public struct TodoListView: View {
 
     private func presentDeleteTodoToast(_ todoId: String) {
         ToastPresenter.present(
-            message: String(localized: "common_undo"),
+            message: String(localized: "common_undo", bundle: PresentationResources.bundle),
             systemImage: "arrow.uturn.left",
             duration: 5,
             action: {
@@ -254,7 +254,7 @@ public struct TodoListView: View {
         if store.state.searchText.isEmpty {
             Text(
                 String.localizedStringWithFormat(
-                    String(localized: "todo_list_search_instruction_format"),
+                    String(localized: "todo_list_search_instruction_format", bundle: PresentationResources.bundle),
                     TodoCategoryItem(from: store.category).localizedName
                 )
             )
@@ -264,7 +264,7 @@ public struct TodoListView: View {
             LoadingView()
         } else if searchResults.isEmpty {
             Spacer()
-            Text(String(localized: "todo_list_search_empty"))
+            Text(String(localized: "todo_list_search_empty", bundle: PresentationResources.bundle))
                 .foregroundStyle(Color.gray)
                 .frame(maxWidth: .infinity)
             Spacer()
@@ -285,7 +285,7 @@ public struct TodoListView: View {
                     .padding(.horizontal, 16)
 
                     if !store.state.showAllSearchResults, limit < searchResults.count {
-                        Button(String(localized: "todo_list_show_more")) {
+                        Button(String(localized: "todo_list_show_more", bundle: PresentationResources.bundle)) {
                             store.send(.binding(.set(\.showAllSearchResults, true)))
                         }
                         .font(.subheadline)
@@ -305,14 +305,17 @@ public struct TodoListView: View {
                     Menu {
                         Text(
                             String.localizedStringWithFormat(
-                                String(localized: "todo_list_filters_applied_format"),
+                                String(
+                                    localized: "todo_list_filters_applied_format",
+                                    bundle: PresentationResources.bundle
+                                ),
                                 Int64(store.appliedFilterCount)
                             )
                         )
                         Button(role: .destructive) {
                             store.send(.view(.resetFilters))
                         } label: {
-                            Text(String(localized: "todo_list_clear_filters"))
+                            Text(String(localized: "todo_list_clear_filters", bundle: PresentationResources.bundle))
                         }
                     } label: {
                         HStack(spacing: 6) {
@@ -329,21 +332,21 @@ public struct TodoListView: View {
                             Text(option.title).tag(option)
                         }
                     } label: {
-                        Text(String(localized: "todo_list_sort_by"))
+                        Text(String(localized: "todo_list_sort_by", bundle: PresentationResources.bundle))
                     }
                     Picker(selection: $store.query.sortOrder) {
                         ForEach([TodoQuery.SortOrder.latest, .oldest], id: \.self) { option in
                             Text(option.title).tag(option)
                         }
                     } label: {
-                        Text(String(localized: "todo_list_sort_order"))
+                        Text(String(localized: "todo_list_sort_order", bundle: PresentationResources.bundle))
                     }
                 } label: {
                     let condition = store.state.query.sortTarget == .createdAt && store.state.query.sortOrder == .latest
                     HStack {
                         Text(
                             String.localizedStringWithFormat(
-                                String(localized: "todo_list_sort_format"),
+                                String(localized: "todo_list_sort_format", bundle: PresentationResources.bundle),
                                 store.state.query.sortTarget.title,
                                 store.state.query.sortOrder.title
                             )
@@ -356,7 +359,7 @@ public struct TodoListView: View {
 
                 Menu {
                     Toggle(isOn: $store.query.isPinned) {
-                        Text(String(localized: "todo_pinned"))
+                        Text(String(localized: "todo_pinned", bundle: PresentationResources.bundle))
                     }
 
                     Picker(selection: $store.query.completionFilter) {
@@ -364,12 +367,12 @@ public struct TodoListView: View {
                             Text(option.title).tag(option)
                         }
                     } label: {
-                        Text(String(localized: "todo_list_completion_status"))
+                        Text(String(localized: "todo_list_completion_status", bundle: PresentationResources.bundle))
                     }
                 } label: {
                     let condition = store.state.query.isPinned || store.state.query.completionFilter != .all
                     HStack {
-                        Text(String(localized: "todo_list_filter_options"))
+                        Text(String(localized: "todo_list_filter_options", bundle: PresentationResources.bundle))
                         Image(systemName: "chevron.down")
                     }
                     .foregroundStyle(condition ? .white : Color(.label))

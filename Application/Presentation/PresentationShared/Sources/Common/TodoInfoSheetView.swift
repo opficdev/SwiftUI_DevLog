@@ -20,7 +20,7 @@ struct TodoInfoSheetView: View {
             ScrollView {
                 LazyVStack(spacing: 32) {
                     VStack(alignment: .leading) {
-                        Text(String(localized: "todo_info_created_at"))
+                        Text(String(localized: "todo_info_created_at", bundle: PresentationResources.bundle))
                             .font(.subheadline)
                             .foregroundStyle(.white)
                         HStack(spacing: 8) {
@@ -38,7 +38,7 @@ struct TodoInfoSheetView: View {
                         Divider()
                     }
                     VStack(alignment: .leading) {
-                        Text(String(localized: "todo_info_due_date"))
+                        Text(String(localized: "todo_info_due_date", bundle: PresentationResources.bundle))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         HStack(spacing: 8) {
@@ -47,7 +47,7 @@ struct TodoInfoSheetView: View {
                             Text(
                                 dueDate?
                                     .formatted(date: .abbreviated, time: .omitted)
-                                ?? String(localized: "todo_info_no_due_date")
+                                ?? String(localized: "todo_info_no_due_date", bundle: PresentationResources.bundle)
                             )
                             .foregroundStyle(dueDate == nil ? .secondary : .primary)
                             Spacer()
@@ -61,7 +61,7 @@ struct TodoInfoSheetView: View {
                         Divider()
                     }
                     VStack(alignment: .leading) {
-                        Text(String(localized: "todo_info_completed_at"))
+                        Text(String(localized: "todo_info_completed_at", bundle: PresentationResources.bundle))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         HStack(spacing: 8) {
@@ -70,7 +70,7 @@ struct TodoInfoSheetView: View {
                             Text(
                                 completedAt?
                                     .formatted(date: .abbreviated, time: .omitted)
-                                ?? String(localized: "todo_info_not_completed")
+                                ?? String(localized: "todo_info_not_completed", bundle: PresentationResources.bundle)
                             )
                             .foregroundStyle(.white)
                             Spacer()
@@ -84,7 +84,7 @@ struct TodoInfoSheetView: View {
                         Divider()
                     }
                     VStack(alignment: .leading) {
-                        Text(String(localized: "todo_tags"))
+                        Text(String(localized: "todo_tags", bundle: PresentationResources.bundle))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         Divider()

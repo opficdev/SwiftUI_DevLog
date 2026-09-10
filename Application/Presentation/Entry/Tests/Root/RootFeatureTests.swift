@@ -7,6 +7,7 @@
 
 import Core
 import Foundation
+import PresentationShared
 import Testing
 
 @MainActor
@@ -142,8 +143,14 @@ struct RootFeatureTests {
 
         await adapter.onAppear()
 
-        #expect(adapter.snapshot.alertTitle == String(localized: "root_app_update_title"))
-        #expect(adapter.snapshot.alertMessage == String(localized: "root_app_update_message"))
+        #expect(
+            adapter.snapshot.alertTitle
+                == String(localized: "root_app_update_title", bundle: PresentationResources.bundle)
+        )
+        #expect(
+            adapter.snapshot.alertMessage
+                == String(localized: "root_app_update_message", bundle: PresentationResources.bundle)
+        )
     }
 
     @Test("업데이트 버튼은 App Store 열기를 요청한다")

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Core
+import PresentationShared
 
 struct ThemeView: View {
     @Binding var theme: SystemTheme
@@ -17,7 +18,7 @@ struct ThemeView: View {
                 theme = .automatic
             }) {
                 HStack {
-                    Text(SystemTheme.automatic.localizedName)
+                    Text(SystemTheme.automatic.localizedName(in: PresentationResources.bundle))
                         .foregroundStyle(Color.primary)
                     Spacer()
                     if theme == .automatic {
@@ -29,7 +30,7 @@ struct ThemeView: View {
                 theme = .light
             }) {
                 HStack {
-                    Text(SystemTheme.light.localizedName)
+                    Text(SystemTheme.light.localizedName(in: PresentationResources.bundle))
                         .foregroundStyle(Color.primary)
                     Spacer()
                     if theme == .light {
@@ -41,7 +42,7 @@ struct ThemeView: View {
                 theme = .dark
             }) {
                 HStack {
-                    Text(SystemTheme.dark.localizedName)
+                    Text(SystemTheme.dark.localizedName(in: PresentationResources.bundle))
                         .foregroundStyle(Color.primary)
                     Spacer()
                     if theme == .dark {
@@ -53,7 +54,7 @@ struct ThemeView: View {
         .listStyle(.insetGrouped)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(String(localized: "nav_theme"))
+                Text(String(localized: "nav_theme", bundle: PresentationResources.bundle))
                     .bold()
             }
         }

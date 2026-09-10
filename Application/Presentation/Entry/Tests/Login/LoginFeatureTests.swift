@@ -92,8 +92,8 @@ struct LoginFeatureTests {
         }
 
         #expect(driver.alert == expectedAlert(
-            title: String(localized: "login_alert_email_unavailable_title"),
-            message: String(localized: "login_alert_email_unavailable_message")
+            title: String(localized: "login_alert_email_unavailable_title", bundle: PresentationResources.bundle),
+            message: String(localized: "login_alert_email_unavailable_message", bundle: PresentationResources.bundle)
         ))
     }
 
@@ -110,8 +110,8 @@ struct LoginFeatureTests {
         }
 
         #expect(driver.alert == expectedAlert(
-            title: String(localized: "common_error_title"),
-            message: String(localized: "common_error_message")
+            title: String(localized: "common_error_title", bundle: PresentationResources.bundle),
+            message: String(localized: "common_error_message", bundle: PresentationResources.bundle)
         ))
     }
 
@@ -203,7 +203,7 @@ private func expectedAlert(
         TextState(title)
     } actions: {
         ButtonState(role: .cancel) {
-            TextState(String(localized: "common_close"))
+            TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
         }
     } message: {
         TextState(message)

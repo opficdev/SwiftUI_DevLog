@@ -209,7 +209,7 @@ struct MainView: View {
                     homeDestinationView(homeRoute)
                 } else {
                     ContentUnavailableView(
-                        String(localized: "home_select_detail"),
+                        String(localized: "home_select_detail", bundle: PresentationResources.bundle),
                         systemImage: "house"
                     )
                 }
@@ -280,7 +280,7 @@ struct MainView: View {
                     todayDestinationView(todayRoute)
                 } else {
                     ContentUnavailableView(
-                        String(localized: "today_select_detail"),
+                        String(localized: "today_select_detail", bundle: PresentationResources.bundle),
                         systemImage: "sun.max"
                     )
                 }
@@ -319,7 +319,7 @@ struct MainView: View {
             .id(todoId)
         } else {
             ContentUnavailableView(
-                String(localized: "push_notifications_select_detail"),
+                String(localized: "push_notifications_select_detail", bundle: PresentationResources.bundle),
                 systemImage: "bell.badge"
             )
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
@@ -387,13 +387,13 @@ private extension MainTab {
     var title: String {
         switch self {
         case .home:
-            String(localized: "nav_home")
+            String(localized: "nav_home", bundle: PresentationResources.bundle)
         case .today:
-            String(localized: "nav_today")
+            String(localized: "nav_today", bundle: PresentationResources.bundle)
         case .notification:
-            String(localized: "nav_notifications")
+            String(localized: "nav_notifications", bundle: PresentationResources.bundle)
         case .profile:
-            String(localized: "nav_profile")
+            String(localized: "nav_profile", bundle: PresentationResources.bundle)
         }
     }
 

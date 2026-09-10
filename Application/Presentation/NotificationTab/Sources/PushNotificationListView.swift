@@ -44,7 +44,7 @@ public struct PushNotificationListView: View {
                     headerOffset = max(0, -offset)
                 }
                 .safeAreaInset(edge: .top) { safeAreaHeader }
-                .navigationTitle(String(localized: "nav_push_notifications"))
+                .navigationTitle(String(localized: "nav_push_notifications", bundle: PresentationResources.bundle))
         }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .sheet(item: sheetStore) { store in
@@ -71,7 +71,7 @@ public struct PushNotificationListView: View {
                 if notifications.isEmpty {
                     HStack {
                         Spacer()
-                        Text(String(localized: "push_notifications_empty"))
+                        Text(String(localized: "push_notifications_empty", bundle: PresentationResources.bundle))
                             .foregroundStyle(Color.gray)
                         Spacer()
                     }
@@ -179,14 +179,14 @@ public struct PushNotificationListView: View {
                 Menu {
                     Text(
                         String.localizedStringWithFormat(
-                            String(localized: "push_filters_applied_format"),
+                            String(localized: "push_filters_applied_format", bundle: PresentationResources.bundle),
                             Int64(store.appliedFilterCount)
                         )
                     )
                     Button(role: .destructive) {
                         store.send(.view(.resetFilters))
                     } label: {
-                        Text(String(localized: "push_clear_all_filters"))
+                        Text(String(localized: "push_clear_all_filters", bundle: PresentationResources.bundle))
                     }
                 } label: {
                     HStack(spacing: 6) {
@@ -205,7 +205,7 @@ public struct PushNotificationListView: View {
                 let condition = store.query.sortOrder == .oldest
                 Text(
                     String.localizedStringWithFormat(
-                        String(localized: "push_sort_format"),
+                        String(localized: "push_sort_format", bundle: PresentationResources.bundle),
                         store.query.sortOrder.title
                     )
                 )
@@ -220,12 +220,12 @@ public struct PushNotificationListView: View {
                         Text(option.title).tag(option)
                     }
                 } label: {
-                    Text(String(localized: "push_period"))
+                    Text(String(localized: "push_period", bundle: PresentationResources.bundle))
                 }
             } label: {
                 let condition = store.query.timeFilter == .none
                 HStack {
-                    Text(String(localized: "push_period"))
+                    Text(String(localized: "push_period", bundle: PresentationResources.bundle))
                     Image(systemName: "chevron.down")
                 }
                 .foregroundStyle(condition ? Color(.label) : .white)
@@ -238,7 +238,7 @@ public struct PushNotificationListView: View {
                 }
             } label: {
                 let condition = store.query.unreadOnly
-                Text(String(localized: "push_unread"))
+                Text(String(localized: "push_unread", bundle: PresentationResources.bundle))
                     .foregroundStyle(condition ? .white : Color(.label))
                     .adaptiveButtonStyle(color: condition ? .blue : .clear)
             }
@@ -335,25 +335,25 @@ public struct PushNotificationListView: View {
 
         if seconds < 60 {
             return String.localizedStringWithFormat(
-                String(localized: "push_time_seconds_ago_format"),
+                String(localized: "push_time_seconds_ago_format", bundle: PresentationResources.bundle),
                 Int64(max(0, seconds))
             )
         } else if seconds < 3600 {
             let minutes = seconds / 60
             return String.localizedStringWithFormat(
-                String(localized: "push_time_minutes_ago_format"),
+                String(localized: "push_time_minutes_ago_format", bundle: PresentationResources.bundle),
                 Int64(minutes)
             )
         } else if seconds < 86400 {
             let hours = seconds / 3600
             return String.localizedStringWithFormat(
-                String(localized: "push_time_hours_ago_format"),
+                String(localized: "push_time_hours_ago_format", bundle: PresentationResources.bundle),
                 Int64(hours)
             )
         } else {
             let days = seconds / 86400
             return String.localizedStringWithFormat(
-                String(localized: "push_time_days_ago_format"),
+                String(localized: "push_time_days_ago_format", bundle: PresentationResources.bundle),
                 Int64(days)
             )
         }
@@ -388,7 +388,7 @@ public struct PushNotificationListView: View {
 
     private func presentDeleteNotificationToast(_ notificationId: String) {
         ToastPresenter.present(
-            message: String(localized: "common_undo"),
+            message: String(localized: "common_undo", bundle: PresentationResources.bundle),
             systemImage: "arrow.uturn.left",
             duration: 5,
             font: .caption,

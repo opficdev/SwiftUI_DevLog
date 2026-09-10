@@ -78,7 +78,7 @@ struct SearchView: View {
             text: $store.searchQuery,
             isPresented: $store.isSearching,
             placement: .navigationBarDrawer(displayMode: .always),
-            prompt: Text(String(localized: "search_prompt"))
+            prompt: Text(String(localized: "search_prompt", bundle: PresentationResources.bundle))
         )
         .onSubmit(of: .search) {
             store.send(.addRecentQuery(store.searchQuery))
@@ -88,7 +88,7 @@ struct SearchView: View {
     private var searchInstruction: some View {
         VStack {
             Spacer()
-            Text(String(localized: "search_instruction"))
+            Text(String(localized: "search_instruction", bundle: PresentationResources.bundle))
                 .foregroundStyle(Color.gray)
             Spacer()
         }
@@ -98,7 +98,7 @@ struct SearchView: View {
     private var emptySearchResult: some View {
         VStack {
             Spacer()
-            Text(String(localized: "search_empty"))
+            Text(String(localized: "search_empty", bundle: PresentationResources.bundle))
                 .foregroundStyle(Color.gray)
             Spacer()
         }
@@ -108,10 +108,10 @@ struct SearchView: View {
     private var hashGuide: some View {
         VStack(spacing: 8) {
             Spacer()
-            Text(String(localized: "search_hash_guide_title"))
+            Text(String(localized: "search_hash_guide_title", bundle: PresentationResources.bundle))
                 .font(.headline)
                 .foregroundStyle(Color(.label))
-            Text(String(localized: "search_hash_guide_message"))
+            Text(String(localized: "search_hash_guide_message", bundle: PresentationResources.bundle))
                 .font(.subheadline)
                 .foregroundStyle(Color.gray)
                 .multilineTextAlignment(.center)
@@ -137,7 +137,7 @@ struct SearchView: View {
         let todos = store.visibleTodos
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text("Todos")
+            Text("Todos", bundle: PresentationResources.bundle)
                 .font(.headline)
                 .foregroundStyle(Color(.label))
             Divider()
@@ -148,7 +148,7 @@ struct SearchView: View {
             }
             .padding(.top, -12)
             if store.shouldShowMoreTodos {
-                Button(String(localized: "search_show_more")) {
+                Button(String(localized: "search_show_more", bundle: PresentationResources.bundle)) {
                     store.send(.setShowAllTodos(true))
                 }
                 .font(.subheadline)
@@ -164,7 +164,7 @@ struct SearchView: View {
         let pages = store.visibleWebPages
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text("Web Pages")
+            Text("Web Pages", bundle: PresentationResources.bundle)
                 .font(.headline)
                 .foregroundStyle(Color(.label))
             Divider()
@@ -175,7 +175,7 @@ struct SearchView: View {
             }
             .padding(.top, -12)
             if store.shouldShowMoreWebPages {
-                Button(String(localized: "search_show_more")) {
+                Button(String(localized: "search_show_more", bundle: PresentationResources.bundle)) {
                     store.send(.setShowAllWebPages(true))
                 }
                 .font(.subheadline)
@@ -211,11 +211,11 @@ struct SearchView: View {
     private var recentQueries: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(String(localized: "search_recent"))
+                Text(String(localized: "search_recent", bundle: PresentationResources.bundle))
                     .font(.headline)
                     .foregroundStyle(Color(.label))
                 Spacer()
-                Button(String(localized: "search_clear_all")) {
+                Button(String(localized: "search_clear_all", bundle: PresentationResources.bundle)) {
                     store.send(.clearRecentQueries)
                 }
                 .font(.subheadline)

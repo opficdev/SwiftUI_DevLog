@@ -135,13 +135,13 @@ private extension MainFeature {
 
     static func alertState() -> AlertState<Never> {
         AlertState {
-            TextState(String(localized: "common_error_title"))
+            TextState(String(localized: "common_error_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "main_alert_badge_error_message"))
+            TextState(String(localized: "main_alert_badge_error_message", bundle: PresentationResources.bundle))
         }
     }
 }

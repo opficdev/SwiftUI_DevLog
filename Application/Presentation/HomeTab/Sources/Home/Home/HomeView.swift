@@ -33,7 +33,7 @@ public struct HomeView: View {
             webPageSection
         }
         .listStyle(.insetGrouped)
-        .navigationTitle(String(localized: "nav_home"))
+        .navigationTitle(String(localized: "nav_home", bundle: PresentationResources.bundle))
         .toolbar { toolbar }
         .prominentAlert(store, state: \.alert, action: \.alert)
         .sheet(item: $store.scope(state: \.sheet, action: \.sheet), content: sheetContent)
@@ -53,7 +53,7 @@ public struct HomeView: View {
             }
         }, header: {
             HStack {
-                Text("TODO")
+                Text("TODO", bundle: PresentationResources.bundle)
                     .foregroundStyle(Color.primary)
                     .font(.title2)
                     .bold()
@@ -77,7 +77,7 @@ public struct HomeView: View {
             } else if store.recentTodos.isEmpty {
                 HStack {
                     Spacer()
-                    Text(String(localized: "home_recent_empty"))
+                    Text(String(localized: "home_recent_empty", bundle: PresentationResources.bundle))
                         .font(.callout)
                     Spacer()
                 }
@@ -88,7 +88,7 @@ public struct HomeView: View {
             }
         } header: {
             HStack {
-                Text(String(localized: "home_recent_title"))
+                Text(String(localized: "home_recent_title", bundle: PresentationResources.bundle))
                     .foregroundStyle(Color.primary)
                     .font(.title2.bold())
                 Spacer()
@@ -109,7 +109,7 @@ public struct HomeView: View {
                 } label: {
                     HStack {
                         Spacer()
-                        Text(String(localized: "home_web_refresh_required"))
+                        Text(String(localized: "home_web_refresh_required", bundle: PresentationResources.bundle))
                             .font(.callout)
                             .multilineTextAlignment(.center)
                         Spacer()
@@ -119,7 +119,7 @@ public struct HomeView: View {
             } else if webPages.isEmpty {
                 HStack {
                     Spacer()
-                    Text(String(localized: "home_web_empty"))
+                    Text(String(localized: "home_web_empty", bundle: PresentationResources.bundle))
                         .font(.callout)
                     Spacer()
                 }
@@ -131,7 +131,7 @@ public struct HomeView: View {
             }
         } header: {
             HStack {
-                Text("Web Page")
+                Text("Web Page", bundle: PresentationResources.bundle)
                     .foregroundStyle(Color.primary)
                     .font(.title2.bold())
                 Spacer()
@@ -187,7 +187,7 @@ public struct HomeView: View {
                             }
                         }
                     } header: {
-                        Text("TODO")
+                        Text("TODO", bundle: PresentationResources.bundle)
                             .foregroundStyle(Color(.label))
                     }
 
@@ -203,7 +203,7 @@ public struct HomeView: View {
                         }
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     } header: {
-                        Text("Web Page")
+                        Text("Web Page", bundle: PresentationResources.bundle)
                             .foregroundStyle(Color(.label))
                     }
                 }
@@ -213,17 +213,25 @@ public struct HomeView: View {
                     Form {
                         Section {
                             TextField(
-                                "https://",
-                                text: $store.webPageURLInput
+                                "",
+                                text: $store.webPageURLInput,
+                                prompt: Text("https://", bundle: PresentationResources.bundle)
                             )
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
                         } footer: {
-                            Text(String(localized: "home_webpage_input_message"))
+                            Text(String(localized: "home_webpage_input_message", bundle: PresentationResources.bundle))
                         }
                     }
                     .scrollDisabled(true)
-                    .navigationTitle(Text(String(localized: "home_webpage_input_title")))
+                    .navigationTitle(
+                        Text(
+                            String(
+                                localized: "home_webpage_input_title",
+                                bundle: PresentationResources.bundle
+                            )
+                        )
+                    )
                     .navigationBarTitleDisplayMode(.inline) //  설정 안하면 섹션 위에 내비게이션 large 만큼 영역 먹음
                     .toolbar {
                         if store.isAppending {
@@ -235,14 +243,14 @@ public struct HomeView: View {
                             }
                         } else {
                             ToolbarItem(placement: .topBarTrailing) {
-                                Button(String(localized: "home_add")) {
+                                Button(String(localized: "home_add", bundle: PresentationResources.bundle)) {
                                     store.send(.view(.addWebPage))
                                 }
                             }
                         }
                     }
                 }
-                .navigationTitle(Text(String(localized: "nav_home_content")))
+                .navigationTitle(Text(String(localized: "nav_home_content", bundle: PresentationResources.bundle)))
                 .navigationBarTitleDisplayMode(.inline)  //  설정 안하면 섹션 위에 내비게이션 large 만큼 영역 먹음
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -342,7 +350,7 @@ public struct HomeView: View {
                 store.send(.view(.deleteWebPage(item)))
                 presentDeleteWebPageToast(item.url.absoluteString)
             } label: {
-                Label(String(localized: "common_delete"), systemImage: "trash")
+                Label(String(localized: "common_delete", bundle: PresentationResources.bundle), systemImage: "trash")
             }
         }
     }
@@ -382,7 +390,7 @@ public struct HomeView: View {
 
     private func presentDeleteWebPageToast(_ urlString: String) {
         ToastPresenter.present(
-            message: String(localized: "common_undo"),
+            message: String(localized: "common_undo", bundle: PresentationResources.bundle),
             systemImage: "arrow.uturn.left",
             duration: 5,
             font: .caption,

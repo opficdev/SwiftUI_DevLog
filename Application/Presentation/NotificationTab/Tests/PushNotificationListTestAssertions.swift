@@ -203,7 +203,7 @@ func verifyDeleteUndoAndFinishToast<Adapter: PushNotificationListStateDriving>(
     let deletedNotifications = adapter.notifications
     let toastMessage = ToastPresenter.item?.message
     #expect(deletedNotifications.first?.isHidden == true)
-    #expect(toastMessage == String(localized: "common_undo"))
+    #expect(toastMessage == String(localized: "common_undo", bundle: PresentationResources.bundle))
 
     await waitUntilMainActor {
         deleteUseCaseSpy.calledNotificationIds == ["notification-1"]

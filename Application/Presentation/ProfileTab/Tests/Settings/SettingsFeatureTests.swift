@@ -103,8 +103,14 @@ struct SettingsFeatureTests {
 
         #expect(adapter.showAlert)
         #expect(adapter.alertType == .removeCache)
-        #expect(adapter.alertTitle == String(localized: "settings_alert_clear_temp_title"))
-        #expect(adapter.alertMessage == String(localized: "settings_alert_clear_temp_message"))
+        #expect(
+            adapter.alertTitle
+                == String(localized: "settings_alert_clear_temp_title", bundle: PresentationResources.bundle)
+        )
+        #expect(
+            adapter.alertMessage
+                == String(localized: "settings_alert_clear_temp_message", bundle: PresentationResources.bundle)
+        )
     }
 
     @Test("캐시 삭제 확인에 성공하면 캐시를 비우고 크기를 다시 조회한다")
@@ -134,8 +140,8 @@ struct SettingsFeatureTests {
         await adapter.confirmRemoveCache()
 
         #expect(adapter.showAlert)
-        #expect(adapter.alertTitle == String(localized: "common_error_title"))
-        #expect(adapter.alertMessage == String(localized: "common_error_message"))
+        #expect(adapter.alertTitle == String(localized: "common_error_title", bundle: PresentationResources.bundle))
+        #expect(adapter.alertMessage == String(localized: "common_error_message", bundle: PresentationResources.bundle))
         #expect(adapter.activeLoadingRow == nil)
     }
 
@@ -183,7 +189,7 @@ struct SettingsFeatureTests {
 
         #expect(deleteSpy.executeCallCount == 1)
         #expect(adapter.showAlert)
-        #expect(adapter.alertTitle == String(localized: "common_error_title"))
+        #expect(adapter.alertTitle == String(localized: "common_error_title", bundle: PresentationResources.bundle))
         #expect(adapter.activeLoadingRow == nil)
     }
 }
@@ -341,52 +347,52 @@ private func expectedSettingsAlert(
     switch type {
     case .signOut:
         return AlertState {
-            TextState(String(localized: "settings_alert_sign_out_title"))
+            TextState(String(localized: "settings_alert_sign_out_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_cancel"))
+                TextState(String(localized: "common_cancel", bundle: PresentationResources.bundle))
             }
             ButtonState(role: .destructive, action: .tapSignOutButton) {
-                TextState(String(localized: "common_confirm"))
+                TextState(String(localized: "common_confirm", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "settings_alert_sign_out_message"))
+            TextState(String(localized: "settings_alert_sign_out_message", bundle: PresentationResources.bundle))
         }
     case .deleteAuth:
         return AlertState {
-            TextState(String(localized: "settings_alert_delete_account_title"))
+            TextState(String(localized: "settings_alert_delete_account_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_cancel"))
+                TextState(String(localized: "common_cancel", bundle: PresentationResources.bundle))
             }
             ButtonState(role: .destructive, action: .tapDeleteAuthButton) {
-                TextState(String(localized: "settings_delete_account_action"))
+                TextState(String(localized: "settings_delete_account_action", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "settings_alert_delete_account_message"))
+            TextState(String(localized: "settings_alert_delete_account_message", bundle: PresentationResources.bundle))
         }
     case .error:
         return AlertState {
-            TextState(String(localized: "common_error_title"))
+            TextState(String(localized: "common_error_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_close"))
+                TextState(String(localized: "common_close", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "common_error_message"))
+            TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
         }
     case .removeCache:
         return AlertState {
-            TextState(String(localized: "settings_alert_clear_temp_title"))
+            TextState(String(localized: "settings_alert_clear_temp_title", bundle: PresentationResources.bundle))
         } actions: {
             ButtonState(role: .cancel) {
-                TextState(String(localized: "common_cancel"))
+                TextState(String(localized: "common_cancel", bundle: PresentationResources.bundle))
             }
             ButtonState(role: .destructive, action: .confirmRemoveCache) {
-                TextState(String(localized: "common_confirm"))
+                TextState(String(localized: "common_confirm", bundle: PresentationResources.bundle))
             }
         } message: {
-            TextState(String(localized: "settings_alert_clear_temp_message"))
+            TextState(String(localized: "settings_alert_clear_temp_message", bundle: PresentationResources.bundle))
         }
     }
 }

@@ -36,7 +36,7 @@ public struct TodayView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle(String(localized: "nav_today"))
+        .navigationTitle(String(localized: "nav_today", bundle: PresentationResources.bundle))
         .toolbar { toolbarContent }
         .background(NavigationBarConfigurator())
         .refreshable { await store.send(.refresh).finish() }
@@ -83,7 +83,7 @@ public struct TodayView: View {
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 Picker(
-                    String(localized: "today_due_visibility_label"),
+                    String(localized: "today_due_visibility_label", bundle: PresentationResources.bundle),
                     selection: $store.displayOptions.dueDateVisibility
                 ) {
                     ForEach(TodayDisplayOptions.DueDateVisibility.allCases, id: \.self) { option in
@@ -92,13 +92,13 @@ public struct TodayView: View {
                 }
 
                 Toggle(
-                    String(localized: "today_pinned_only"),
+                    String(localized: "today_pinned_only", bundle: PresentationResources.bundle),
                     isOn: $store.displayOptions.isFocusedOnly
                 )
                 .tint(.orange)
 
                 if store.displayOptions.focusVisibility == .focusedOnly {
-                    Text(String(localized: "today_pinned_only_description"))
+                    Text(String(localized: "today_pinned_only_description", bundle: PresentationResources.bundle))
                         .font(.caption)
                 }
             } label: {
@@ -141,7 +141,13 @@ public struct TodayView: View {
                         Button {
                             store.send(.completeTodo(item))
                         } label: {
-                            Label(String(localized: "today_complete_action"), systemImage: "checkmark")
+                            Label(
+                                String(
+                                    localized: "today_complete_action",
+                                    bundle: PresentationResources.bundle
+                                ),
+                                systemImage: "checkmark"
+                            )
                         }
                         .tint(.green)
                     }
@@ -179,28 +185,28 @@ public struct TodayView: View {
         case .all:
             if store.todos.isEmpty {
                 return EmptyStateContent(
-                    title: String(localized: "today_empty_all_title"),
-                    message: String(localized: "today_empty_all_message")
+                    title: String(localized: "today_empty_all_title", bundle: PresentationResources.bundle),
+                    message: String(localized: "today_empty_all_message", bundle: PresentationResources.bundle)
                 )
             }
             return EmptyStateContent(
-                title: String(localized: "today_empty_filtered_title"),
-                message: String(localized: "today_empty_filtered_message")
+                title: String(localized: "today_empty_filtered_title", bundle: PresentationResources.bundle),
+                message: String(localized: "today_empty_filtered_message", bundle: PresentationResources.bundle)
             )
         case .focused:
             return EmptyStateContent(
-                title: String(localized: "today_empty_focused_title"),
-                message: String(localized: "today_empty_focused_message")
+                title: String(localized: "today_empty_focused_title", bundle: PresentationResources.bundle),
+                message: String(localized: "today_empty_focused_message", bundle: PresentationResources.bundle)
             )
         case .overdue:
             return EmptyStateContent(
-                title: String(localized: "today_empty_overdue_title"),
-                message: String(localized: "today_empty_overdue_message")
+                title: String(localized: "today_empty_overdue_title", bundle: PresentationResources.bundle),
+                message: String(localized: "today_empty_overdue_message", bundle: PresentationResources.bundle)
             )
         case .dueSoon:
             return EmptyStateContent(
-                title: String(localized: "today_empty_due_soon_title"),
-                message: String(localized: "today_empty_due_soon_message")
+                title: String(localized: "today_empty_due_soon_title", bundle: PresentationResources.bundle),
+                message: String(localized: "today_empty_due_soon_message", bundle: PresentationResources.bundle)
             )
         }
     }
@@ -215,11 +221,11 @@ private extension TodayDisplayOptions.DueDateVisibility {
     var title: String {
         switch self {
         case .all:
-            return String(localized: "today_due_visibility_all")
+            return String(localized: "today_due_visibility_all", bundle: PresentationResources.bundle)
         case .withDueDateOnly:
-            return String(localized: "today_due_visibility_with_due")
+            return String(localized: "today_due_visibility_with_due", bundle: PresentationResources.bundle)
         case .withoutDueDateOnly:
-            return String(localized: "today_due_visibility_without_due")
+            return String(localized: "today_due_visibility_without_due", bundle: PresentationResources.bundle)
         }
     }
 }
@@ -228,13 +234,13 @@ private extension TodayFeature.SectionScope {
     var title: String {
         switch self {
         case .all:
-            return String(localized: "today_summary_all")
+            return String(localized: "today_summary_all", bundle: PresentationResources.bundle)
         case .focused:
-            return String(localized: "today_summary_focused")
+            return String(localized: "today_summary_focused", bundle: PresentationResources.bundle)
         case .overdue:
-            return String(localized: "today_summary_overdue")
+            return String(localized: "today_summary_overdue", bundle: PresentationResources.bundle)
         case .dueSoon:
-            return String(localized: "today_summary_due_soon")
+            return String(localized: "today_summary_due_soon", bundle: PresentationResources.bundle)
         }
     }
 
@@ -334,7 +340,7 @@ private struct TodayTodoRow: View {
 
         if dueDay < today {
             return DueDateBadge(
-                text: String(localized: "today_due_overdue"),
+                text: String(localized: "today_due_overdue", bundle: PresentationResources.bundle),
                 textColor: .red,
                 backgroundColor: Color.red.opacity(0.12)
             )

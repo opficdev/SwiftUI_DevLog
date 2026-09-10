@@ -33,10 +33,10 @@ struct HomeStoreTestAdapter {
     var showAlert: Bool { store.state.alert != nil }
     var alertType: HomeFeature.AlertType? {
         guard let title = store.state.alert?.title else { return nil }
-        if title == TextState(String(localized: "home_invalid_url_title")) {
+        if title == TextState(String(localized: "home_invalid_url_title", bundle: PresentationResources.bundle)) {
             return .invalidURL
         }
-        if title == TextState(String(localized: "common_error_title")) {
+        if title == TextState(String(localized: "common_error_title", bundle: PresentationResources.bundle)) {
             return .error
         }
         return nil

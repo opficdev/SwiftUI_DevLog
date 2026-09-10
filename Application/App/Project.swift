@@ -22,7 +22,7 @@ let project = Project(
                 "Sources/Resource/Assets.xcassets",
                 "../Presentation/PresentationShared/Resources/Assets.xcassets",
                 "Sources/Resource/GoogleService-Info.plist",
-                "Sources/Resource/Localizable.xcstrings",
+                "../Presentation/PresentationShared/Resources/Localizable.xcstrings",
             ],
             entitlements: .file(path: "Sources/Resource/DevLog.entitlements"),
             scripts: [
