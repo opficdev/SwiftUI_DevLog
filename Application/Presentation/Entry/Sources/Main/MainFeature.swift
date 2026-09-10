@@ -19,7 +19,6 @@ struct MainFeature {
         @Presents var alert: AlertState<Never>?
         var unreadPushCount = 0
         var isObservingUnreadPushCount = false
-        var isSidebarPresented = true
     }
 
     enum Action: Equatable {
@@ -30,7 +29,6 @@ struct MainFeature {
         enum ViewAction: Equatable {
             case onAppear
             case selectedTabChanged(MainTab)
-            case setSidebarPresented(Bool)
         }
 
         enum StoreAction: Equatable {
@@ -59,8 +57,6 @@ struct MainFeature {
             case .view(.selectedTabChanged(let tab)):
                 guard let screenName = tab.analyticsScreenName else { break }
                 return trackScreenViewEffect(screenName)
-            case .view(.setSidebarPresented(let isPresented)):
-                state.isSidebarPresented = isPresented
             case .store(.setUnreadPushCount(let count)):
                 state.unreadPushCount = count
                 return updateBadgeCountEffect(count)

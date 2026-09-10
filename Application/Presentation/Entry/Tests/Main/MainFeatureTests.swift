@@ -14,18 +14,6 @@ import Testing
 
 @MainActor
 struct MainFeatureTests {
-    @Test("MainFeature는 사이드바 표시 상태를 갱신한다")
-    func MainFeature는_사이드바_표시_상태를_갱신한다() async {
-        let store = makeStore()
-
-        await store.send(.view(.setSidebarPresented(false))) {
-            $0.isSidebarPresented = false
-        }
-        await store.send(.view(.setSidebarPresented(true))) {
-            $0.isSidebarPresented = true
-        }
-    }
-
     @Test("MainFeature는 기존 Main 상태관리처럼 최초 onAppear에서만 unread count 관찰을 시작한다")
     func MainFeature는_기존_Main_상태관리처럼_최초_onAppear에서만_unread_count_관찰을_시작한다() async {
         let reference = MainStateManagementReference()
