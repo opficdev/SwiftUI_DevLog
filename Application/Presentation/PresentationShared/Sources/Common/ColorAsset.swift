@@ -12,16 +12,22 @@ public enum ColorAsset {
     case appBackground
     case border
     case danger
+    case dangerContainer
     case info
+    case infoContainer
     case onPrimaryContainer
     case primaryContainer
+    case review
+    case reviewContainer
     case success
+    case successContainer
     case surface
     case surfaceSecondary
     case textPrimary
     case textSecondary
     case textTertiary
     case warning
+    case warningContainer
 
     fileprivate var name: String {
         let name = String(describing: self)
