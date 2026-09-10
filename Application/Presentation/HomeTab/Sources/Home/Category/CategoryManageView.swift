@@ -9,7 +9,7 @@ import SwiftUI
 import PresentationShared
 
 struct CategoryManageView: View {
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Bindable var store: StoreOf<CategoryManageFeature>
 
     var body: some View {

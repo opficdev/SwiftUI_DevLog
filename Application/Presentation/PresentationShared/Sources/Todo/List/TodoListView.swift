@@ -12,7 +12,7 @@ import Core
 import Domain
 
 public struct TodoListView: View {
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac

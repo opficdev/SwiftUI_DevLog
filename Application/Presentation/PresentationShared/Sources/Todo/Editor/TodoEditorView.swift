@@ -12,7 +12,7 @@ import Domain
 
 public struct TodoEditorView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @State var store: StoreOf<TodoEditorFeature>
     @FocusState private var field: Field?
@@ -449,7 +449,7 @@ private struct TodoEditorInfoSheetView: View {
 }
 
 private struct DueDatePicker<Content: View>: View {
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Environment(\.safeAreaInsets) private var safeAreaInsets
     @State private var isPresented: Bool = false
     @State private var height: CGFloat = .pi

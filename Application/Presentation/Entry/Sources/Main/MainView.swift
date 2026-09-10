@@ -65,7 +65,7 @@ struct MainView: View {
     private func tabContent(_ tab: MainTab) -> some View {
         let isSelected = selectedTab == tab
         tabView(tab, isSelected: isSelected)
-            .environment(\.isExposableTabContentActive, isSelected)
+            .environment(\.isTabContentActive, isSelected)
     }
 
     private func tabLabel(_ tab: MainTab) -> some View {

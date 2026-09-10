@@ -8,12 +8,12 @@
 import SwiftUI
 
 public extension EnvironmentValues {
-    var isExposableTabContentActive: Bool {
-        get { self[ExposableTabContentActiveKey.self] }
-        set { self[ExposableTabContentActiveKey.self] = newValue }
+    var isTabContentActive: Bool {
+        get { self[TabContentActiveKey.self] }
+        set { self[TabContentActiveKey.self] = newValue }
     }
 
-    private struct ExposableTabContentActiveKey: EnvironmentKey {
+    private struct TabContentActiveKey: EnvironmentKey {
         static let defaultValue = true
     }
 }

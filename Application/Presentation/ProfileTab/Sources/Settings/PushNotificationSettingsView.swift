@@ -9,7 +9,7 @@ import SwiftUI
 import PresentationShared
 
 struct PushNotificationSettingsView: View {
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @State var store: StoreOf<PushNotificationSettingsFeature>
 
     var body: some View {

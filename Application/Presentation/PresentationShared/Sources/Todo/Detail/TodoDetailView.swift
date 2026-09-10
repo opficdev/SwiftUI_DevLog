@@ -12,7 +12,7 @@ import Core
 import Domain
 
 public struct TodoDetailView: View {
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @State var store: StoreOf<TodoDetailFeature>

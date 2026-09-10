@@ -28,7 +28,7 @@ public extension View {
 
 private struct ProminentAlertModifier<State, Action, AlertAction>: ViewModifier
 where State: ObservableState {
-    @Environment(\.isExposableTabContentActive) private var isTabContentActive
+    @Environment(\.isTabContentActive) private var isTabContentActive
 
     let store: Store<State, Action>
     let alertState: KeyPath<State, AlertState<AlertAction>?>
