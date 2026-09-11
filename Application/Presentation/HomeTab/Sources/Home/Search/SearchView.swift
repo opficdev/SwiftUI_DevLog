@@ -14,194 +14,354 @@ struct SearchView: View {
     @State private var router = NavigationRouter<Path>()
     @State var store: StoreOf<SearchFeature>
 
-    init(store: StoreOf<SearchFeature>) {
-        self.store = store
-    }
-
     var body: some View {
         NavigationStack(path: $router.path) {
-            searchableContent
-                .navigationDestination(for: Path.self) { path in
-                    switch path {
-                    case .todo(let todoId):
-                        TodoDetailView(store: Store(
-                            initialState: TodoDetailFeature.State(todoId: todoId, showEditButton: true)
-                        ) {
-                            TodoDetailFeature()
-                        })
-                    }
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
+                    Section {
+                        if !store.searchQuery.isEmpty {
+                            SearchResults(
+                                store: store,
+                                onSelectTodo: { router.push(.todo($0)) }
+                            )
+                        }
+                        RecentSearchQuries(store: store)
+                        instruction
+                    } header: { tipCard }
                 }
-                .onAppear { store.send(.onAppear) }
-                .onChange(of: store.isSearching) { _, isSearching in
-                    if !isSearching {
-                        dismiss()
-                    }
-                }
-                .prominentAlert(store, state: \.alert, action: \.alert)
-        }
-    }
-
-    @ViewBuilder
-    private var searchableContent: some View {
-        Group {
-            if store.searchQuery.isEmpty {
-                if store.recentQueries.isEmpty {
-                    searchInstruction
-                } else {
-                    ScrollView {
-                        recentQueries
-                    }
-                }
-            } else if store.isHashOnlyQuery {
-                hashGuide
-            } else if store.isLoading {
-                LoadingView()
-            } else if store.todos.isEmpty {
-                emptySearchResult
-            } else {
-                ScrollView {
-                    searchResults
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+            }
+            .safeAreaInset(edge: .top, spacing: 0) { topBar }
+            .background(Color.appBackground.ignoresSafeArea())
+            .prominentAlert(store, state: \.alert, action: \.alert)
+            .navigationDestination(for: Path.self) { path in
+                switch path {
+                case .todo(let todoId):
+                    TodoDetailView(store: Store(
+                        initialState: TodoDetailFeature.State(todoId: todoId, showEditButton: true)
+                    ) {
+                        TodoDetailFeature()
+                    })
                 }
             }
         }
-        .searchable(
-            text: $store.searchQuery,
-            isPresented: $store.isSearching,
-            placement: .navigationBarDrawer(displayMode: .always),
-            prompt: Text(String(localized: "search_prompt", bundle: PresentationResources.bundle))
-        )
-        .onSubmit(of: .search) {
-            store.send(.addRecentQuery(store.searchQuery))
+    }
+
+    private var topBar: some View {
+        VStack(alignment: .leading) {
+            Button {
+                store.send(.binding(.set(\.isSearching, false)))
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .foregroundStyle(Color.textSecondary)
+                    .font(.title)
+                    .padding(6)
+            }
+            .adaptiveButtonStyle(shape: .circle, color: .border)
+            SearchField(store: store)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
+        .padding(.bottom, 8)
+        .background(Color.appBackground, ignoresSafeAreaEdges: .top)
+    }
+
+    private var tipCard: some View {
+        HStack(alignment: .top) {
+            Image(systemName: "info.circle.fill")
+                .font(.title)
+            VStack(alignment: .leading) {
+                Text(String(
+                    localized: "search_todo_number_tip_title",
+                    bundle: PresentationResources.bundle
+                ))
+                    .bold()
+                Text(String(
+                    localized: "search_todo_number_tip_message",
+                    bundle: PresentationResources.bundle
+                ))
+                    .foregroundStyle(Color.textSecondary)
+                    .font(.caption)
+            }
+            Spacer()
+        }
+        .foregroundStyle(Color.accent)
+        .padding()
+        .background {
+            Rectangle()
+                .fill(Color.appBackground)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.primaryContainer)
         }
     }
 
-    private var searchInstruction: some View {
-        VStack {
+    private var instruction: some View {
+        HStack {
             Spacer()
-            Text(String(localized: "search_instruction", bundle: PresentationResources.bundle))
-                .foregroundStyle(Color.gray)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var emptySearchResult: some View {
-        VStack {
-            Spacer()
-            Text(String(localized: "search_empty", bundle: PresentationResources.bundle))
-                .foregroundStyle(Color.gray)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var hashGuide: some View {
-        VStack(spacing: 8) {
-            Spacer()
-            Text(String(localized: "search_hash_guide_title", bundle: PresentationResources.bundle))
-                .font(.headline)
-                .foregroundStyle(Color(.label))
-            Text(String(localized: "search_hash_guide_message", bundle: PresentationResources.bundle))
-                .font(.subheadline)
-                .foregroundStyle(Color.gray)
+            Text(String(
+                localized: "search_scope_instruction",
+                bundle: PresentationResources.bundle
+            ))
+                .foregroundStyle(Color.textSecondary)
                 .multilineTextAlignment(.center)
             Spacer()
         }
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct SearchField: View {
+    let store: StoreOf<SearchFeature>
+    @FocusState private var isFocused: Bool
+
+    private var searchQuery: Binding<String> {
+        Binding(
+            get: { store.searchQuery },
+            set: { query in
+                guard query != store.searchQuery else { return }
+                store.send(.binding(.set(\.searchQuery, query)))
+            }
+        )
     }
 
-    private var searchResults: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            if !store.todos.isEmpty {
-                todoResults
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(Color.textSecondary)
+            TextField(
+                "",
+                text: searchQuery,
+                prompt: Text(String(
+                    localized: "search_prompt",
+                    bundle: PresentationResources.bundle)
+                )
+                .foregroundColor(Color.secondary),
+            )
+            .focused($isFocused)
+            .onSubmit {
+                store.send(.addRecentQuery(store.searchQuery))
+            }
+            if !store.searchQuery.isEmpty {
+                Button {
+                    store.send(.binding(.set(\.searchQuery, "")))
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.textSecondary)
+                }
+                .buttonStyle(.plain)
             }
         }
-        .padding(.vertical, 8)
+        .font(.title3)
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surface)
+                .strokeBorder(Color.border, lineWidth: 2)
+        }
+        .onAppear {
+            isFocused = true
+        }
     }
+}
 
-    private var todoResults: some View {
+private struct SearchResults: View {
+    let store: StoreOf<SearchFeature>
+    let onSelectTodo: (String) -> Void
+
+    var body: some View {
         let todos = store.visibleTodos
 
-        return VStack(alignment: .leading, spacing: 12) {
-            Text("Todos", bundle: PresentationResources.bundle)
-                .font(.headline)
-                .foregroundStyle(Color(.label))
-            Divider()
-            LazyVStack(spacing: 0) {
-                ForEach(todos, id: \.id) { todo in
-                    todoResultRow(todo)
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                Text(String(
+                    localized: "search_results_title",
+                    bundle: PresentationResources.bundle
+                ))
+                    .font(.title3)
+                    .bold()
+                Spacer()
+                Text(String.localizedStringWithFormat(
+                    String(
+                        localized: "search_result_count_format",
+                        bundle: PresentationResources.bundle
+                    ),
+                    Int64(store.todos.count)
+                ))
+                .font(.callout.bold())
+                .foregroundStyle(Color.accent)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.primaryContainer, in: .capsule)
+            }
+            if store.isHashOnlyQuery {
+                VStack(spacing: 8) {
+                    Text(String(
+                        localized: "search_hash_guide_title",
+                        bundle: PresentationResources.bundle)
+                    )
+                    .font(.headline)
+                    Text(String(
+                        localized: "search_hash_guide_message",
+                        bundle: PresentationResources.bundle)
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(Color.textSecondary)
+                    .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+            } else if store.isLoading && todos.isEmpty {
+                ProgressView()
+                    .tint(Color.accent)
+            } else if todos.isEmpty {
+                Text(String(
+                    localized: "todo_list_search_empty",
+                    bundle: PresentationResources.bundle)
+                )
+            } else {
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(zip(todos.indices, todos)), id: \.1.id) { index, item in
+                        Button {
+                            onSelectTodo(item.id)
+                        } label: {
+                            SearchResultRow(item: item)
+                                .todoDetailPreview(todoId: item.id)
+                        }
+                        .buttonStyle(.plain)
+                        if index < todos.count - 1 { Divider() }
+                    }
+                }
+                .background {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.surface)
+                        .strokeBorder(Color.border, lineWidth: 2)
+                }
+                if store.shouldShowMoreTodos {
+                    Button {
+                        store.send(.setShowAllTodos(true))
+                    } label: {
+                        Text(String(
+                            localized: "search_show_more",
+                            bundle: PresentationResources.bundle)
+                        )
+                        .foregroundStyle(Color.accent)
+                        .font(.callout.bold())
+                    }
+                    .adaptiveButtonStyle(color: .primaryContainer)
                 }
             }
-            .padding(.top, -12)
-            if store.shouldShowMoreTodos {
-                Button(String(localized: "search_show_more", bundle: PresentationResources.bundle)) {
-                    store.send(.setShowAllTodos(true))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct SearchResultRow: View {
+    @ScaledMetric(relativeTo: .title2) private var iconSize = CGFloat(48)
+    @Environment(\.colorScheme) private var colorScheme
+    let item: SearchTodoItem
+    private var isDarkMode: Bool { colorScheme == .dark }
+
+    var body: some View {
+        let category = TodoCategoryItem(from: item.category)
+
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(category.color.opacity(isDarkMode ? 1 : 0.2))
+                .frame(width: iconSize, height: iconSize)
+                .overlay {
+                    Image(systemName: category.symbolName)
+                        .font(.title3.bold())
+                        .foregroundStyle(isDarkMode ? .white : category.color)
+                }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.title)
+                    .font(.headline)
+                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text("#\(item.number)")
+                        .foregroundStyle(Color.accent)
+                    Text("·")
+                    Text(item.createdAt.formatted(.dateTime.month().day().weekday(.abbreviated)))
                 }
                 .font(.subheadline)
-                .foregroundStyle(Color.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 4)
+                .foregroundStyle(Color.textSecondary)
+                .lineLimit(1)
             }
+            Spacer(minLength: 8)
+            Image(systemName: item.isPinned ? "star.fill" : "star")
+                .font(.title3)
+                .foregroundStyle(item.isPinned ? Color.orange : .textTertiary)
+            Image(systemName: "chevron.right")
+                .font(.callout.bold())
+                .foregroundStyle(Color.textSecondary)
         }
-        .padding(.horizontal, 16)
+        .padding()
     }
+}
 
-    private func todoResultRow(_ item: TodoListItem) -> some View {
-        Button {
-            router.push(Path.todo(item.id))
-        } label: {
-            VStack(spacing: 0) {
-                TodoItemRow(item)
-                Divider()
-            }
-        }
-        .todoDetailPreview(todoId: item.id)
-    }
+private struct RecentSearchQuries: View {
+    let store: StoreOf<SearchFeature>
 
-    private var recentQueries: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    var body: some View {
+        VStack(spacing: 8) {
             HStack {
                 Text(String(localized: "search_recent", bundle: PresentationResources.bundle))
-                    .font(.headline)
-                    .foregroundStyle(Color(.label))
+                    .font(.title3)
+                    .bold()
                 Spacer()
-                Button(String(localized: "search_clear_all", bundle: PresentationResources.bundle)) {
+                Button {
                     store.send(.clearRecentQueries)
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.callout)
+                        .foregroundStyle(
+                            store.recentQueries.isEmpty ?
+                            Color.textSecondary : .onPrimaryContainer
+                        )
                 }
-                .font(.subheadline)
-                .foregroundStyle(Color.gray)
+                .disabled(store.recentQueries.isEmpty)
+                .padding(.trailing)
             }
-
-            ForEach(store.recentQueries, id: \.self) { query in
-                HStack {
-                    Image(systemName: "clock.arrow.circlepath")
-                        .foregroundStyle(Color.gray)
-                    Text(query)
-                        .foregroundStyle(Color.primary)
-                    Spacer()
-                    Button {
-                        store.send(.removeRecentQuery(query))
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(Color.gray)
+            LazyVStack(spacing: 0) {
+                ForEach(Array(zip(
+                    store.recentQueries.indices,
+                    store.recentQueries)), id: \.1
+                ) { idx, query in
+                    VStack(spacing: 0) {
+                        HStack {
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundStyle(Color.textSecondary)
+                                Text(query)
+                                    .lineLimit(1)
+                                Spacer()
+                            }
+                            .contentShape(.rect)
+                            .onTapGesture {
+                                store.send(.binding(.set(\.searchQuery, query)))
+                            }
+                            Button {
+                                store.send(.removeRecentQuery(query))
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .foregroundStyle(Color.textSecondary)
+                            }
+                        }
+                        .padding()
+                        if idx < store.recentQueries.count - 1 { Divider() }
                     }
-                    .buttonStyle(.plain)
                 }
-                .padding(.vertical, 4)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    store.send(.binding(.set(\.searchQuery, query)))
-                    store.send(.binding(.set(\.isSearching, true)))
-                }
+            }
+            .background {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.surface)
+                    .strokeBorder(Color.border, lineWidth: 2)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
     }
+}
 
-    private enum Path: Hashable {
-        case todo(String)
-    }
+private enum Path: Hashable {
+    case todo(String)
 }

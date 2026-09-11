@@ -18,7 +18,7 @@ struct SearchStoreTestAdapter {
     var searchQuery: String { store.state.searchQuery }
     var isSearching: Bool { store.state.isSearching }
     var isLoading: Bool { store.state.isLoading }
-    var todos: [TodoListItem] { store.state.todos }
+    var todos: [SearchTodoItem] { store.state.todos }
     var recentQueries: [String] { Array(store.state.recentQueries) }
     var showAllTodos: Bool { store.state.showAllTodos }
     var isHashOnlyQuery: Bool { store.state.isHashOnlyQuery }
@@ -26,7 +26,7 @@ struct SearchStoreTestAdapter {
 
     init(
         recentQueries: [String] = [],
-        initialTodos: [TodoListItem] = [],
+        initialTodos: [SearchTodoItem] = [],
         isSearching: Bool = false,
         isLoading: Bool = false,
         fetchTodosUseCase: FetchTodosUseCase = SearchFetchTodosUseCaseSpy(),
@@ -124,7 +124,7 @@ struct SearchStoreTestAdapter {
         await store.receive(.store(.applySearchQuery(query)))
     }
 
-    func receiveSearchResults(todos: [TodoListItem]) async {
+    func receiveSearchResults(todos: [SearchTodoItem]) async {
         let wasLoading = store.state.isLoading
         await store.receive(.store(.fetchTodos(todos))) {
             $0.todos = todos

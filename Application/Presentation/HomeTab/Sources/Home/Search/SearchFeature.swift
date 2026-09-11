@@ -18,7 +18,7 @@ struct SearchFeature {
         var loading = LoadingFeature.State()
         var isSearching = false
         var searchQuery = ""
-        var todos: [TodoListItem] = []
+        var todos: [SearchTodoItem] = []
         var recentQueries = OrderedSet<String>()
         var showAllTodos = false
         let contentsLimit = 5
@@ -31,7 +31,7 @@ struct SearchFeature {
             loading.isLoading
         }
 
-        var visibleTodos: [TodoListItem] {
+        var visibleTodos: [SearchTodoItem] {
             if showAllTodos {
                 return todos
             }
@@ -60,7 +60,7 @@ struct SearchFeature {
         case loading(LoadingFeature.Action)
 
         enum StoreAction: Equatable {
-            case fetchTodos([TodoListItem])
+            case fetchTodos([SearchTodoItem])
             case applySearchQuery(String)
             case setAlert(Bool)
         }
@@ -208,7 +208,7 @@ private extension SearchFeature {
         .run { [fetchTodosUseCase] send in
             do {
                 let todos = try await fetchTodosUseCase.execute(TodoQuery(keyword: query), cursor: nil)
-                let todoItems = todos.items.compactMap { TodoListItem(from: $0) }
+                let todoItems = todos.items.map(SearchTodoItem.init(todo:))
                 await send(.store(.fetchTodos(todoItems)))
                 if isLoading {
                     await send(.loading(.end(target: .default, mode: .immediate)))
