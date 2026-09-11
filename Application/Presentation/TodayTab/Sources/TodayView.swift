@@ -422,6 +422,11 @@ private struct TodayTodoCard: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
+                    Image(systemName: item.isPinned ? "star.fill" : "star")
+                        .font(.title3)
+                        .foregroundStyle(item.isPinned ? Color.warning : .textTertiary)
+                        .onTapGesture { onTogglePinned() }
+
                     Image(systemName: "chevron.right")
                         .font(.callout.bold())
                         .foregroundStyle(Color.textTertiary)
@@ -429,11 +434,6 @@ private struct TodayTodoCard: View {
             }
             .buttonStyle(.plain)
             .todoDetailPreview(todoId: item.id)
-
-            Image(systemName: item.isPinned ? "star.fill" : "star")
-                .font(.title3)
-                .foregroundStyle(item.isPinned ? Color.warning : .textTertiary)
-                .onTapGesture { onTogglePinned() }
         }
         .padding(20)
         .background {
