@@ -164,26 +164,33 @@ struct TodoEditorFeatureTests {
         #expect(adapter.referenceItems[5] == TodoReferenceItem(from: reference5))
     }
 
-    @Test("정보와 참조 Todo 시트 상태를 액션에 맞게 변경한다")
-    func 정보와_참조_Todo_시트_상태를_액션에_맞게_변경한다() async {
+    @Test("하나의 inspector에서 옵션과 참조 Todo를 전환한다")
+    func 하나의_inspector에서_옵션과_참조_Todo를_전환한다() async {
         let adapter = TodoEditorStoreTestAdapter(category: .system(.doc))
         let item = TodoIdItem(id: "todo-2")
 
-        await adapter.setSheet(.info)
+        await adapter.showInspector(.options)
 
-        #expect(adapter.sheet == .info)
+        #expect(adapter.isInspectorPresented)
+        #expect(adapter.inspectorContent == .options)
 
-        await adapter.dismissSheet()
+        await adapter.showInspector(.todo(item))
 
-        #expect(adapter.sheet == nil)
+        #expect(adapter.inspectorContent == .todo(item))
+        #expect(adapter.isInspectorPresented)
 
-        await adapter.setSheet(.todo(item))
+        await adapter.showInspector(.options)
 
-        #expect(adapter.sheet == .todo(item))
+        #expect(adapter.inspectorContent == .options)
+        #expect(adapter.isInspectorPresented)
 
-        await adapter.tapSheetCloseButton()
+        await adapter.setInspectorPresented(false)
 
-        #expect(adapter.sheet == nil)
+        #expect(!adapter.isInspectorPresented)
+        await adapter.showInspector(.todo(item))
+
+        #expect(adapter.inspectorContent == .todo(item))
+        #expect(adapter.isInspectorPresented)
     }
 
     @Test("새 Todo 저장 성공은 draft를 저장하고 생성 delegate를 전송한다")

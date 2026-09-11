@@ -12,8 +12,10 @@ import Domain
 
 public struct TodoEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.isTabContentActive) private var isTabContentActive
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
     @State var store: StoreOf<TodoEditorFeature>
     @FocusState private var field: Field?
     private let calendar = Calendar.current
@@ -35,79 +37,93 @@ public struct TodoEditorView: View {
 
     public var body: some View {
         NavigationStack {
-            selectedContent
-            .onTapGesture {
-                field = .content
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+                VStack(spacing: 8) {
+                    ToolBar(
+                        store: store,
+                        showsActions: !movesActionsToInspector,
+                        onClose: close,
+                        onSubmit: submit
+                    )
+                    GeometryReader { geometry in
+                        ScrollView {
+                            VStack(spacing: 16) {
+                                VStack(alignment: .trailing, spacing: 16) {
+                                    TitleField(store: store, field: _field)
+                                    ModePicker(store: store, field: _field)
+                                        .frame(maxWidth: horizontalSizeClass == .regular ? 280 : .infinity)
+                                }
+                                .onGeometryChange(for: CGFloat.self) { proxy in
+                                    proxy.size.height
+                                } action: { height in
+                                    store.send(.binding(.set(\.editorHeaderHeight, height)))
+                                }
+                                ContentView(
+                                    store: store,
+                                    field: _field,
+                                    minimumHeight: max(
+                                        0,
+                                        geometry.size.height - store.editorHeaderHeight - 16 - safeAreaInsets.bottom
+                                    )
+                                )
+                                .onTapGesture {
+                                    field = .content
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .contentMargins(.vertical, 16, for: .scrollContent)
+                    }
+                }
             }
             .onAppear { store.send(.onAppear) }
             .onChange(of: store.saveResult) { _, result in
                 handleSaveResult(result)
             }
-            .navigationTitle(store.navigationTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.background, for: .navigationBar)
-            .sheet(
-                item: $store.scope(state: \.sheet, action: \.sheet)
-                    .activePresentation(when: isTabContentActive)
-            ) { store in
-                sheetContent(store)
-            }
-            .toolbar { toolbarContent }
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .prominentAlert(store, state: \.alert, action: \.alert)
-        }
-    }
-
-    @ViewBuilder
-    private var selectedContent: some View {
-        if store.tabViewTag == .editor {
-            editorContent
-        } else {
-            previewContent
-        }
-    }
-
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        if !isiOSAppOnMac {
-            ToolbarLeadingButton { close() }
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                store.send(.setSheet(.info))
-            } label: {
-                Image(systemName: "info.circle")
-            }
-        }
-        if store.isLoading {
-            if #available(iOS 26.0, *) {
-                ToolbarSpacer(.fixed, placement: .topBarTrailing)
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                ProgressView()
-            }
-        } else {
-            ToolbarTrailingButton {
-                submit()
-            }
-            .disabled(!store.isReadyToSubmit)
-        }
-    }
-
-    private var editorContent: some View {
-        ScrollView {
-            LazyVStack(spacing: 10) {
-                titleSection
-                LazyVStack(
-                    alignment: .leading,
-                    spacing: 0,
-                    pinnedViews: [.sectionHeaders]
-                ) {
-                    Section {
-                        tabView
-                    } header: {
-                        if !isiOSAppOnMac {
-                            tabPicker
-                                .padding(.horizontal)
+            .inspector(isPresented: $store.isInspectorPresented) {
+                switch store.inspectorContent {
+                case .options:
+                    InspectorView(
+                        store: store,
+                        showsEditorActions: movesActionsToInspector,
+                        onSubmit: submit
+                    ) {
+                        store.send(.binding(.set(\.isInspectorPresented, false)))
+                    }
+                case .todo(let item):
+                    NavigationStack {
+                        TodoDetailView(store: Store(
+                            initialState: TodoDetailFeature.State(todoId: item.id, showEditButton: false)
+                        ) {
+                            TodoDetailFeature()
+                        })
+                        .id(item.id)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button {
+                                    store.send(.showInspector(.options))
+                                } label: {
+                                    Label(
+                                        String(
+                                            localized: "todo_options_section",
+                                            bundle: PresentationResources.bundle
+                                        ),
+                                        systemImage: "chevron.left"
+                                    )
+                                }
+                            }
+                            if movesActionsToInspector {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    EditorToolbarActions(store: store, onSubmit: submit)
+                                }
+                            } else {
+                                ToolbarTrailingButton {
+                                    store.send(.binding(.set(\.isInspectorPresented, false)))
+                                }
+                            }
                         }
                     }
                 }
@@ -115,34 +131,120 @@ public struct TodoEditorView: View {
         }
     }
 
-    private var previewContent: some View {
-        VStack(spacing: 10) {
-            titleSection
-            if !isiOSAppOnMac {
-                tabPicker
-                    .padding(.horizontal)
-            }
-            tabView
+    private var movesActionsToInspector: Bool {
+        store.isInspectorPresented && (isiOSAppOnMac || horizontalSizeClass == .regular)
+    }
+
+    private func close() {
+        if let onClose {
+            onClose()
+        } else {
+            dismiss()
         }
     }
 
-    @ViewBuilder
-    private var titleSection: some View {
-        Group {
-            if isiOSAppOnMac {
-                HStack(spacing: 12) {
-                    titleField
-                    tabPicker
-                        .frame(width: 180)
+    private func submit() {
+        store.send(.upsertTodo)
+    }
+
+    private func handleSaveResult(_ result: TodoEditorFeature.SaveResult?) {
+        switch result {
+        case .created:
+            onCreateSuccess?()
+        case .updated(let todo):
+            onUpdateSuccess?(todo)
+        case .none:
+            break
+        }
+    }
+}
+
+private struct ToolBar: View {
+    let store: StoreOf<TodoEditorFeature>
+    let showsActions: Bool
+    let onClose: () -> Void
+    let onSubmit: () -> Void
+    @ScaledMetric(relativeTo: .title) private var iconSize = UIFont.preferredFont(
+        forTextStyle: .title1,
+        compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
+    ).lineHeight
+
+    var body: some View {
+        HStack {
+            Button {
+                onClose()
+            } label: {
+                if #available(iOS 26.0, *) {
+                    Image(systemName: "xmark")
+                        .frame(width: iconSize, height: iconSize)
+                } else {
+                    Text(String(localized: "common_close", bundle: PresentationResources.bundle))
                 }
-            } else {
-                titleField
+            }
+            .font(.title)
+            .adaptiveButtonStyle(shape: .circle)
+            Spacer()
+            Text(store.navigationTitle)
+                .font(.title3.bold())
+            Spacer()
+            if showsActions {
+                EditorToolbarActions(store: store, onSubmit: onSubmit)
             }
         }
         .padding(.horizontal)
+        .padding(.top, 12)
     }
+}
 
-    private var titleField: some View {
+private struct EditorToolbarActions: View {
+    let store: StoreOf<TodoEditorFeature>
+    let onSubmit: () -> Void
+    @ScaledMetric(relativeTo: .title) private var iconSize = UIFont.preferredFont(
+        forTextStyle: .title1,
+        compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
+    ).lineHeight
+
+    var body: some View {
+        HStack {
+            Button {
+                store.send(.showInspector(.options))
+            } label: {
+                Image(systemName: "info.circle")
+                    .frame(width: iconSize, height: iconSize)
+                    .foregroundStyle(Color.primary)
+            }
+            .font(.title)
+            .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+            if store.isLoading {
+                ProgressView()
+                    .frame(width: iconSize, height: iconSize)
+                    .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+            } else {
+                Button {
+                    onSubmit()
+                } label: {
+                    if #available(iOS 26.0, *) {
+                        Image(systemName: "checkmark")
+                            .frame(width: iconSize, height: iconSize)
+                            .foregroundStyle(Color.primary)
+                    } else {
+                        Text(String(localized: "todo_manage_save", bundle: PresentationResources.bundle))
+                            .foregroundStyle(Color.primary)
+                    }
+                }
+                .font(.title)
+                .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+                .disabled(!store.isReadyToSubmit)
+            }
+        }
+    }
+}
+
+private struct TitleField: View {
+    @Bindable var store: StoreOf<TodoEditorFeature>
+    @FocusState var field: Field?
+
+    var body: some View {
         TextField(
             "",
             text: $store.title,
@@ -155,34 +257,75 @@ public struct TodoEditorView: View {
             .foregroundColor(Color.secondary),
         )
         .font(.title2)
-        .frame(height: 30)
         .focused($field, equals: .title)
+        .frame(height: 30)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surface)
+                .strokeBorder(Color.border, lineWidth: 2)
+        }
+    }
+}
+
+private struct ModePicker: View {
+    @Bindable var store: StoreOf<TodoEditorFeature>
+    @FocusState var field: Field?
+
+    var body: some View {
+        HStack(spacing: 0) {
+            modeButton(
+                String(localized: "todo_write", bundle: PresentationResources.bundle),
+                tab: .editor
+            )
+            modeButton(
+                String(localized: "todo_preview", bundle: PresentationResources.bundle),
+                tab: .preview
+            )
+        }
+        .padding(2)
+        .background(Color.border, in: RoundedRectangle(cornerRadius: 16))
     }
 
-    private var tabPicker: some View {
-        Picker(
-            "",
-            selection: Binding(
-                get: { store.tabViewTag },
-                set: { tag in
-                    if tag == .editor {
-                        store.send(.binding(.set(\.tabViewTag, .editor)))
-                        field = .content
-                    } else {
-                        transitionToPreview()
+    @ViewBuilder
+    private func modeButton(_ title: String, tab: TodoEditorFeature.EditorTab) -> some View {
+        let isSelected = store.tabViewTag == tab
+
+        Button {
+            if tab == .editor {
+                store.send(.binding(.set(\.tabViewTag, .editor)))
+                field = .content
+            } else {
+                field = nil
+                DispatchQueue.main.async {
+                    store.send(.binding(.set(\.tabViewTag, .preview)))
+                }
+            }
+        } label: {
+            Text(title)
+                .font(.body)
+                .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
+                .frame(maxWidth: .infinity, minHeight: 36)
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.surface)
+                            .shadow(color: Color.textSecondary.opacity(0.08), radius: 2, y: 2)
                     }
                 }
-            )
-        ) {
-            Text(String(localized: "todo_write", bundle: PresentationResources.bundle))
-                .tag(TodoEditorFeature.EditorTab.editor)
-            Text(String(localized: "todo_preview", bundle: PresentationResources.bundle))
-                .tag(TodoEditorFeature.EditorTab.preview)
+                .contentShape(.rect)
         }
-        .pickerStyle(.segmented)
+        .buttonStyle(.plain)
     }
+}
 
-    private var tabView: some View {
+private struct ContentView: View {
+    @Bindable var store: StoreOf<TodoEditorFeature>
+    @FocusState var field: Field?
+    let minimumHeight: CGFloat
+
+    var body: some View {
         Group {
             if store.tabViewTag == .editor {
                 VStack(alignment: .leading, spacing: 8) {
@@ -205,12 +348,18 @@ public struct TodoEditorView: View {
                     TodoMarkdownContentView(
                         content: store.content,
                         referenceItems: store.referenceItems,
-                        onOpenTodoID: { store.send(.setSheet(.todo(TodoIdItem(id: $0)))) }
+                        onOpenTodoID: { store.send(.showInspector(.todo(TodoIdItem(id: $0)))) }
                     )
                 }
             }
         }
-        .padding(.top, 10)
+        .padding(.vertical, 10)
+        .frame(minHeight: minimumHeight, alignment: .topLeading)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surface)
+                .strokeBorder(Color.border, lineWidth: 2)
+        }
     }
 
     private var markdownHint: some View {
@@ -230,168 +379,202 @@ public struct TodoEditorView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.vertical, 8)
     }
-
-    private func submit() {
-        store.send(.upsertTodo)
-    }
-
-    private func close() {
-        if let onClose {
-            onClose()
-        } else {
-            dismiss()
-        }
-    }
-
-    private func transitionToPreview() {
-        field = nil
-
-        DispatchQueue.main.async {
-            store.send(.binding(.set(\.tabViewTag, .preview)))
-        }
-    }
-
-    private func handleSaveResult(_ result: TodoEditorFeature.SaveResult?) {
-        switch result {
-        case .created:
-            onCreateSuccess?()
-        case .updated(let todo):
-            onUpdateSuccess?(todo)
-        case .none:
-            break
-        }
-    }
-
-    @ViewBuilder
-    private func sheetContent(
-        _ sheetStore: Store<TodoEditorFeature.SheetState, TodoEditorFeature.Action.Sheet>
-    ) -> some View {
-        switch sheetStore.state {
-        case .info:
-            TodoEditorInfoSheetView(store: store) {
-                sheetStore.send(.tapCloseButton)
-            }
-        case .todo(let item):
-            NavigationStack {
-                TodoDetailView(store: Store(
-                    initialState: TodoDetailFeature.State(todoId: item.id, showEditButton: false)
-                ) {
-                    TodoDetailFeature()
-                })
-                .toolbar {
-                    ToolbarLeadingButton {
-                        sheetStore.send(.tapCloseButton)
-                    }
-                }
-            }
-            .background(Color(.systemGroupedBackground))
-            .presentationDragIndicator(.visible)
-        }
-    }
-
-    private enum Field: Hashable {
-        case title, content
-    }
 }
 
-private struct TodoEditorInfoSheetView: View {
+private struct InspectorView: View {
     @Bindable var store: StoreOf<TodoEditorFeature>
-    let onClose: () -> Void
     @FocusState private var isTagFieldFocused: Bool
+    @ScaledMetric(relativeTo: .title) private var iconSize = UIFont.preferredFont(
+        forTextStyle: .title1,
+        compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
+    ).lineHeight
+    var showsEditorActions = false
+    var onSubmit: () -> Void = {}
+    let onClose: () -> Void
     private let calendar = Calendar.current
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section(String(localized: "todo_options_section", bundle: PresentationResources.bundle)) {
-                    Picker(
-                        String(localized: "todo_category", bundle: PresentationResources.bundle),
-                        selection: Binding(
-                            get: { store.category.id },
-                            set: { categoryId in
-                                guard let item = store.categories.first(where: {
-                                    $0.id == categoryId
-                                }) else {
-                                    return
-                                }
-
-                                store.send(.binding(.set(\.category, item)))
-                            }
-                        )
-                    ) {
-                        ForEach(store.categories, id: \.id) { item in
-                            Text(item.localizedName)
-                                .tag(item.id)
-                        }
-                    }
-
-                    Toggle(
-                        String(localized: "todo_completed", bundle: PresentationResources.bundle),
-                        isOn: Binding(
-                            get: { store.isCompleted },
-                            set: { store.send(.setCompleted($0)) }
-                        )
-                    )
-                    .tint(.blue)
-
-                    Toggle(
-                        String(localized: "todo_pinned", bundle: PresentationResources.bundle),
-                        isOn: Binding(
-                            get: { store.isPinned },
-                            set: { store.send(.binding(.set(\.isPinned, $0))) }
-                        )
-                    )
-                    .tint(.blue)
-
-                    dueDateControl
-                }
-
-                Section(String(localized: "todo_tags", bundle: PresentationResources.bundle)) {
-                    HStack(spacing: 12) {
-                        TextField(
-                            String(localized: "todo_add", bundle: PresentationResources.bundle),
-                            text: $store.tagText
-                        )
-                        .frame(height: UIFont.preferredFont(forTextStyle: .title2).lineHeight)
-                        .textInputAutocapitalization(.never)
-                        .focused($isTagFieldFocused)
-                        .onSubmit {
-                            submitTag()
-                        }
-
-                        if isTagFieldFocused {
-                            Button {
-                                submitTag()
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(canSubmitTag ? .blue : .secondary)
-                            }
-                            .disabled(!canSubmitTag)
-                        }
-                    }
-
-                    if store.tags.isEmpty {
-                        Text(String(localized: "todo_no_tags", bundle: PresentationResources.bundle))
-                            .foregroundStyle(.secondary)
-                            .padding(.vertical, 4)
-                    } else {
-                        TagList(
-                            store.tags,
-                            isEditing: isTagFieldFocused,
-                            action: { store.send(.removeTag($0)) }
-                        )
-                    }
-                }
-            }
-            .navigationTitle(String(localized: "todo_details", bundle: PresentationResources.bundle))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarLeadingButton {
-                    onClose()
-                }
+        ZStack {
+            Color.appBackground.ignoresSafeArea()
+            VStack(spacing: 8) {
+                toolBar
+                content
             }
         }
+    }
+
+    private var toolBar: some View {
+        HStack {
+            Spacer()
+            if showsEditorActions {
+                EditorToolbarActions(store: store, onSubmit: onSubmit)
+            } else {
+                Button {
+                    onClose()
+                } label: {
+                    Image(systemName: "checkmark")
+                        .frame(width: iconSize, height: iconSize)
+                        .foregroundStyle(Color.primary)
+                }
+                .font(.title)
+                .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.top, 12)
+        .overlay {
+            if !showsEditorActions {
+                Text(String(localized: "todo_details", bundle: PresentationResources.bundle))
+                    .font(.title3.bold())
+            }
+        }
+    }
+
+    private var content: some View {
+            ScrollView {
+                LazyVStack(spacing: 24) {
+                    VStack(spacing: 0) {
+                        HStack(spacing: 12) {
+                            optionIcon("tag.fill", color: Color.accent)
+                            Spacer()
+                            Picker(
+                                String(localized: "todo_category", bundle: PresentationResources.bundle),
+                                selection: Binding(
+                                    get: { store.category.id },
+                                    set: { categoryId in
+                                        guard let item = store.categories.first(where: {
+                                            $0.id == categoryId
+                                        }) else { return }
+                                        store.send(.binding(.set(\.category, item)))
+                                    }
+                                )
+                            ) {
+                                ForEach(store.categories, id: \.id) { item in
+                                    Text(item.localizedName)
+                                        .tag(item.id)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .tint(Color.accent)
+                        }
+                        .padding(.vertical, 12)
+
+                        Divider().overlay(Color.border)
+
+                        Toggle(
+                            isOn: Binding(
+                                get: { store.isCompleted },
+                                set: { store.send(.setCompleted($0)) }
+                            )
+                        ) {
+                            HStack(spacing: 12) {
+                                optionIcon("circle", color: Color.textSecondary)
+                                Text(String(localized: "todo_completed", bundle: PresentationResources.bundle))
+                            }
+                        }
+                        .tint(Color.accent)
+                        .padding(.vertical, 12)
+
+                        Divider().overlay(Color.border)
+
+                        Toggle(
+                            isOn: Binding(
+                                get: { store.isPinned },
+                                set: { store.send(.binding(.set(\.isPinned, $0))) }
+                            )
+                        ) {
+                            HStack(spacing: 12) {
+                                optionIcon("star.fill", color: Color.warning)
+                                Text(String(localized: "todo_pinned", bundle: PresentationResources.bundle))
+                            }
+                        }
+                        .tint(Color.accent)
+                        .padding(.vertical, 12)
+
+                        Divider().overlay(Color.border)
+
+                        dueDateControl
+                            .padding(.vertical, 12)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.surface)
+                            .strokeBorder(Color.border, lineWidth: 2)
+                    }
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(String(localized: "todo_tags", bundle: PresentationResources.bundle))
+                            .font(.headline)
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack(spacing: 12) {
+                                TextField(
+                                    String(localized: "todo_add", bundle: PresentationResources.bundle),
+                                    text: $store.tagText
+                                )
+                                .frame(height: UIFont.preferredFont(forTextStyle: .title2).lineHeight)
+                                .textInputAutocapitalization(.never)
+                                .focused($isTagFieldFocused)
+                                .onSubmit { submitTag() }
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.surfaceSecondary)
+                                        .strokeBorder(Color.border, lineWidth: 2)
+                                }
+                                .tint(Color.accent)
+
+                                Button {
+                                    submitTag()
+                                } label: {
+                                    Image(systemName: "plus")
+                                        .font(.title2.weight(.semibold))
+                                        .foregroundStyle(canSubmitTag ? Color.surface : Color.textSecondary)
+                                        .padding(12)
+                                        .background(
+                                            canSubmitTag ? Color.accent : Color.surfaceSecondary,
+                                            in: Circle()
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(!canSubmitTag)
+                            }
+
+                            if store.tags.isEmpty {
+                                Text(String(localized: "todo_no_tags", bundle: PresentationResources.bundle))
+                                    .foregroundStyle(.secondary)
+                                    .padding(.vertical, 4)
+                            } else {
+                                TagList(
+                                    store.tags,
+                                    isEditing: true,
+                                    action: { store.send(.removeTag($0)) }
+                                )
+                            }
+                            Text("같은 태그는 한 번만 추가할 수 있어요")   // l10n
+                        }
+                        .padding(20)
+                        .background {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.surface)
+                                .strokeBorder(Color.border, lineWidth: 2)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
+            .contentMargins(.top, 16, for: .scrollContent)
+    }
+
+    private func optionIcon(_ name: String, color: Color) -> some View {
+        Image(systemName: name)
+            .font(.title3)
+            .foregroundStyle(color)
+            .frame(width: 44, height: 44)
+            .background(color.opacity(0.08), in: Circle())
     }
 
     private var dueDateControl: some View {
@@ -399,7 +582,8 @@ private struct TodoEditorInfoSheetView: View {
             get: { store.dueDate ?? Date() },
             set: { store.send(.binding(.set(\.dueDate, $0))) }
         )) {
-            HStack {
+            HStack(spacing: 12) {
+                optionIcon("calendar", color: Color.textSecondary)
                 Text(String(localized: "todo_due_date", bundle: PresentationResources.bundle))
                     .foregroundStyle(.primary)
                 Spacer()
@@ -414,6 +598,11 @@ private struct TodoEditorInfoSheetView: View {
                 }
             }
         }
+    }
+
+    private func close() {
+        isTagFieldFocused = false
+        onClose()
     }
 
     private func submitTag() {
@@ -489,4 +678,8 @@ private struct DueDatePicker<Content: View>: View {
             }
         }
     }
+}
+
+private enum Field: Hashable {
+    case title, content
 }
