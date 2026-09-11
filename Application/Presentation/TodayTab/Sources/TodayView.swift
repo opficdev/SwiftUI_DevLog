@@ -11,6 +11,7 @@ import Domain
 import PresentationShared
 
 public struct TodayView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var path = [TodayRoute]()
     @State private var store: StoreOf<TodayFeature>
     private let isSelected: Bool
@@ -32,67 +33,261 @@ public struct TodayView: View {
         self.windowEvent = windowEvent
     }
 
-//    public var body: some View {
-//        NavigationStack(path: $path) {
-//            List {
-//                summarySection
-//                if store.sections.isEmpty, !store.isLoading {
-//                    emptySection
-//                } else {
-//                    ForEach(store.sections) { section in
-//                        todoSection(section.title, items: section.items)
-//                    }
-//                }
-//            }
-//            .listStyle(.insetGrouped)
-//            .navigationTitle(String(localized: "nav_today", bundle: PresentationResources.bundle))
-//            .navigationDestination(for: TodayRoute.self, destination: destinationView)
-//            .toolbar { toolbarContent }
-//            .background(NavigationBarConfigurator())
-//            .refreshable { await store.send(.refresh).finish() }
-//        }
-//        .onChange(of: isSelected, initial: true) { _, isSelected in
-//            if isSelected {
-//                store.send(.fetchData)
-//            }
-//        }
-//        .prominentAlert(store, state: \.alert, action: \.alert)
-//        .overlay {
-//            if store.isLoading {
-//                LoadingView()
-//            }
-//        }
-//    }
-
     public var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
-                LazyVStack(pinnedViews: [.sectionHeaders]) {
+                LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
                     Section {
-
+                        scopePicker
+                        if displaySections.isEmpty, !store.isLoading {
+                            emptyContent
+                                .padding(.horizontal)
+                        } else {
+                            ForEach(displaySections) { section in
+                                todoSection(section)
+                                    .padding(.horizontal)
+                            }
+                        }
                     } header: {
-
+                        achievementCard
                     }
                 }
+                .padding(.bottom, 24)
+            }
+            .safeAreaInset(edge: .top, spacing: 0) { topBar }
+            .background(Color.appBackground.ignoresSafeArea())
+            .refreshable { await store.send(.refresh).finish() }
+            .navigationDestination(for: TodayRoute.self, destination: destination)
+        }
+        .onChange(of: isSelected, initial: true) { _, isSelected in
+            if isSelected {
+                store.send(.fetchData)
+            }
+        }
+        .onChange(of: scenePhase) { _, scenePhase in
+            if scenePhase == .active, isSelected {
+                store.send(.checkCurrentDate(Date()))
+            }
+        }
+        .task(id: isSelected) {
+            guard isSelected else { return }
+            await monitorDateChanges()
+        }
+        .prominentAlert(store, state: \.alert, action: \.alert)
+        .overlay {
+            if store.isLoading {
+                LoadingView()
             }
         }
     }
 
     private var topBar: some View {
-        VStack {
-            HStack {
-                Text("오늘 할 일 달성")
-                Text("진행 중")
+        Text(String(localized: "nav_today", bundle: PresentationResources.bundle))
+            .font(.largeTitle.bold())
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .background(Color.appBackground, ignoresSafeAreaEdges: .top)
+    }
+
+    private var achievementCard: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 10) {
+                Text(String(
+                    localized: "today_achievement_title",
+                    bundle: PresentationResources.bundle)
+                )
+                .font(.title3.bold())
+
+                Text(achievementStatusTitle)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(Color.accent)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.primaryContainer, in: .capsule)
+
+                Spacer(minLength: 8)
+
+                progressCount
+                filterMenu
+            }
+
+            ProgressView(value: store.todayAchievement?.progress ?? 0)
+                .tint(Color.accent)
+        }
+        .padding(20)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surface)
+                .strokeBorder(Color.border, lineWidth: 2)
+        }
+        .padding(.horizontal)
+        .background(Color.appBackground)
+    }
+
+    private var progressCount: some View {
+        Group {
+            if let achievement = store.todayAchievement {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text("\(achievement.completedCount)")
+                        .font(.title2.bold())
+                        .foregroundStyle(Color.accent)
+                    Text("/")
+                    Text("\(achievement.totalCount)")
+                }
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(Color.textSecondary)
+            } else {
+                Text("-- / --")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(Color.textSecondary)
+            }
+        }
+    }
+
+    private var filterMenu: some View {
+        Menu {
+            Picker(
+                String(
+                    localized: "today_due_visibility_label",
+                    bundle: PresentationResources.bundle
+                ),
+                selection: $store.displayOptions.dueDateVisibility
+            ) {
+                ForEach(TodayDisplayOptions.DueDateVisibility.allCases, id: \.self) { option in
+                    Text(option.title).tag(option)
+                }
+            }
+
+            Toggle(
+                String(
+                    localized: "today_pinned_only",
+                    bundle: PresentationResources.bundle
+                ),
+                isOn: $store.displayOptions.isFocusedOnly
+            )
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.headline)
+                .foregroundStyle(Color.textSecondary)
+                .padding(8)
+        }
+    }
+
+    @ViewBuilder
+    private var scopePicker: some View {
+        let summaryCounts = store.summaryCounts
+
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(TodayFeature.SectionScope.allCases, id: \.self) { scope in
+                    let isSelected = store.selectedSectionScope == scope
+                    Button {
+                        withAnimation(.easeInOut) {
+                            _ = store.send(.setSectionScope(scope))
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(scope.title)
+                            Text("\(summaryCounts[scope, default: 0])")
+                                .fontWeight(.bold)
+                        }
+                        .font(.callout)
+                        .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
+                    }
+                    .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .clear)
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+        .contentMargins(.horizontal, 16, for: .scrollContent)
+    }
+
+    private var displaySections: [TodayDisplaySection] {
+        guard store.selectedSectionScope == .all else {
+            return store.sections.map(TodayDisplaySection.init)
+        }
+
+        let todayItems = visibleTodayTodos
+        let todayItemIDs = Set(todayItems.filter { !$0.isCompleted }.map(\.id))
+        let remainingSections = store.sections.compactMap { section -> TodayDisplaySection? in
+            let items = section.items.filter { !todayItemIDs.contains($0.id) }
+            guard !items.isEmpty else { return nil }
+            return TodayDisplaySection(section: section, items: items)
+        }
+        let order: [TodayFeature.SectionCategory] = [.overdue, .dueSoon, .focused, .later, .unscheduled]
+        var sections = order.compactMap { category in
+            remainingSections.first { $0.category == category }
+        }
+
+        guard !todayItems.isEmpty else { return sections }
+        let todaySection = TodayDisplaySection(todayItems: todayItems)
+        let insertionIndex = sections.firstIndex { $0.category != .overdue } ?? sections.endIndex
+        sections.insert(todaySection, at: insertionIndex)
+        return sections
+    }
+
+    private var visibleTodayTodos: [TodayTodoItem] {
+        let items = TodayFeature.displayedTodos(
+            todos: store.todayTodos,
+            displayOptions: store.displayOptions
+        )
+        return items.filter(\.isPinned) + items.filter { !$0.isPinned }
+    }
+
+    private func todoSection(_ section: TodayDisplaySection) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Text(section.title)
+                    .font(.title3.bold())
+                    .foregroundStyle(section.accentColor)
+                Text("\(section.items.count)")
+                    .font(.callout.bold())
+                    .foregroundStyle(section.accentColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(section.accentColor.opacity(0.1), in: .capsule)
                 Spacer()
-                HStack(spacing: 8) {
-//                    let todayTodos = store.todos.filter { $0.dueDate.}
-//                    Text(store.todos.filter { $0.})
+                if section.id == .today {
+                    Text(String(localized: "today_pinned_first", bundle: PresentationResources.bundle))
+                        .font(.callout)
+                        .foregroundStyle(Color.textSecondary)
+                }
+            }
+
+            LazyVStack(spacing: 12) {
+                ForEach(section.items) { item in
+                    TodayTodoCard(
+                        item: item,
+                        onComplete: { store.send(.completeTodo(item)) },
+                        onTogglePinned: { store.send(.togglePinned(item)) }
+                    )
                 }
             }
         }
     }
 
-    private func destinationView(_ route: TodayRoute) -> some View {
+    private var emptyContent: some View {
+        VStack(spacing: 8) {
+            Text(emptyStateContent.title)
+                .font(.headline)
+            Text(emptyStateContent.message)
+                .font(.callout)
+                .foregroundStyle(Color.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+        .padding(.horizontal, 20)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surface)
+                .strokeBorder(Color.border, lineWidth: 2)
+        }
+    }
+
+    private func destination(_ route: TodayRoute) -> some View {
         switch route {
         case .todo(let item):
             TodoDetailView(
@@ -107,123 +302,23 @@ public struct TodayView: View {
         }
     }
 
-    private var summarySection: some View {
-        Section {
-            ScrollView(.horizontal) {
-                let summaryCounts = store.summaryCounts
-                let selectedSectionScope = store.selectedSectionScope
-
-                HStack(spacing: 12) {
-                    ForEach(TodayFeature.SectionScope.allCases, id: \.self) { scope in
-                        Button {
-                            withAnimation(SwiftUI.Animation.easeInOut) {
-                                _ = store.send(.setSectionScope(scope))
-                            }
-                        } label: {
-                            SummaryCard(
-                                title: scope.title,
-                                value: summaryCounts[scope, default: 0],
-                                accentColor: scope.accentColor,
-                                isSelected: selectedSectionScope == scope
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-            .scrollIndicators(.never)
-            .contentMargins(.horizontal, 16)
-        }
-        .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
-    }
-
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
-            Menu {
-                Picker(
-                    String(localized: "today_due_visibility_label", bundle: PresentationResources.bundle),
-                    selection: $store.displayOptions.dueDateVisibility
-                ) {
-                    ForEach(TodayDisplayOptions.DueDateVisibility.allCases, id: \.self) { option in
-                        Text(option.title).tag(option)
-                    }
-                }
-
-                Toggle(
-                    String(localized: "today_pinned_only", bundle: PresentationResources.bundle),
-                    isOn: $store.displayOptions.isFocusedOnly
-                )
-                .tint(.orange)
-
-                if store.displayOptions.focusVisibility == .focusedOnly {
-                    Text(String(localized: "today_pinned_only_description", bundle: PresentationResources.bundle))
-                        .font(.caption)
-                }
-            } label: {
-                let options = store.displayOptions
-                Image(systemName: "line.3.horizontal.decrease.circle\(options == .default ? "" : ".fill")")
+    private func monitorDateChanges() async {
+        while !Task.isCancelled {
+            let date = Date()
+            store.send(.checkCurrentDate(date))
+            let interval = TodayFeature.dayInterval(containing: date)
+            let seconds = min(max(interval.end.timeIntervalSince(date), 1), 60)
+            do {
+                try await Task.sleep(for: .seconds(seconds))
+            } catch {
+                return
             }
         }
     }
 
-    private var emptySection: some View {
-        Section {
-            VStack(spacing: 8) {
-                Text(emptyStateContent.title)
-                    .foregroundStyle(.primary)
-                Text(emptyStateContent.message)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 28)
-        }
-    }
-
-    @ViewBuilder
-    private func todoSection(_ title: String, items: [TodayTodoItem]) -> some View {
-        if !items.isEmpty {
-            Section {
-                ForEach(items) { item in
-                    todoRow(item)
-                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                        Button {
-                            store.send(.togglePinned(item))
-                        } label: {
-                            Image(systemName: item.isPinned ? "star.slash" : "star.fill")
-                        }
-                        .tint(.orange)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button {
-                            store.send(.completeTodo(item))
-                        } label: {
-                            Label(
-                                String(
-                                    localized: "today_complete_action",
-                                    bundle: PresentationResources.bundle
-                                ),
-                                systemImage: "checkmark"
-                            )
-                        }
-                        .tint(.green)
-                    }
-                }
-            } header: {
-                Text(title)
-                    .listRowInsets(EdgeInsets())
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func todoRow(_ item: TodayTodoItem) -> some View {
-        NavigationLink(value: TodayRoute.todo(TodoIdItem(id: item.id))) {
-            TodayTodoRow(item: item)
-        }
-        .todoDetailPreview(todoId: item.id)
+    private var achievementStatusTitle: String {
+        store.todayAchievement?.status.title
+            ?? String(localized: "today_achievement_status_loading", bundle: PresentationResources.bundle)
     }
 
     private var emptyStateContent: EmptyStateContent {
@@ -263,6 +358,149 @@ public struct TodayView: View {
     }
 }
 
+private struct TodayDisplaySection: Identifiable {
+    enum Identifier: Hashable {
+        case today
+        case category(TodayFeature.SectionCategory)
+    }
+
+    let id: Identifier
+    let category: TodayFeature.SectionCategory?
+    let title: String
+    let items: [TodayTodoItem]
+    let accentColor: Color
+
+    init(_ section: TodayFeature.SectionContent) {
+        self.init(section: section, items: section.items)
+    }
+
+    init(section: TodayFeature.SectionContent, items: [TodayTodoItem]) {
+        self.id = .category(section.category)
+        self.category = section.category
+        self.title = section.category.displayTitle
+        self.items = items
+        self.accentColor = section.category == .overdue ? .danger : .primary
+    }
+
+    init(todayItems: [TodayTodoItem]) {
+        self.id = .today
+        self.category = nil
+        self.title = String(localized: "today_section_today", bundle: PresentationResources.bundle)
+        self.items = todayItems
+        self.accentColor = .primary
+    }
+}
+
+private struct TodayTodoCard: View {
+    @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(30)
+    let item: TodayTodoItem
+    let onComplete: () -> Void
+    let onTogglePinned: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            completionStatus
+
+            NavigationLink(value: TodayRoute.todo(TodoIdItem(id: item.id))) {
+                HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        todoInformation
+                        Text(item.title)
+                            .font(.headline)
+                            .strikethrough(item.isCompleted)
+                            .foregroundStyle(item.isCompleted ? Color.textSecondary : .primary)
+                            .multilineTextAlignment(.leading)
+                        if !item.content.isEmpty {
+                            Text(item.content)
+                                .font(.callout)
+                                .foregroundStyle(Color.textSecondary)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Image(systemName: "chevron.right")
+                        .font(.callout.bold())
+                        .foregroundStyle(Color.textTertiary)
+                }
+            }
+            .buttonStyle(.plain)
+            .todoDetailPreview(todoId: item.id)
+
+            Button(action: onTogglePinned) {
+                Image(systemName: item.isPinned ? "star.fill" : "star")
+                    .font(.title3)
+                    .foregroundStyle(item.isPinned ? Color.warning : Color.textTertiary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(20)
+        .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surface)
+                .strokeBorder(Color.border, lineWidth: 2)
+        }
+    }
+
+    @ViewBuilder
+    private var completionStatus: some View {
+        if item.isCompleted {
+            Image(systemName: "checkmark.circle.fill")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(Color.success)
+                .frame(width: completionSize, height: completionSize)
+        } else {
+            Button(action: onComplete) {
+                Image(systemName: "circle")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(Color.textTertiary)
+                    .frame(width: completionSize, height: completionSize)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var todoInformation: some View {
+        let category = TodoCategoryItem(from: item.category)
+        return HStack(spacing: 8) {
+            Label(category.localizedName, systemImage: category.symbolName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(category.color)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(category.color.opacity(0.1), in: .rect(cornerRadius: 8))
+
+            if let dueDate = item.dueDate {
+                Label(dueDateText(dueDate), systemImage: "clock")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(dueDateColor(dueDate))
+            }
+        }
+    }
+
+    private func dueDateText(_ date: Date) -> String {
+        let calendar = Calendar.autoupdatingCurrent
+        if calendar.isDateInToday(date) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        if calendar.isDateInYesterday(date) {
+            return String(localized: "today_due_yesterday", bundle: PresentationResources.bundle)
+        }
+        return date.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated).hour().minute())
+    }
+
+    private func dueDateColor(_ date: Date) -> Color {
+        let calendar = Calendar.autoupdatingCurrent
+        if calendar.startOfDay(for: date) < calendar.startOfDay(for: Date()) {
+            return .danger
+        }
+        return .accent
+    }
+}
+
 private extension TodayDisplayOptions.DueDateVisibility {
     var title: String {
         switch self {
@@ -289,120 +527,32 @@ private extension TodayFeature.SectionScope {
             return String(localized: "today_summary_due_soon", bundle: PresentationResources.bundle)
         }
     }
+}
 
-    var accentColor: Color {
+private extension TodayFeature.SectionCategory {
+    var displayTitle: String {
         switch self {
-        case .all:
-            return .blue
-        case .focused:
-            return .orange
         case .overdue:
-            return .red
+            return String(localized: "today_section_overdue", bundle: PresentationResources.bundle)
         case .dueSoon:
-            return .green
+            return String(localized: "today_section_upcoming", bundle: PresentationResources.bundle)
+        case .focused:
+            return String(localized: "today_section_focused", bundle: PresentationResources.bundle)
+        case .later:
+            return String(localized: "today_section_later", bundle: PresentationResources.bundle)
+        case .unscheduled:
+            return String(localized: "today_section_unscheduled", bundle: PresentationResources.bundle)
         }
     }
 }
 
-private struct SummaryCard: View {
-    let title: String
-    let value: Int
-    let accentColor: Color
-    let isSelected: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(isSelected ? accentColor : .secondary)
-            Text("\(value)")
-                .font(.title2.bold())
-                .foregroundStyle(Color(.label))
+private extension TodayFeature.TodayAchievement.Status {
+    var title: String {
+        let key = switch self {
+        case .empty: "today_achievement_status_empty"
+        case .inProgress: "today_achievement_status_in_progress"
+        case .completed: "today_achievement_status_completed"
         }
-        .frame(width: 96, alignment: .leading)
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(isSelected ? accentColor.opacity(0.2) : accentColor.opacity(0.12))
-                .strokeBorder(
-                    isSelected ? accentColor.opacity(0.55) : accentColor.opacity(0.18),
-                    lineWidth: isSelected ? 1.5 : 1
-                )
-        )
-        .scaleEffect(isSelected ? 1 : 0.98)
-    }
-}
-
-private struct TodayTodoRow: View {
-    private let calendar = Calendar.current
-    let item: TodayTodoItem
-
-    var body: some View {
-        let todoCategoryItem = TodoCategoryItem(from: item.category)
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: todoCategoryItem.symbolName)
-                    .foregroundStyle(todoCategoryItem.color)
-                    .frame(width: 18)
-                Text(item.title)
-                    .font(.headline)
-                    .foregroundStyle(Color(.label))
-                    .lineLimit(1)
-                Text("#\(item.number)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.gray)
-                    .fixedSize(horizontal: true, vertical: false)
-                Spacer()
-            }
-
-            HStack(spacing: 8) {
-                Text(todoCategoryItem.localizedName)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(todoCategoryItem.color)
-
-                if let dueDate {
-                    Text(dueDate.text)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(dueDate.textColor)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(dueDate.backgroundColor)
-                        )
-                }
-            }
-
-            if !item.tags.isEmpty {
-                TagList(item.tags, lineLimit: 1)
-            }
-        }
-    }
-
-    private var dueDate: DueDateBadge? {
-        guard let date = item.dueDate else { return nil }
-        let today = calendar.startOfDay(for: Date())
-        let dueDay = calendar.startOfDay(for: date)
-
-        if dueDay < today {
-            return DueDateBadge(
-                text: String(localized: "today_due_overdue", bundle: PresentationResources.bundle),
-                textColor: .red,
-                backgroundColor: Color.red.opacity(0.12)
-            )
-        }
-
-        let formatted = date.formatted(date: .abbreviated, time: .omitted)
-        return DueDateBadge(
-            text: formatted,
-            textColor: .blue,
-            backgroundColor: Color.blue.opacity(0.12)
-        )
-    }
-
-    private struct DueDateBadge {
-        let text: String
-        let textColor: Color
-        let backgroundColor: Color
+        return String(localized: String.LocalizationValue(key), bundle: PresentationResources.bundle)
     }
 }
