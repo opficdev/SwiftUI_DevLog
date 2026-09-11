@@ -17,17 +17,17 @@ struct SearchView: View {
     var body: some View {
         NavigationStack(path: $router.path) {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 24) {
-                    SearchField(store: store)
-                    tipCard
-                    if !store.searchQuery.isEmpty {
-                        SearchResults(
-                            store: store,
-                            onSelectTodo: { router.push(.todo($0)) }
-                        )
-                    }
-                    RecentSearchQuries(store: store)
-                    instruction
+                LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
+                    Section {
+                        if !store.searchQuery.isEmpty {
+                            SearchResults(
+                                store: store,
+                                onSelectTodo: { router.push(.todo($0)) }
+                            )
+                        }
+                        RecentSearchQuries(store: store)
+                        instruction
+                    } header: { tipCard }
                 }
                 .padding(.horizontal)
             }
@@ -48,17 +48,20 @@ struct SearchView: View {
     }
 
     private var topBar: some View {
-        HStack(spacing: 12) {
-            Button {
-                store.send(.binding(.set(\.isSearching, false)))
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(Color.textSecondary)
+        VStack(alignment: .leading) {
+            HStack(spacing: 12) {
+                Button {
+                    store.send(.binding(.set(\.isSearching, false)))
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundStyle(Color.textSecondary)
+                }
+                .buttonStyle(.plain)
+                Text(String(localized: "search_title", bundle: PresentationResources.bundle))
+                    .font(.title.bold())
             }
-            .buttonStyle(.plain)
-            Text(String(localized: "search_title", bundle: PresentationResources.bundle))
-                .font(.title.bold())
+            SearchField(store: store)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -88,6 +91,8 @@ struct SearchView: View {
         .foregroundStyle(Color.accent)
         .padding()
         .background {
+            Rectangle()
+                .fill(Color.appBackground)
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.primaryContainer)
         }
