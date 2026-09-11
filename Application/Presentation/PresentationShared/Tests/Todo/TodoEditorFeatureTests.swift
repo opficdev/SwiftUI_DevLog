@@ -97,6 +97,32 @@ struct TodoEditorFeatureTests {
         ])
     }
 
+    @Test("숨김 카테고리 Todo도 ID로 선택 상태를 유지한다")
+    func 숨김_카테고리_Todo도_ID로_선택_상태를_유지한다() async {
+        let visiblePreference = TodoCategoryPreference(category: .system(.doc), isVisible: true)
+        let hiddenPreference = TodoCategoryPreference(category: .system(.issue), isVisible: false)
+        let adapter = TodoEditorStoreTestAdapter(
+            todo: makeTodoEditorTodo(category: .system(.issue)),
+            fetchPreferencesUseCase: TodoEditorFetchPreferencesUseCaseSpy(
+                preferences: [visiblePreference, hiddenPreference]
+            )
+        )
+
+        await adapter.onAppear()
+
+        #expect(adapter.selectedCategoryID == TodoCategoryItem(from: hiddenPreference).id)
+        #expect(adapter.categories.contains { $0.id == adapter.selectedCategoryID })
+
+        await adapter.setSelectedCategoryID(TodoCategoryItem(from: visiblePreference).id)
+        #expect(adapter.category == TodoCategoryItem(from: visiblePreference))
+
+        await adapter.setSelectedCategoryID(TodoCategoryItem(from: hiddenPreference).id)
+        #expect(adapter.category == TodoCategoryItem(from: hiddenPreference))
+
+        await adapter.setSelectedCategoryID("missing-category")
+        #expect(adapter.category == TodoCategoryItem(from: hiddenPreference))
+    }
+
     @Test("태그 추가와 삭제는 OrderedSet 상태를 변경한다")
     func 태그_추가와_삭제는_OrderedSet_상태를_변경한다() async {
         let adapter = TodoEditorStoreTestAdapter(category: .system(.doc))
@@ -164,26 +190,33 @@ struct TodoEditorFeatureTests {
         #expect(adapter.referenceItems[5] == TodoReferenceItem(from: reference5))
     }
 
-    @Test("정보와 참조 Todo 시트 상태를 액션에 맞게 변경한다")
-    func 정보와_참조_Todo_시트_상태를_액션에_맞게_변경한다() async {
+    @Test("하나의 inspector에서 옵션과 참조 Todo를 전환한다")
+    func 하나의_inspector에서_옵션과_참조_Todo를_전환한다() async {
         let adapter = TodoEditorStoreTestAdapter(category: .system(.doc))
         let item = TodoIdItem(id: "todo-2")
 
-        await adapter.setSheet(.info)
+        await adapter.showInspector(.options)
 
-        #expect(adapter.sheet == .info)
+        #expect(adapter.isInspectorPresented)
+        #expect(adapter.inspectorContent == .options)
 
-        await adapter.dismissSheet()
+        await adapter.showInspector(.todo(item))
 
-        #expect(adapter.sheet == nil)
+        #expect(adapter.inspectorContent == .todo(item))
+        #expect(adapter.isInspectorPresented)
 
-        await adapter.setSheet(.todo(item))
+        await adapter.showInspector(.options)
 
-        #expect(adapter.sheet == .todo(item))
+        #expect(adapter.inspectorContent == .options)
+        #expect(adapter.isInspectorPresented)
 
-        await adapter.tapSheetCloseButton()
+        await adapter.setInspectorPresented(false)
 
-        #expect(adapter.sheet == nil)
+        #expect(!adapter.isInspectorPresented)
+        await adapter.showInspector(.todo(item))
+
+        #expect(adapter.inspectorContent == .todo(item))
+        #expect(adapter.isInspectorPresented)
     }
 
     @Test("새 Todo 저장 성공은 draft를 저장하고 생성 delegate를 전송한다")

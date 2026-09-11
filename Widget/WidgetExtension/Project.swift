@@ -26,6 +26,7 @@ let project = Project(
             ],
             resources: [
                 "Resource/Assets.xcassets",
+                "../../Application/Shared/Resources/ColorPalette.xcassets",
                 "Resource/Localizable.xcstrings"
             ],
             entitlements: .file(path: "Resource/DevLogWidget.entitlements"),
@@ -38,6 +39,7 @@ let project = Project(
             settings: .devlog(
                 versionXcconfigPath: "../../Application/Shared/Version.xcconfig",
                 base: [
+                    "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
                     "CODE_SIGN_STYLE": "Automatic",
                     "ENABLE_USER_SCRIPT_SANDBOXING": "NO"
                 ]

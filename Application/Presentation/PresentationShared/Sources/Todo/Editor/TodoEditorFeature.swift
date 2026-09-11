@@ -15,7 +15,8 @@ public struct TodoEditorFeature {
     @ObservableState
     public struct State: Equatable {
         @Presents public var alert: AlertState<Never>?
-        @Presents public var sheet: SheetState?
+        public var isInspectorPresented = false
+        public var inspectorContent = InspectorContent.options
         public var isCompleted: Bool = false
         public var completedAt: Date?
         public var isPinned: Bool = false
@@ -23,12 +24,24 @@ public struct TodoEditorFeature {
         public var content: String = ""
         public var referenceItems: [Int: TodoReferenceItem] = [:]
         public var dueDate: Date?
+        public var selectedDueDate: Date {
+            get { dueDate ?? Date() }
+            set { dueDate = newValue }
+        }
         public var loading = LoadingFeature.State()
         public var tags: OrderedSet<String> = []
         public var tagText: String = ""
         public var tabViewTag: EditorTab = .editor
+        public var editorHeaderHeight = CGFloat.zero
         public var categories: [TodoCategoryItem] = []
         public var category = TodoCategoryItem(from: .system(.etc))
+        public var selectedCategoryID: String {
+            get { category.id }
+            set {
+                guard let category = categories.first(where: { $0.id == newValue }) else { return }
+                self.category = category
+            }
+        }
         public var saveResult: SaveResult?
         let id: String
         let isChecked: Bool
@@ -96,10 +109,8 @@ public struct TodoEditorFeature {
         }
     }
 
-    @ObservableState
-    @CasePathable
-    public enum SheetState: Equatable {
-        case info
+    public enum InspectorContent: Equatable {
+        case options
         case todo(TodoIdItem)
     }
 
@@ -115,23 +126,18 @@ public struct TodoEditorFeature {
 
     public enum Action: BindableAction, Equatable {
         case alert(PresentationAction<Never>)
-        case sheet(PresentationAction<Sheet>)
         case binding(BindingAction<State>)
         case delegate(Delegate)
         case onAppear
         case addTag(String)
         case removeTag(String)
         case setCompleted(Bool)
-        case setSheet(SheetState?)
+        case showInspector(InspectorContent)
         case upsertTodo
         case createSucceeded
         case saveFailed
         case updateSucceeded(Todo)
         case loading(LoadingFeature.Action)
-
-        public enum Sheet: Equatable {
-            case tapCloseButton
-        }
 
         public enum Delegate: Equatable {
             case created
@@ -155,21 +161,21 @@ public struct TodoEditorFeature {
             LoadingFeature()
         }
         BindingReducer()
+            .onChange(of: \.isCompleted) { _, isCompleted in
+                Reduce { state, _ in
+                    state.completedAt = isCompleted ? now : nil
+                    return .none
+                }
+            }
         Reduce { state, action in
             switch action {
             case .alert:
-                break
-            case .sheet(.dismiss):
-                state.sheet = nil
-            case .sheet(.presented(.tapCloseButton)):
-                state.sheet = nil
-            case .sheet:
                 break
             case .binding(\.content):
                 if state.tabViewTag == .preview {
                     return resolveMarkdownEffect(content: state.content)
                 }
-            case .binding(\.dueDate):
+            case .binding(\.dueDate), .binding(\.selectedDueDate):
                 if let tomorrowDate = Calendar.current.date(byAdding: .day, value: 1, to: now),
                    let dueDate = state.dueDate {
                     state.dueDate = max(dueDate, tomorrowDate)
@@ -197,8 +203,13 @@ public struct TodoEditorFeature {
                     state.completedAt = isCompleted ? now : nil
                 }
                 state.isCompleted = isCompleted
-            case .setSheet(let sheet):
-                state.sheet = sheet
+            case .showInspector(let content):
+                if content == .options && state.inspectorContent == .options {
+                    state.isInspectorPresented.toggle()
+                } else {
+                    state.isInspectorPresented = true
+                }
+                state.inspectorContent = content
             case .upsertTodo:
                 state.saveResult = nil
                 if state.originalDraft == nil {
@@ -219,18 +230,6 @@ public struct TodoEditorFeature {
             return .none
         }
         .ifLet(\.$alert, action: \.alert)
-        .ifLet(\.$sheet, action: \.sheet) {
-            TodoEditorSheetFeature()
-        }
-    }
-}
-
-private struct TodoEditorSheetFeature: Reducer {
-    typealias State = TodoEditorFeature.SheetState
-    typealias Action = TodoEditorFeature.Action.Sheet
-
-    var body: some ReducerOf<Self> {
-        EmptyReducer()
     }
 }
 

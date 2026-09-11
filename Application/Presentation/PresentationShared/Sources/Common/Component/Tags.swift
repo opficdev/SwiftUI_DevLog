@@ -43,7 +43,7 @@ public struct Tag: View {
     public var body: some View {
         HStack(spacing: 4) {
             Text(name)
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.accent)
                 .bold()
                 .lineLimit(1)
                 .fixedSize()
@@ -74,7 +74,7 @@ public struct Tag: View {
                         .frame(width: height, height: height)
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(
-                            .blue,
+                            Color.accent,
                             .black.opacity(colorScheme == .light ? 0 : 0.4)
                         )
 
@@ -84,7 +84,7 @@ public struct Tag: View {
         }
         .background {
             Capsule()
-                .fill(.blue.opacity(0.2))
+                .fill(Color.accent.opacity(0.2))
         }
     }
 }

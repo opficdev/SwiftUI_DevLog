@@ -24,11 +24,13 @@ final class TodoEditorStoreTestAdapter {
     var content: String { store.state.content }
     var referenceItems: [Int: TodoReferenceItem] { store.state.referenceItems }
     var dueDate: Date? { store.state.dueDate }
-    var sheet: TodoEditorFeature.SheetState? { store.state.sheet }
+    var inspectorContent: TodoEditorFeature.InspectorContent { store.state.inspectorContent }
+    var isInspectorPresented: Bool { store.state.isInspectorPresented }
     var isLoading: Bool { store.state.isLoading }
     var tags: [String] { Array(store.state.tags) }
     var categories: [TodoCategoryItem] { store.state.categories }
     var category: TodoCategoryItem { store.state.category }
+    var selectedCategoryID: String { store.state.selectedCategoryID }
     var hasChanges: Bool { store.state.hasChanges }
     var isReadyToSubmit: Bool { store.state.isReadyToSubmit }
     var saveResult: TodoEditorFeature.SaveResult? { store.state.saveResult }
@@ -110,21 +112,16 @@ final class TodoEditorStoreTestAdapter {
         }
     }
 
-    func setSheet(_ sheet: TodoEditorFeature.SheetState?) async {
-        await store.send(.setSheet(sheet)) {
-            $0.sheet = sheet
+    func showInspector(_ content: TodoEditorFeature.InspectorContent) async {
+        await store.send(.showInspector(content)) {
+            $0.inspectorContent = content
+            $0.isInspectorPresented = true
         }
     }
 
-    func dismissSheet() async {
-        await store.send(.sheet(.dismiss)) {
-            $0.sheet = nil
-        }
-    }
-
-    func tapSheetCloseButton() async {
-        await store.send(.sheet(.presented(.tapCloseButton))) {
-            $0.sheet = nil
+    func setInspectorPresented(_ isPresented: Bool) async {
+        await store.send(.binding(.set(\.isInspectorPresented, isPresented))) {
+            $0.isInspectorPresented = isPresented
         }
     }
 
@@ -138,6 +135,12 @@ final class TodoEditorStoreTestAdapter {
     func setPinned(_ isPinned: Bool) async {
         await store.send(.binding(.set(\.isPinned, isPinned))) {
             $0.isPinned = isPinned
+        }
+    }
+
+    func setSelectedCategoryID(_ id: String) async {
+        await store.send(.binding(.set(\.selectedCategoryID, id))) {
+            $0.selectedCategoryID = id
         }
     }
 
