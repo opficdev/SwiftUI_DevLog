@@ -392,10 +392,12 @@ private struct TodayDisplaySection: Identifiable {
 }
 
 private struct TodayTodoCard: View {
+    @Environment(\.colorScheme) private var colorScheme
     @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(30)
     let item: TodayTodoItem
     let onComplete: () -> Void
     let onTogglePinned: () -> Void
+    private var isDarkMode: Bool { colorScheme == .dark }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -428,12 +430,10 @@ private struct TodayTodoCard: View {
             .buttonStyle(.plain)
             .todoDetailPreview(todoId: item.id)
 
-            Button(action: onTogglePinned) {
-                Image(systemName: item.isPinned ? "star.fill" : "star")
-                    .font(.title3)
-                    .foregroundStyle(item.isPinned ? Color.warning : Color.textTertiary)
-            }
-            .buttonStyle(.plain)
+            Image(systemName: item.isPinned ? "star.fill" : "star")
+                .font(.title3)
+                .foregroundStyle(item.isPinned ? Color.warning : .textTertiary)
+                .onTapGesture { onTogglePinned() }
         }
         .padding(20)
         .background {
@@ -463,20 +463,30 @@ private struct TodayTodoCard: View {
         }
     }
 
+    @ViewBuilder
     private var todoInformation: some View {
         let category = TodoCategoryItem(from: item.category)
-        return HStack(spacing: 8) {
-            Label(category.localizedName, systemImage: category.symbolName)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(category.color)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(category.color.opacity(0.1), in: .rect(cornerRadius: 8))
+        HStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Image(systemName: category.symbolName)
+                Text(category.localizedName)
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(isDarkMode ? .white : category.color)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                category.color.opacity(isDarkMode ? 1 : 0.2),
+                in: .rect(cornerRadius: 8)
+            )
 
             if let dueDate = item.dueDate {
-                Label(dueDateText(dueDate), systemImage: "clock")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(dueDateColor(dueDate))
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                    Text(dueDateText(dueDate))
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(dueDateColor(dueDate))
             }
         }
     }
