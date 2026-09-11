@@ -57,7 +57,7 @@ struct SearchView: View {
                     .foregroundStyle(Color.textSecondary)
             }
             .buttonStyle(.plain)
-            Text("검색")  // l10n
+            Text(String(localized: "search_title", bundle: PresentationResources.bundle))
                 .font(.title.bold())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -71,9 +71,15 @@ struct SearchView: View {
             Image(systemName: "info.circle.fill")
                 .font(.title)
             VStack(alignment: .leading) {
-                Text("Todo 번호로 바로 찾기")  // l10n
+                Text(String(
+                    localized: "search_todo_number_tip_title",
+                    bundle: PresentationResources.bundle
+                ))
                     .bold()
-                Text("#123처럼 입력하면 해당 Todo를 찾을 수 있어요.")  // l10n
+                Text(String(
+                    localized: "search_todo_number_tip_message",
+                    bundle: PresentationResources.bundle
+                ))
                     .foregroundStyle(Color.textSecondary)
                     .font(.caption)
             }
@@ -90,7 +96,10 @@ struct SearchView: View {
     private var instruction: some View {
         HStack {
             Spacer()
-            Text("Todo만 검색됩니다.\n문서나 다른 컨텐츠는 검색되지 않아요")  // l10n
+            Text(String(
+                localized: "search_scope_instruction",
+                bundle: PresentationResources.bundle
+            ))
                 .foregroundStyle(Color.textSecondary)
                 .multilineTextAlignment(.center)
             Spacer()
@@ -161,11 +170,20 @@ private struct SearchResults: View {
 
         VStack(spacing: 8) {
             HStack(spacing: 12) {
-                Text("검색 결과")  // l10n
+                Text(String(
+                    localized: "search_results_title",
+                    bundle: PresentationResources.bundle
+                ))
                     .font(.title3)
                     .bold()
                 Spacer()
-                Text("\(store.todos.count)개")  // l10n
+                Text(String.localizedStringWithFormat(
+                    String(
+                        localized: "search_result_count_format",
+                        bundle: PresentationResources.bundle
+                    ),
+                    Int64(store.todos.count)
+                ))
                     .font(.callout.bold())
                     .foregroundStyle(Color.accent)
                     .padding(.horizontal, 12)
@@ -284,7 +302,7 @@ private struct RecentSearchQuries: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Text("최근 검색")
+                Text(String(localized: "search_recent", bundle: PresentationResources.bundle))
                     .font(.title3)
                     .bold()
                 Spacer()
