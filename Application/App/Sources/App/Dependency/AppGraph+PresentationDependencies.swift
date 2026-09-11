@@ -192,15 +192,6 @@ private extension AppGraph {
                 .userPreferencesUseCaseGraph
                 .updateSystemThemeUseCase
         )
-        ProfilePresentationDependencyPreparation.prepareSettingsStorage(
-            &dependencies,
-            fetchWebPageImageDirSizeUseCase: webPageGraphSet
-                .webPageImageUseCaseGraph
-                .fetchWebPageImageDirSizeUseCase,
-            clearWebPageImageDirectoryUseCase: webPageGraphSet
-                .webPageImageUseCaseGraph
-                .clearWebPageImageDirectoryUseCase
-        )
         ProfilePresentationDependencyPreparation.prepareAccount(
             &dependencies,
             fetchAuthProvidersUseCase: authenticationGraphSet

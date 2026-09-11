@@ -11,5 +11,4 @@ final class PersistenceGraphSet {
     let userDefaultsStoreGraph = UserDefaultsStoreGraph()
     let memoryCacheStoreGraph = MemoryCacheStoreGraph()
     let themeStoreGraph = ThemeStoreGraph()
-    let webPageImageStoreGraph = WebPageImageStoreGraph()
 }

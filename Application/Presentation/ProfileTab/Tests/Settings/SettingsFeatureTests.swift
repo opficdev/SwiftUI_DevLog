@@ -84,67 +84,6 @@ struct SettingsFeatureTests {
         #expect(updateSpy.themes == [.light])
     }
 
-    @Test("캐시 크기 조회 결과를 상태에 반영한다")
-    func 캐시_크기_조회_결과를_상태에_반영한다() async {
-        let fetchSpy = FetchWebPageImageDirSizeUseCaseSpy(dirSize: 2_048)
-        let adapter = SettingsStoreTestAdapter(fetchDirSizeUseCase: fetchSpy)
-
-        await adapter.updateDirSize()
-
-        #expect(fetchSpy.executeCallCount == 1)
-        #expect(adapter.dirSize == 2_048)
-    }
-
-    @Test("캐시 삭제를 누르면 삭제 확인 알림을 표시한다")
-    func 캐시_삭제를_누르면_삭제_확인_알림을_표시한다() async {
-        let adapter = SettingsStoreTestAdapter()
-
-        await adapter.tapRemoveCacheButton()
-
-        #expect(adapter.showAlert)
-        #expect(adapter.alertType == .removeCache)
-        #expect(
-            adapter.alertTitle
-                == String(localized: "settings_alert_clear_temp_title", bundle: PresentationResources.bundle)
-        )
-        #expect(
-            adapter.alertMessage
-                == String(localized: "settings_alert_clear_temp_message", bundle: PresentationResources.bundle)
-        )
-    }
-
-    @Test("캐시 삭제 확인에 성공하면 캐시를 비우고 크기를 다시 조회한다")
-    func 캐시_삭제_확인에_성공하면_캐시를_비우고_크기를_다시_조회한다() async {
-        let clearSpy = ClearWebPageImageDirectoryUseCaseSpy()
-        let fetchSpy = FetchWebPageImageDirSizeUseCaseSpy(dirSize: 0)
-        let adapter = SettingsStoreTestAdapter(
-            fetchDirSizeUseCase: fetchSpy,
-            clearDirectoryUseCase: clearSpy
-        )
-
-        await adapter.tapRemoveCacheButton()
-        await adapter.confirmRemoveCache()
-
-        #expect(!adapter.showAlert)
-        #expect(adapter.dirSize == 0)
-        #expect(adapter.activeLoadingRow == nil)
-    }
-
-    @Test("캐시 삭제에 실패하면 공통 에러 알림을 표시한다")
-    func 캐시_삭제에_실패하면_공통_에러_알림을_표시한다() async {
-        let clearSpy = ClearWebPageImageDirectoryUseCaseSpy()
-        clearSpy.error = SettingsTestError.failure
-        let adapter = SettingsStoreTestAdapter(clearDirectoryUseCase: clearSpy)
-
-        await adapter.tapRemoveCacheButton()
-        await adapter.confirmRemoveCache()
-
-        #expect(adapter.showAlert)
-        #expect(adapter.alertTitle == String(localized: "common_error_title", bundle: PresentationResources.bundle))
-        #expect(adapter.alertMessage == String(localized: "common_error_message", bundle: PresentationResources.bundle))
-        #expect(adapter.activeLoadingRow == nil)
-    }
-
     @Test("로그아웃 성공 후에도 LoginView 전환 전까지 로딩 상태를 유지한다")
     func 로그아웃_성공_후에도_LoginView_전환_전까지_로딩_상태를_유지한다() async {
         let signOutSpy = SignOutUseCaseSpy()
@@ -198,7 +137,6 @@ private enum SettingsAlertType {
     case signOut
     case deleteAuth
     case error
-    case removeCache
 }
 
 @MainActor
@@ -207,7 +145,6 @@ private struct SettingsStoreTestAdapter {
     private let clock: TestClock<Duration>
 
     var theme: SystemTheme { store.state.theme }
-    var dirSize: Int64 { store.state.dirSize }
     var isNetworkConnected: Bool { store.state.isNetworkConnected }
     var isLoading: Bool { store.state.isLoading }
     var activeLoadingRow: SettingsFeature.ActiveLoadingRow? { store.state.activeLoadingRow }
@@ -229,9 +166,7 @@ private struct SettingsStoreTestAdapter {
         signOutUseCase: SignOutUseCase = SignOutUseCaseSpy(),
         networkUseCase: ObserveNetworkConnectivityUseCase = ObserveNetworkConnectivityUseCaseSpy(),
         themeUseCase: ObserveSystemThemeUseCase = ObserveSystemThemeUseCaseSpy(),
-        updateThemeUseCase: UpdateSystemThemeUseCase = UpdateSystemThemeUseCaseSpy(),
-        fetchDirSizeUseCase: FetchWebPageImageDirSizeUseCase = FetchWebPageImageDirSizeUseCaseSpy(),
-        clearDirectoryUseCase: ClearWebPageImageDirectoryUseCase = ClearWebPageImageDirectoryUseCaseSpy()
+        updateThemeUseCase: UpdateSystemThemeUseCase = UpdateSystemThemeUseCaseSpy()
     ) {
         let clock = TestClock()
         self.clock = clock
@@ -243,8 +178,6 @@ private struct SettingsStoreTestAdapter {
             $0.profileNetworkConnectivityUseCase = networkUseCase
             $0.profileSystemThemeUseCase = themeUseCase
             $0.updateSystemThemeUseCase = updateThemeUseCase
-            $0.fetchWebPageImageDirSizeUseCase = fetchDirSizeUseCase
-            $0.clearWebPageImageDirectoryUseCase = clearDirectoryUseCase
             $0.continuousClock = clock
         }
         store.exhaustivity = .off(showSkippedAssertions: false)
@@ -258,27 +191,6 @@ private struct SettingsStoreTestAdapter {
         await store.send(.binding(.set(\.theme, theme))) {
             $0.theme = theme
         }
-    }
-
-    func updateDirSize() async {
-        await store.send(.updateDirSize)
-        await drainReceivedActions()
-    }
-
-    func tapRemoveCacheButton() async {
-        await store.send(.tapRemoveCacheButton) {
-            $0.alert = expectedSettingsAlert(for: .removeCache)
-            $0.alertType = .removeCache
-        }
-    }
-
-    func confirmRemoveCache() async {
-        await store.send(.alert(.presented(.confirmRemoveCache))) {
-            $0.alert = nil
-            $0.alertType = nil
-            $0.activeLoadingRow = .removeCache
-        }
-        await drainReceivedActions()
     }
 
     func tapSignOutButton() async {
@@ -335,8 +247,6 @@ private extension SettingsAlertType {
             self = .deleteAuth
         case .error:
             self = .error
-        case .removeCache:
-            self = .removeCache
         }
     }
 }
@@ -380,19 +290,6 @@ private func expectedSettingsAlert(
             }
         } message: {
             TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
-        }
-    case .removeCache:
-        return AlertState {
-            TextState(String(localized: "settings_alert_clear_temp_title", bundle: PresentationResources.bundle))
-        } actions: {
-            ButtonState(role: .cancel) {
-                TextState(String(localized: "common_cancel", bundle: PresentationResources.bundle))
-            }
-            ButtonState(role: .destructive, action: .confirmRemoveCache) {
-                TextState(String(localized: "common_confirm", bundle: PresentationResources.bundle))
-            }
-        } message: {
-            TextState(String(localized: "settings_alert_clear_temp_message", bundle: PresentationResources.bundle))
         }
     }
 }

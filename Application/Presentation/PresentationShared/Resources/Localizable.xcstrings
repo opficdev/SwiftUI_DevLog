@@ -1658,40 +1658,6 @@
         }
       }
     },
-    "settings_alert_clear_temp_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will clear temporary data and free up space.\nDo you want to continue?"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "임시 데이터를 삭제하고 정리합니다.\n계속하시겠습니까?"
-          }
-        }
-      }
-    },
-    "settings_alert_clear_temp_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Temporary Data"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "임시 데이터 삭제"
-          }
-        }
-      }
-    },
     "settings_alert_delete_account_message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1756,23 +1722,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "로그아웃"
-          }
-        }
-      }
-    },
-    "settings_clear_temp_data" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Temporary Data"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "임시 데이터 삭제"
           }
         }
       }

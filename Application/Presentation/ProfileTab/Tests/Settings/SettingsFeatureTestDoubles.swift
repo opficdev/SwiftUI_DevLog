@@ -97,33 +97,6 @@ final class UpdateSystemThemeUseCaseSpy: UpdateSystemThemeUseCase {
     }
 }
 
-final class FetchWebPageImageDirSizeUseCaseSpy: FetchWebPageImageDirSizeUseCase {
-    var dirSize: Int64
-    private(set) var executeCallCount = 0
-
-    init(dirSize: Int64 = 0) {
-        self.dirSize = dirSize
-    }
-
-    func execute() async -> Int64 {
-        executeCallCount += 1
-        return dirSize
-    }
-}
-
-final class ClearWebPageImageDirectoryUseCaseSpy: ClearWebPageImageDirectoryUseCase {
-    var error: Error?
-    private(set) var executeCallCount = 0
-
-    func execute() async throws {
-        executeCallCount += 1
-
-        if let error {
-            throw error
-        }
-    }
-}
-
 enum SettingsTestError: Error {
     case failure
 }

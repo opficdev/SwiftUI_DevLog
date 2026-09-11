@@ -60,15 +60,6 @@ public enum ProfileDependencyPreparation {
         dependencies.updateSystemThemeUseCase = updateSystemThemeUseCase
     }
 
-    public static func prepareSettingsStorage(
-        _ dependencies: inout DependencyValues,
-        fetchWebPageImageDirSizeUseCase: FetchWebPageImageDirSizeUseCase,
-        clearWebPageImageDirectoryUseCase: ClearWebPageImageDirectoryUseCase
-    ) {
-        dependencies.fetchWebPageImageDirSizeUseCase = fetchWebPageImageDirSizeUseCase
-        dependencies.clearWebPageImageDirectoryUseCase = clearWebPageImageDirectoryUseCase
-    }
-
     public static func prepareAccount(
         _ dependencies: inout DependencyValues,
         fetchAuthProvidersUseCase: FetchAuthProvidersUseCase,
