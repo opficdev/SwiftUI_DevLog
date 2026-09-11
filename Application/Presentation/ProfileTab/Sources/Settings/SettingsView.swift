@@ -37,24 +37,6 @@ struct SettingsView: View {
                 }
                 .disabled(!connected)
 
-                let dirSize = store.dirSize
-                Button {
-                    store.send(.tapRemoveCacheButton)
-                } label: {
-                    HStack {
-                        Text(String(localized: "settings_clear_temp_data", bundle: PresentationResources.bundle))
-                            .foregroundStyle(dirSize == 0 ? Color.secondary : .primary)
-                        Spacer()
-                        if store.activeLoadingRow == .removeCache {
-                            ProgressView()
-                                .tint(.secondary)
-                        } else {
-                            Text(formatFileSize(bytes: dirSize))
-                                .foregroundStyle(Color.secondary.opacity(dirSize == 0 ? 0 : 1))
-                        }
-                    }
-                }
-                .disabled(dirSize == 0 || store.isLoading)
             }
             
             Section {
@@ -128,25 +110,5 @@ struct SettingsView: View {
         .navigationTitle(String(localized: "nav_settings", bundle: PresentationResources.bundle))
         .navigationBarTitleDisplayMode(.inline)
         .prominentAlert(store, state: \.alert, action: \.alert)
-        .onAppear {
-            store.send(.updateDirSize)
-        }
-    }
-
-    private func formatFileSize(bytes: Int64) -> String {
-        let units = ["B", "KB", "MB", "GB"]
-        var value = Double(max(bytes, 0))
-        var unitIndex = 0
-
-        while 1024.0 <= value && unitIndex < units.count - 1 {
-            value /= 1024.0
-            unitIndex += 1
-        }
-
-        let truncated = floor(value * 100.0) / 100.0
-        let numberString = truncated.formatted(
-            .number.precision(.fractionLength(0...2))
-        )
-        return "\(numberString)\(units[unitIndex])"
     }
 }

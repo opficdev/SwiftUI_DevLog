@@ -9,6 +9,5 @@ public protocol AnalyticsService {
     func trackScreenView(_ name: String)
     func trackTodoCreate()
     func trackTodoComplete()
-    func trackWebPageCreate()
     func trackPushOpen()
 }

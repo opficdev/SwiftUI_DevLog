@@ -19,7 +19,6 @@ struct SettingsFeature {
     }
 
     enum ActiveLoadingRow: Equatable {
-        case removeCache
         case signOut
         case deleteAuth
     }
@@ -28,7 +27,6 @@ struct SettingsFeature {
     struct State: Equatable {
         @Presents var alert: AlertState<Action.Alert>?
         var theme: SystemTheme = .automatic
-        var dirSize: Int64 = 0
         var isNetworkConnected = true
         var activeLoadingRow: ActiveLoadingRow?
         var loading = LoadingFeature.State()
@@ -75,22 +73,17 @@ struct SettingsFeature {
         case startObserving
         case networkStatusChanged(Bool)
         case setAlert(AlertType)
-        case setDirSize(Int64)
-        case updateDirSize
-        case tapRemoveCacheButton
         case loading(LoadingFeature.Action)
 
         enum Alert: Equatable {
             case tapDeleteAuthButton
             case tapSignOutButton
-            case confirmRemoveCache
         }
 
         enum AlertType: Equatable {
             case signOut
             case deleteAuth
             case error
-            case removeCache
         }
     }
 
@@ -99,8 +92,6 @@ struct SettingsFeature {
     @Dependency(\.profileNetworkConnectivityUseCase) var networkConnectivityUseCase
     @Dependency(\.profileSystemThemeUseCase) var systemThemeUseCase
     @Dependency(\.updateSystemThemeUseCase) var updateSystemThemeUseCase
-    @Dependency(\.fetchWebPageImageDirSizeUseCase) var fetchWebPageImageDirSizeUseCase
-    @Dependency(\.clearWebPageImageDirectoryUseCase) var clearWebPageImageDirectoryUseCase
 
     var body: some ReducerOf<Self> {
         Scope(state: \.loading, action: \.loading) {
@@ -119,11 +110,6 @@ struct SettingsFeature {
                 state.alertType = nil
                 state.activeLoadingRow = .signOut
                 return signOutEffect()
-            case .alert(.presented(.confirmRemoveCache)):
-                state.alert = nil
-                state.alertType = nil
-                state.activeLoadingRow = .removeCache
-                return clearWebPageImageDirectoryEffect()
             case .alert(.dismiss):
                 state.alert = nil
                 state.alertType = nil
@@ -143,13 +129,6 @@ struct SettingsFeature {
             case .setAlert(let type):
                 state.alert = Self.alertState(for: type)
                 state.alertType = type
-            case .setDirSize(let value):
-                state.dirSize = value
-            case .updateDirSize:
-                return fetchWebPageImageDirSizeEffect()
-            case .tapRemoveCacheButton:
-                state.alert = Self.alertState(for: .removeCache)
-                state.alertType = .removeCache
             case .loading(.end):
                 if !state.isLoading {
                     state.activeLoadingRow = nil
@@ -190,15 +169,6 @@ extension DependencyValues {
         set { self[UpdateSystemThemeUseCaseKey.self] = newValue }
     }
 
-    var fetchWebPageImageDirSizeUseCase: FetchWebPageImageDirSizeUseCase {
-        get { self[FetchWebPageImageDirSizeUseCaseKey.self] }
-        set { self[FetchWebPageImageDirSizeUseCaseKey.self] = newValue }
-    }
-
-    var clearWebPageImageDirectoryUseCase: ClearWebPageImageDirectoryUseCase {
-        get { self[ClearWebPageImageDirectoryUseCaseKey.self] }
-        set { self[ClearWebPageImageDirectoryUseCaseKey.self] = newValue }
-    }
 }
 
 private enum DeleteAuthUseCaseKey: DependencyKey {
@@ -251,26 +221,6 @@ private enum UpdateSystemThemeUseCaseKey: DependencyKey {
     }
 }
 
-private enum FetchWebPageImageDirSizeUseCaseKey: DependencyKey {
-    static var liveValue: FetchWebPageImageDirSizeUseCase {
-        preconditionFailure("FetchWebPageImageDirSizeUseCase must be provided.")
-    }
-
-    static var testValue: FetchWebPageImageDirSizeUseCase {
-        liveValue
-    }
-}
-
-private enum ClearWebPageImageDirectoryUseCaseKey: DependencyKey {
-    static var liveValue: ClearWebPageImageDirectoryUseCase {
-        preconditionFailure("ClearWebPageImageDirectoryUseCase must be provided.")
-    }
-
-    static var testValue: ClearWebPageImageDirectoryUseCase {
-        liveValue
-    }
-}
-
 private extension SettingsFeature {
     func observeNetworkConnectivityEffect() -> Effect<Action> {
         .publisher { [networkConnectivityUseCase] in
@@ -292,28 +242,6 @@ private extension SettingsFeature {
     func updateSystemThemeEffect(_ theme: SystemTheme) -> Effect<Action> {
         .run { [updateSystemThemeUseCase] _ in
             updateSystemThemeUseCase.execute(theme)
-        }
-    }
-
-    func fetchWebPageImageDirSizeEffect() -> Effect<Action> {
-        .run { [fetchWebPageImageDirSizeUseCase] send in
-            let dirSize = await fetchWebPageImageDirSizeUseCase.execute()
-            await send(.setDirSize(dirSize))
-        }
-    }
-
-    func clearWebPageImageDirectoryEffect() -> Effect<Action> {
-        .run { [clearWebPageImageDirectoryUseCase, fetchWebPageImageDirSizeUseCase] send in
-            await send(.loading(.begin(target: .default, mode: .delayed)))
-            do {
-                try await clearWebPageImageDirectoryUseCase.execute()
-                let dirSize = await fetchWebPageImageDirSizeUseCase.execute()
-                await send(.setDirSize(dirSize))
-                await send(.loading(.end(target: .default, mode: .delayed)))
-            } catch {
-                await send(.loading(.end(target: .default, mode: .delayed)))
-                await send(.setAlert(.error))
-            }
         }
     }
 
@@ -390,19 +318,6 @@ private extension SettingsFeature {
                 }
             } message: {
                 TextState(String(localized: "common_error_message", bundle: PresentationResources.bundle))
-            }
-        case .removeCache:
-            return AlertState {
-                TextState(String(localized: "settings_alert_clear_temp_title", bundle: PresentationResources.bundle))
-            } actions: {
-                ButtonState(role: .cancel) {
-                    TextState(String(localized: "common_cancel", bundle: PresentationResources.bundle))
-                }
-                ButtonState(role: .destructive, action: .confirmRemoveCache) {
-                    TextState(String(localized: "common_confirm", bundle: PresentationResources.bundle))
-                }
-            } message: {
-                TextState(String(localized: "settings_alert_clear_temp_message", bundle: PresentationResources.bundle))
             }
         }
     }

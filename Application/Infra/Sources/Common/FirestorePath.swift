@@ -15,7 +15,6 @@ enum FirestorePath {
         case records
         case versions
         case notifications
-        case webPages
     }
 
     enum UserData: String {
@@ -92,11 +91,4 @@ enum FirestorePath {
         "\(user(uid))/\(Collection.notifications.rawValue)"
     }
 
-    static func webPages(_ uid: String) -> String {
-        "\(user(uid))/\(Collection.webPages.rawValue)"
-    }
-
-    static func webPage(_ uid: String, documentId: String) -> String {
-        "\(webPages(uid))/\(documentId)"
-    }
 }

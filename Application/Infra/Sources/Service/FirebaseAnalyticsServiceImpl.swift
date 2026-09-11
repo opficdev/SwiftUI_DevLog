@@ -12,7 +12,6 @@ final class FirebaseAnalyticsServiceImpl: AnalyticsService {
     private enum EventName {
         static let todoCreate = "todo_create"
         static let todoComplete = "todo_complete"
-        static let webPageCreate = "webpage_create"
         static let pushOpen = "push_open"
     }
 
@@ -31,10 +30,6 @@ final class FirebaseAnalyticsServiceImpl: AnalyticsService {
 
     func trackTodoComplete() {
         Analytics.logEvent(EventName.todoComplete, parameters: nil)
-    }
-
-    func trackWebPageCreate() {
-        Analytics.logEvent(EventName.webPageCreate, parameters: nil)
     }
 
     func trackPushOpen() {

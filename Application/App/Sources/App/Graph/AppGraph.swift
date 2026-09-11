@@ -16,12 +16,8 @@ final class AppGraph {
     }
 
     @Provide
-    private func makeInfraGraphSet(
-        persistenceGraphSet: PersistenceGraphSet
-    ) -> InfraGraphSet {
-        InfraGraphSet(
-            webPageImageStore: persistenceGraphSet.webPageImageStoreGraph.webPageImageStore
-        )
+    private func makeInfraGraphSet() -> InfraGraphSet {
+        InfraGraphSet()
     }
 
     @Provide
@@ -72,19 +68,6 @@ final class AppGraph {
             memoryCacheStoreGraph: persistenceGraphSet.memoryCacheStoreGraph,
             widgetSnapshotUpdaterGraph: widgetGraphSet.widgetSnapshotUpdaterGraph,
             developmentGoalRepositoryGraph: developmentGraphSet.developmentGoalRepositoryGraph
-        )
-    }
-
-    @Provide
-    private func makeWebPageGraphSet(
-        persistenceGraphSet: PersistenceGraphSet,
-        infraGraphSet: InfraGraphSet
-    ) -> WebPageGraphSet {
-        WebPageGraphSet(
-            authServiceGraph: infraGraphSet.authServiceGraph,
-            webPageMetadataServiceGraph: infraGraphSet.webPageMetadataServiceGraph,
-            webPageServiceGraph: infraGraphSet.webPageServiceGraph,
-            webPageImageStoreGraph: persistenceGraphSet.webPageImageStoreGraph
         )
     }
 

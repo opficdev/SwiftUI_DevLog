@@ -1,7 +1,7 @@
 # DevLog
 
 > 개발 기록과 Todo를 한 곳에서 관리하는 SwiftUI 기반 앱  
-> 저장한 링크, 작업 메모, 마감 일정, 개인 활동 흐름을 하나의 앱 안에서 정리하는 구조
+> 작업 메모, 마감 일정, 개인 활동 흐름을 하나의 앱 안에서 정리하는 구조
 
 <table>
   <tr>
@@ -53,12 +53,10 @@
 
 ## 프로젝트 개요
 
-개발 과정에서 해야 할 일, 참고 링크, 진행 기록이 여러 곳에 흩어지기 쉬운 문제 해결 목적  
-Todo, 저장 링크, 오늘 할 일, 받은 알림, 누적 활동을 하나의 화면 흐름 안에서 함께 관리할 수 있도록 구성한 앱
+개발 과정에서 해야 할 일과 진행 기록이 여러 곳에 흩어지기 쉬운 문제를 해결하고 Todo와 오늘 할 일, 받은 알림, 누적 활동을 하나의 화면 흐름 안에서 함께 관리할 수 있도록 구성한 앱
 
 - Todo 유형별 정리 및 빠른 탐색
 - Markdown, 태그, 마감일, 중요 표시를 포함한 Todo 작성
-- 웹 페이지 저장 및 재열람
 - 오늘 기준 우선 확인 Todo 요약
 - 받은 푸시 알림 확인 및 Todo 연계
 - 분기별 활동 히트맵 제공
@@ -101,8 +99,6 @@ Todo, 저장 링크, 오늘 할 일, 받은 알림, 누적 활동을 하나의 �
 - 작업 성격별 Todo 유형 진입점 제공
 - Home에서 Todo 유형 노출 여부 및 순서 편집
 - 최근 수정 Todo 별도 섹션 제공
-- 저장한 웹 페이지 목록 확인 및 즉시 열람
-- URL 입력 시 메타데이터 수집 후 제목과 썸네일 저장
 
 ### Todo 관리
 
@@ -130,7 +126,7 @@ Todo, 저장 링크, 오늘 할 일, 받은 알림, 누적 활동을 하나의 �
 ### 검색
 
 - Home 화면 검색 버튼을 통한 통합 검색 진입
-- Todo와 저장한 웹 페이지 통합 검색
+- Todo 검색
 - 디바운스 기반 검색 처리
 - 최근 검색어 저장, 개별 삭제, 전체 삭제 지원
 
@@ -138,7 +134,7 @@ Todo, 저장 링크, 오늘 할 일, 받은 알림, 누적 활동을 하나의 �
 
 - 상태 메시지 직접 수정
 - 분기 이동 및 직접 선택, 생성/완료 활동 필터 기반 히트맵 제공
-- 테마 변경, 푸시 알림 시간 설정, 캐시 정리 기능 제공
+- 테마 변경과 푸시 알림 시간 설정 기능 제공
 - 설정 화면에서 앱 버전, 개인정보 처리방침, 베타 테스트 링크 확인
 
 ---
@@ -154,7 +150,7 @@ Todo, 저장 링크, 오늘 할 일, 받은 알림, 누적 활동을 하나의 �
 | State & Async | Observable, Combine, async/await, The Composable Architecture |
 | Backend | Firebase Authentication, Firestore, Cloud Functions, Cloud Messaging |
 | Monitoring | Firebase Analytics, Crashlytics |
-| Apple Frameworks | AuthenticationServices, UserNotifications, LinkPresentation, Network, CryptoKit, os.log |
+| Apple Frameworks | AuthenticationServices, UserNotifications, Network, CryptoKit, os.log |
 | External Packages | ComposableArchitecture, OrderedCollections, GoogleSignIn, Nexa |
 | Testing | swift-testing, TCA TestStore |
 | Tooling | Xcode, Tuist, mise, Swift Package Manager, SwiftLint, Fastlane |

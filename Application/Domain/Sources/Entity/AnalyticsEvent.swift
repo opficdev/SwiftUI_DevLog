@@ -9,6 +9,5 @@ public enum AnalyticsEvent {
     case screenView(String)
     case todoCreate
     case todoComplete
-    case webPageCreate
     case pushOpen
 }

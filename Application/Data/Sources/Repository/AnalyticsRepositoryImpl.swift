@@ -22,8 +22,6 @@ final class AnalyticsRepositoryImpl: AnalyticsRepository {
             analyticsService.trackTodoCreate()
         case .todoComplete:
             analyticsService.trackTodoComplete()
-        case .webPageCreate:
-            analyticsService.trackWebPageCreate()
         case .pushOpen:
             analyticsService.trackPushOpen()
         }

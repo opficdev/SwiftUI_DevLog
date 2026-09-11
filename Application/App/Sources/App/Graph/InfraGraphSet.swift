@@ -5,7 +5,6 @@
 //  Created by opfic on 9/7/26.
 //
 
-import Data
 import Infra
 
 final class InfraGraphSet {
@@ -29,15 +28,5 @@ final class InfraGraphSet {
     let userServiceGraph = UserServiceGraph()
     let profileImageDataServiceGraph = ProfileImageDataServiceGraph()
     let pushNotificationServiceGraph = PushNotificationServiceGraph()
-    let webPageServiceGraph = WebPageServiceGraph()
-    let webPageMetadataServiceGraph: WebPageMetadataServiceGraph
     let networkConnectivityProviderGraph = NWPathConnectivityProviderGraph()
-
-    init(webPageImageStore: WebPageImageStore) {
-        self.webPageMetadataServiceGraph = WebPageMetadataServiceGraph(
-            input: WebPageMetadataServiceGraphInput(
-                webPageImageStore: webPageImageStore
-            )
-        )
-    }
 }

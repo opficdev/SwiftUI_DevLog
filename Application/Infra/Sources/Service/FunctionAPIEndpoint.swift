@@ -16,16 +16,6 @@ extension FunctionAPIEndpoint where Response == EmptyAPIResponse {
         Self(method: .delete, path: "/todos/\(functionAPIPathSegment(id))/deletion-request")
     }
 
-    // WebPage id는 이미 Firestore document id로 percent-encoded된 값
-    // 여기서 다시 인코딩하면 Functions가 실제 문서 id와 다른 값을 받는다
-    static func requestWebPageDeletion(_ id: String) -> Self {
-        Self(method: .post, path: "/web-pages/\(id)/deletion-request")
-    }
-
-    static func undoWebPageDeletion(_ id: String) -> Self {
-        Self(method: .delete, path: "/web-pages/\(id)/deletion-request")
-    }
-
     static func requestPushNotificationDeletion(_ id: String) -> Self {
         Self(method: .post, path: "/push-notifications/\(functionAPIPathSegment(id))/deletion-request")
     }
