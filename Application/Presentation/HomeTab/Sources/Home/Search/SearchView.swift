@@ -187,11 +187,11 @@ private struct SearchResults: View {
                     ),
                     Int64(store.todos.count)
                 ))
-                    .font(.callout.bold())
-                    .foregroundStyle(Color.accent)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.primaryContainer, in: .capsule)
+                .font(.callout.bold())
+                .foregroundStyle(Color.accent)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.primaryContainer, in: .capsule)
             }
             if store.isHashOnlyQuery {
                 VStack(spacing: 8) {
@@ -244,10 +244,10 @@ private struct SearchResults: View {
                             localized: "search_show_more",
                             bundle: PresentationResources.bundle)
                         )
+                        .foregroundStyle(Color.accent)
+                        .font(.callout.bold())
                     }
-                    .font(.callout.bold())
-                    .foregroundStyle(Color.accent)
-                    .frame(maxWidth: .infinity)
+                    .adaptiveButtonStyle(color: .primaryContainer)
                 }
             }
         }
