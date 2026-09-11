@@ -42,110 +42,12 @@ struct TodayFeature {
         var unscheduled: [TodayTodoItem] = []
     }
 
-    @ObservableState
-    struct State: Equatable {
-        @Presents var alert: AlertState<Never>?
-        var todos: [TodayTodoItem] = []
-        var selectedSectionScope: SectionScope = .all
-        var displayOptions: TodayDisplayOptions
-        var loading = LoadingFeature.State()
-
-        init(displayOptions: TodayDisplayOptions = .default) {
-            self.displayOptions = displayOptions
-        }
-
-        var isLoading: Bool {
-            loading.isLoading
-        }
-
-        var sections: [SectionContent] {
-            let now = Date()
-            let items = TodayFeature.groupedSectionItems(
-                from: TodayFeature.displayedTodos(
-                    todos: todos,
-                    displayOptions: displayOptions
-                ),
-                now: now
-            )
-
-            switch selectedSectionScope {
-            case .all:
-                return
-                    TodayFeature.makeSection(
-                        category: .focused,
-                        title: String(localized: "today_section_focused", bundle: PresentationResources.bundle),
-                        items: items.focused
-                    )
-                    + TodayFeature.makeSection(
-                        category: .overdue,
-                        title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
-                        items: items.overdue
-                    )
-                    + TodayFeature.makeSection(
-                        category: .dueSoon,
-                        title: String.localizedStringWithFormat(
-                            String(localized: "today_section_due_soon_format", bundle: PresentationResources.bundle),
-                            Int64(TodayFeature.upcomingWindowDays)
-                        ),
-                        items: items.dueSoon
-                    )
-                    + TodayFeature.makeSection(
-                        category: .later,
-                        title: String(localized: "today_section_later", bundle: PresentationResources.bundle),
-                        items: items.later
-                    )
-                    + TodayFeature.makeSection(
-                        category: .unscheduled,
-                        title: String(localized: "today_section_unscheduled", bundle: PresentationResources.bundle),
-                        items: items.unscheduled
-                    )
-            case .focused:
-                return TodayFeature.makeSection(
-                    category: .focused,
-                    title: String(localized: "today_section_focused", bundle: PresentationResources.bundle),
-                    items: items.focused
-                )
-            case .overdue:
-                return TodayFeature.makeSection(
-                    category: .overdue,
-                    title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
-                    items: items.overdue
-                )
-            case .dueSoon:
-                return TodayFeature.makeSection(
-                    category: .dueSoon,
-                    title: String.localizedStringWithFormat(
-                        String(localized: "today_section_due_soon_format", bundle: PresentationResources.bundle),
-                        Int64(TodayFeature.upcomingWindowDays)
-                    ),
-                    items: items.dueSoon
-                )
-            }
-        }
-
-        var summaryCounts: [SectionScope: Int] {
-            let now = Date()
-            return Dictionary(
-                uniqueKeysWithValues: SectionScope.allCases.map { scope in
-                    (
-                        scope,
-                        TodayFeature.summaryValue(
-                            for: scope,
-                            todos: todos,
-                            displayOptions: displayOptions,
-                            now: now
-                        )
-                    )
-                }
-            )
-        }
-    }
-
     enum Action: BindableAction, Equatable {
         case alert(PresentationAction<Never>)
         case binding(BindingAction<State>)
         case refresh
         case fetchData
+        case checkCurrentDate(Date)
         case setSectionScope(SectionScope)
         case resetDisplayOptions
         case completeTodo(TodayTodoItem)
@@ -155,7 +57,12 @@ struct TodayFeature {
 
         enum StoreAction: Equatable {
             case setAlert
-            case setTodos([TodayTodoItem])
+            case setTodos(
+                incomplete: [TodayTodoItem],
+                completedToday: [TodayTodoItem],
+                interval: DateInterval
+            )
+            case setCompletedTodayTodos([TodayTodoItem], interval: DateInterval)
             case updateTodo(TodayTodoItem)
             case removeTodo(String)
         }
@@ -166,6 +73,7 @@ struct TodayFeature {
     @Dependency(\.upsertTodoUseCase) var upsertTodoUseCase
     @Dependency(\.updateTodayDisplayOptionsUseCase) var updateTodayDisplayOptionsUseCase
     @Dependency(\.trackAnalyticsEventUseCase) var trackAnalyticsEventUseCase
+    @Dependency(\.date.now) var now
 
     static let pageSize = 20
     static let upcomingWindowDays = 7
@@ -186,9 +94,22 @@ struct TodayFeature {
             case .binding:
                 break
             case .refresh:
-                return fetchTodosEffect(showsIndicator: false)
+                let interval = prepareTodayInterval(state: &state, now: now)
+                return fetchTodosEffect(interval: interval, showsIndicator: false)
             case .fetchData:
-                return fetchTodosEffect()
+                let interval = prepareTodayInterval(state: &state, now: now)
+                return fetchTodosEffect(interval: interval)
+            case .checkCurrentDate(let date):
+                let interval = Self.dayInterval(containing: date)
+                guard state.todayInterval != interval else { break }
+                let requiresFullFetch = !state.isIncompleteDataLoaded
+                state.todayInterval = interval
+                state.completedTodayTodos = []
+                state.isCompletedTodayDataLoaded = false
+                if requiresFullFetch {
+                    return fetchTodosEffect(interval: interval, showsIndicator: false)
+                }
+                return fetchCompletedTodayTodosEffect(interval: interval)
             case .setSectionScope(let scope):
                 if state.selectedSectionScope == scope, scope != .all {
                     state.selectedSectionScope = .all
@@ -204,16 +125,39 @@ struct TodayFeature {
                 return togglePinnedEffect(item)
             case .store(.setAlert):
                 state.alert = Self.alertState()
-            case .store(.setTodos(let todos)):
-                state.todos = todos
+            case .store(.setTodos(let incomplete, let completedToday, let interval)):
+                guard state.todayInterval == interval else { break }
+                state.todos = incomplete
+                state.isIncompleteDataLoaded = true
+                state.completedTodayTodos = completedToday
+                state.isCompletedTodayDataLoaded = true
+            case .store(.setCompletedTodayTodos(let todos, let interval)):
+                guard state.todayInterval == interval else { break }
+                state.completedTodayTodos = todos
+                state.isCompletedTodayDataLoaded = true
             case .store(.updateTodo(let item)):
-                if let index = state.todos.firstIndex(where: { $0.id == item.id }) {
-                    state.todos[index] = item
+                if item.isCompleted {
+                    state.todos.removeAll { $0.id == item.id }
+                    if Self.isDue(item, in: state.todayInterval) {
+                        if let index = state.completedTodayTodos.firstIndex(where: { $0.id == item.id }) {
+                            state.completedTodayTodos[index] = item
+                        } else {
+                            state.completedTodayTodos.append(item)
+                        }
+                    } else {
+                        state.completedTodayTodos.removeAll { $0.id == item.id }
+                    }
                 } else {
-                    state.todos.append(item)
+                    state.completedTodayTodos.removeAll { $0.id == item.id }
+                    if let index = state.todos.firstIndex(where: { $0.id == item.id }) {
+                        state.todos[index] = item
+                    } else {
+                        state.todos.append(item)
+                    }
                 }
             case .store(.removeTodo(let todoId)):
                 state.todos.removeAll { $0.id == todoId }
+                state.completedTodayTodos.removeAll { $0.id == todoId }
             case .loading:
                 break
             }
@@ -257,7 +201,19 @@ private enum UpdateTodayDisplayOptionsUseCaseKey: DependencyKey {
 }
 
 private extension TodayFeature {
-    func fetchTodosEffect(showsIndicator: Bool = true) -> Effect<Action> {
+    func prepareTodayInterval(state: inout State, now: Date) -> DateInterval {
+        let interval = Self.dayInterval(containing: now)
+        guard state.todayInterval != interval else { return interval }
+        state.todayInterval = interval
+        state.completedTodayTodos = []
+        state.isCompletedTodayDataLoaded = false
+        return interval
+    }
+
+    func fetchTodosEffect(
+        interval: DateInterval,
+        showsIndicator: Bool = true
+    ) -> Effect<Action> {
         .run { [fetchTodosUseCase] send in
             if showsIndicator {
                 await send(.loading(.begin(target: .default, mode: .delayed)))
@@ -285,9 +241,18 @@ private extension TodayFeature {
                     ),
                     cursor: nil
                 )
+                async let completedTodayTodosPage = fetchTodosUseCase.execute(
+                    Self.completedTodayQuery(interval: interval),
+                    cursor: nil
+                )
                 let todosWithDueDate = try await todosWithDueDatePage.items.compactMap(TodayTodoItem.init(from:))
                 let todosWithoutDueDate = try await todosWithoutDueDatePage.items.compactMap(TodayTodoItem.init(from:))
-                await send(.store(.setTodos(todosWithDueDate + todosWithoutDueDate)))
+                let completedTodayTodos = try await completedTodayTodosPage.items.compactMap(TodayTodoItem.init(from:))
+                await send(.store(.setTodos(
+                    incomplete: todosWithDueDate + todosWithoutDueDate,
+                    completedToday: completedTodayTodos,
+                    interval: interval
+                )))
                 if showsIndicator {
                     await send(.loading(.end(target: .default, mode: .delayed)))
                 }
@@ -298,6 +263,34 @@ private extension TodayFeature {
                 await send(.store(.setAlert))
             }
         }
+    }
+
+    func fetchCompletedTodayTodosEffect(interval: DateInterval) -> Effect<Action> {
+        .run { [fetchTodosUseCase] send in
+            do {
+                let page = try await fetchTodosUseCase.execute(
+                    Self.completedTodayQuery(interval: interval),
+                    cursor: nil
+                )
+                let todos = page.items.compactMap(TodayTodoItem.init(from:))
+                await send(.store(.setCompletedTodayTodos(todos, interval: interval)))
+            } catch {
+                await send(.store(.setAlert))
+            }
+        }
+    }
+
+    static func completedTodayQuery(interval: DateInterval) -> TodoQuery {
+        TodoQuery(
+            completionFilter: .completed,
+            dueDateFilter: .withDueDate,
+            sortDateFrom: interval.start,
+            sortDateTo: interval.end,
+            sortTarget: .dueDate,
+            sortOrder: .oldest,
+            pageSize: Self.pageSize,
+            fetchAllPages: true
+        )
     }
 
     func updateDisplayOptionsEffect(_ options: TodayDisplayOptions) -> Effect<Action> {
@@ -307,17 +300,21 @@ private extension TodayFeature {
     }
 
     func completeTodoEffect(_ item: TodayTodoItem) -> Effect<Action> {
-        .run { [fetchTodoByIdUseCase, upsertTodoUseCase, trackAnalyticsEventUseCase] send in
+        .run { [fetchTodoByIdUseCase, upsertTodoUseCase, trackAnalyticsEventUseCase, now] send in
             await send(.loading(.begin(target: .default, mode: .delayed)))
             do {
                 var todo = try await fetchTodoByIdUseCase.execute(item.id)
-                let now = Date()
                 todo.isCompleted = true
                 todo.completedAt = now
                 todo.updatedAt = now
                 try await upsertTodoUseCase.execute(todo)
                 trackAnalyticsEventUseCase.execute(.todoComplete)
-                await send(.store(.removeTodo(todo.id)))
+                guard let item = TodayTodoItem(from: todo) else {
+                    await send(.loading(.end(target: .default, mode: .delayed)))
+                    await send(.store(.setAlert))
+                    return
+                }
+                await send(.store(.updateTodo(item)))
                 await send(.loading(.end(target: .default, mode: .delayed)))
             } catch {
                 await send(.loading(.end(target: .default, mode: .delayed)))
@@ -327,12 +324,12 @@ private extension TodayFeature {
     }
 
     func togglePinnedEffect(_ item: TodayTodoItem) -> Effect<Action> {
-        .run { [fetchTodoByIdUseCase, upsertTodoUseCase] send in
+        .run { [fetchTodoByIdUseCase, upsertTodoUseCase, now] send in
             await send(.loading(.begin(target: .default, mode: .delayed)))
             do {
                 var todo = try await fetchTodoByIdUseCase.execute(item.id)
                 todo.isPinned.toggle()
-                todo.updatedAt = Date()
+                todo.updatedAt = now
                 try await upsertTodoUseCase.execute(todo)
                 guard let todayTodoItem = TodayTodoItem(from: todo) else {
                     await send(.loading(.end(target: .default, mode: .delayed)))

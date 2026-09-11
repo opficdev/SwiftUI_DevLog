@@ -32,34 +32,62 @@ public struct TodayView: View {
         self.windowEvent = windowEvent
     }
 
+//    public var body: some View {
+//        NavigationStack(path: $path) {
+//            List {
+//                summarySection
+//                if store.sections.isEmpty, !store.isLoading {
+//                    emptySection
+//                } else {
+//                    ForEach(store.sections) { section in
+//                        todoSection(section.title, items: section.items)
+//                    }
+//                }
+//            }
+//            .listStyle(.insetGrouped)
+//            .navigationTitle(String(localized: "nav_today", bundle: PresentationResources.bundle))
+//            .navigationDestination(for: TodayRoute.self, destination: destinationView)
+//            .toolbar { toolbarContent }
+//            .background(NavigationBarConfigurator())
+//            .refreshable { await store.send(.refresh).finish() }
+//        }
+//        .onChange(of: isSelected, initial: true) { _, isSelected in
+//            if isSelected {
+//                store.send(.fetchData)
+//            }
+//        }
+//        .prominentAlert(store, state: \.alert, action: \.alert)
+//        .overlay {
+//            if store.isLoading {
+//                LoadingView()
+//            }
+//        }
+//    }
+
     public var body: some View {
         NavigationStack(path: $path) {
-            List {
-                summarySection
-                if store.sections.isEmpty, !store.isLoading {
-                    emptySection
-                } else {
-                    ForEach(store.sections) { section in
-                        todoSection(section.title, items: section.items)
+            ScrollView {
+                LazyVStack(pinnedViews: [.sectionHeaders]) {
+                    Section {
+
+                    } header: {
+
                     }
                 }
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle(String(localized: "nav_today", bundle: PresentationResources.bundle))
-            .navigationDestination(for: TodayRoute.self, destination: destinationView)
-            .toolbar { toolbarContent }
-            .background(NavigationBarConfigurator())
-            .refreshable { await store.send(.refresh).finish() }
         }
-        .onChange(of: isSelected, initial: true) { _, isSelected in
-            if isSelected {
-                store.send(.fetchData)
-            }
-        }
-        .prominentAlert(store, state: \.alert, action: \.alert)
-        .overlay {
-            if store.isLoading {
-                LoadingView()
+    }
+
+    private var topBar: some View {
+        VStack {
+            HStack {
+                Text("오늘 할 일 달성")
+                Text("진행 중")
+                Spacer()
+                HStack(spacing: 8) {
+//                    let todayTodos = store.todos.filter { $0.dueDate.}
+//                    Text(store.todos.filter { $0.})
+                }
             }
         }
     }

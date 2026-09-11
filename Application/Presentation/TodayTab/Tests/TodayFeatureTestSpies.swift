@@ -12,6 +12,7 @@ import Domain
 
 final class TodayFetchTodosUseCaseSpy: FetchTodosUseCase {
     var pagesByFilter: [TodoQuery.DueDateFilter: TodoPage]
+    var completedTodayPage: TodoPage
     var error: Error?
     private let recorder = TodayFetchTodosUseCaseCallRecorder()
 
@@ -19,9 +20,11 @@ final class TodayFetchTodosUseCaseSpy: FetchTodosUseCase {
         pagesByFilter: [TodoQuery.DueDateFilter: TodoPage] = [
             .withDueDate: TodoPage(items: [], nextCursor: nil),
             .withoutDueDate: TodoPage(items: [], nextCursor: nil)
-        ]
+        ],
+        completedTodayPage: TodoPage = TodoPage(items: [], nextCursor: nil)
     ) {
         self.pagesByFilter = pagesByFilter
+        self.completedTodayPage = completedTodayPage
     }
 
     func execute(_ query: TodoQuery, cursor: TodoCursor?) async throws -> TodoPage {
@@ -29,6 +32,10 @@ final class TodayFetchTodosUseCaseSpy: FetchTodosUseCase {
 
         if let error {
             throw error
+        }
+
+        if query.completionFilter == .completed {
+            return completedTodayPage
         }
 
         return pagesByFilter[query.dueDateFilter] ?? TodoPage(items: [], nextCursor: nil)
@@ -138,8 +145,10 @@ func makeTodayTodo(
     id: String = "todo-1",
     isPinned: Bool = false,
     isCompleted: Bool = false,
+    isChecked: Bool = false,
     number: Int = 1,
     title: String = "Todo",
+    content: String = "content",
     dueDate: Date? = nil
 ) -> Todo {
     let now = Date(timeIntervalSince1970: 0)
@@ -147,10 +156,10 @@ func makeTodayTodo(
         id: id,
         isPinned: isPinned,
         isCompleted: isCompleted,
-        isChecked: false,
+        isChecked: isChecked,
         number: number,
         title: title,
-        content: "content",
+        content: content,
         createdAt: now,
         updatedAt: now,
         completedAt: isCompleted ? now : nil,

@@ -38,6 +38,11 @@ struct TodayDisplayedSection: Equatable {
 @MainActor
 protocol TodayStateDriving {
     var todos: [TodayTodoItem] { get }
+    var completedTodayTodos: [TodayTodoItem] { get }
+    var todayTodos: [TodayTodoItem] { get }
+    var todayAchievement: TodayFeature.TodayAchievement? { get }
+    var todayInterval: DateInterval { get }
+    var isTodayDataLoaded: Bool { get }
     var selectedSectionScope: TodayTestSectionScope { get }
     var displayOptions: TodayDisplayOptions { get }
     var showAlert: Bool { get }
@@ -46,6 +51,7 @@ protocol TodayStateDriving {
     var summaryCounts: [TodayTestSectionScope: Int] { get }
 
     func fetchData() async
+    func checkCurrentDate(_ date: Date) async
     func setSectionScope(_ scope: TodayTestSectionScope) async
     func setDueDateVisibility(_ visibility: TodayDisplayOptions.DueDateVisibility) async
     func setFocusVisibility(_ visibility: TodayDisplayOptions.FocusVisibility) async
@@ -59,6 +65,11 @@ struct TodayStoreTestAdapter: TodayStateDriving {
     private let store: TestStoreOf<TodayFeature>
 
     var todos: [TodayTodoItem] { store.state.todos }
+    var completedTodayTodos: [TodayTodoItem] { store.state.completedTodayTodos }
+    var todayTodos: [TodayTodoItem] { store.state.todayTodos }
+    var todayAchievement: TodayFeature.TodayAchievement? { store.state.todayAchievement }
+    var todayInterval: DateInterval { store.state.todayInterval }
+    var isTodayDataLoaded: Bool { store.state.isTodayDataLoaded }
     var selectedSectionScope: TodayTestSectionScope { store.state.selectedSectionScope.testValue }
     var displayOptions: TodayDisplayOptions { store.state.displayOptions }
     var showAlert: Bool { store.state.alert != nil }
@@ -79,11 +90,13 @@ struct TodayStoreTestAdapter: TodayStateDriving {
         fetchDisplayOptionsUseCase: FetchTodayDisplayOptionsUseCase = TodayFetchDisplayOptionsUseCaseSpy(),
         updateDisplayOptionsUseCase: UpdateTodayDisplayOptionsUseCase = TodayUpdateDisplayOptionsUseCaseSpy(),
         trackAnalyticsEventUseCase: TrackAnalyticsEventUseCase = TodayTrackAnalyticsEventUseCaseSpy(),
+        now: Date = Date(),
         configureDependencies: ((inout DependencyValues) -> Void)? = nil
     ) {
         store = TestStore(
             initialState: TodayFeature.State(
-                displayOptions: fetchDisplayOptionsUseCase.execute()
+                displayOptions: fetchDisplayOptionsUseCase.execute(),
+                now: now
             )
         ) {
             TodayFeature()
@@ -93,6 +106,7 @@ struct TodayStoreTestAdapter: TodayStateDriving {
             $0.upsertTodoUseCase = upsertUseCase
             $0.updateTodayDisplayOptionsUseCase = updateDisplayOptionsUseCase
             $0.trackAnalyticsEventUseCase = trackAnalyticsEventUseCase
+            $0.date.now = now
             $0.continuousClock = ContinuousClock()
             configureDependencies?(&$0)
         }
@@ -102,6 +116,34 @@ struct TodayStoreTestAdapter: TodayStateDriving {
     func fetchData() async {
         await store.send(.fetchData)
         await drainReceivedActions()
+    }
+
+    func checkCurrentDate(_ date: Date) async {
+        await store.send(.checkCurrentDate(date))
+        await drainReceivedActions()
+    }
+
+    func receiveCompletedTodayTodos(
+        _ todos: [TodayTodoItem],
+        interval: DateInterval
+    ) async {
+        await store.send(.store(.setCompletedTodayTodos(todos, interval: interval)))
+    }
+
+    func receiveTodos(
+        incomplete: [TodayTodoItem],
+        completedToday: [TodayTodoItem],
+        interval: DateInterval
+    ) async {
+        await store.send(.store(.setTodos(
+            incomplete: incomplete,
+            completedToday: completedToday,
+            interval: interval
+        )))
+    }
+
+    func receiveUpdatedTodo(_ item: TodayTodoItem) async {
+        await store.send(.store(.updateTodo(item)))
     }
 
     func setSectionScope(_ scope: TodayTestSectionScope) async {

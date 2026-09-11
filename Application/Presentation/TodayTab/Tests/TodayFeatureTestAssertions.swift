@@ -32,25 +32,32 @@ func verifyTodayFetchData<Adapter: TodayStateDriving>(
     await adapter.fetchData()
 
     await waitUntilTodayMainActor {
-        adapter.todos.count == 5
+        adapter.todos.count == 5 && adapter.isTodayDataLoaded
     }
 
     let queries = await fetchUseCaseSpy.calledQueries()
-    let queriesByDueDateFilter = Dictionary(
-        uniqueKeysWithValues: queries.map { ($0.dueDateFilter, $0) }
-    )
+    let incompleteDueDateQuery = queries.first {
+        $0.completionFilter == .incomplete && $0.dueDateFilter == .withDueDate
+    }
+    let incompleteWithoutDueDateQuery = queries.first {
+        $0.completionFilter == .incomplete && $0.dueDateFilter == .withoutDueDate
+    }
+    let completedTodayQuery = queries.first { $0.completionFilter == .completed }
     let cursors = await fetchUseCaseSpy.calledCursors()
 
-    #expect(queries.count == 2)
-    #expect(Set(queries.map(\.dueDateFilter)) == Set([.withDueDate, .withoutDueDate]))
-    #expect(queries.allSatisfy { $0.completionFilter == .incomplete })
-    #expect(queriesByDueDateFilter[.withDueDate]?.sortTarget == .dueDate)
-    #expect(queriesByDueDateFilter[.withDueDate]?.sortOrder == .oldest)
-    #expect(queriesByDueDateFilter[.withoutDueDate]?.sortTarget == .updatedAt)
-    #expect(queriesByDueDateFilter[.withoutDueDate]?.sortOrder == .latest)
+    #expect(queries.count == 3)
+    #expect(incompleteDueDateQuery?.sortTarget == .dueDate)
+    #expect(incompleteDueDateQuery?.sortOrder == .oldest)
+    #expect(incompleteWithoutDueDateQuery?.sortTarget == .updatedAt)
+    #expect(incompleteWithoutDueDateQuery?.sortOrder == .latest)
+    #expect(completedTodayQuery?.dueDateFilter == .withDueDate)
+    #expect(completedTodayQuery?.sortDateFrom == adapter.todayInterval.start)
+    #expect(completedTodayQuery?.sortDateTo == adapter.todayInterval.end)
+    #expect(completedTodayQuery?.sortTarget == .dueDate)
+    #expect(completedTodayQuery?.sortOrder == .oldest)
     #expect(queries.map(\.pageSize).allSatisfy { $0 == 20 })
     #expect(queries.map(\.fetchAllPages).allSatisfy { $0 })
-    #expect(cursors.count == 2)
+    #expect(cursors.count == 3)
     #expect(cursors.allSatisfy { $0 == nil })
     #expect(adapter.todos.map(\.id) == ["focused", "overdue", "due-soon", "later", "unscheduled"])
     #expect(adapter.summaryCounts == [

@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 import Core
+import Domain
 @testable import TodayTab
 
 @MainActor
@@ -79,103 +80,240 @@ struct TodayFeatureTests {
         try await verifyTodayFetchData(adapter: adapter, fetchUseCaseSpy: fetchSpy)
     }
 
-    @Test("TodayFeature setSectionScope는 동일 탭 재선택 시 all로 되돌린다")
-    func TodayFeature_setSectionScope는_동일_탭_재선택_시_all로_되돌린다() async throws {
-        let todos = makeTodaySectionTodos()
+    @Test("TodayFeature fetchData는 오늘 완료 Todo를 별도 조회해 달성 상태를 만든다")
+    func TodayFeature_fetchData는_오늘_완료_Todo를_별도_조회해_달성_상태를_만든다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let incompleteToday = makeTodayTodo(id: "incomplete-today", dueDate: now)
+        let completedToday = makeTodayTodo(id: "completed-today", isCompleted: true, dueDate: now)
         let fetchSpy = TodayFetchTodosUseCaseSpy(
             pagesByFilter: [
-                .withDueDate: .init(items: todos.filter { $0.dueDate != nil }, nextCursor: nil),
-                .withoutDueDate: .init(items: todos.filter { $0.dueDate == nil }, nextCursor: nil)
-            ]
+                .withDueDate: TodoPage(items: [incompleteToday], nextCursor: nil),
+                .withoutDueDate: TodoPage(items: [], nextCursor: nil)
+            ],
+            completedTodayPage: TodoPage(items: [completedToday], nextCursor: nil)
         )
-        let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy)
+        let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy, now: now)
 
-        try await verifyTodaySectionScopeToggle(adapter: adapter, fetchUseCaseSpy: fetchSpy)
+        await adapter.fetchData()
+
+        #expect(adapter.completedTodayTodos.map(\.id) == ["completed-today"])
+        #expect(adapter.todayTodos.map(\.id) == ["incomplete-today", "completed-today"])
+        #expect(adapter.todayAchievement?.completedCount == 1)
+        #expect(adapter.todayAchievement?.totalCount == 2)
+        #expect(adapter.summaryCounts[.all] == 1)
     }
 
-    @Test("TodayFeature displayOptions 변경은 필터링 결과와 저장 상태를 갱신한다")
-    func TodayFeature_displayOptions_변경은_필터링_결과와_저장_상태를_갱신한다() async throws {
-        let todos = makeTodaySectionTodos()
-        let fetchSpy = TodayFetchTodosUseCaseSpy(
-            pagesByFilter: [
-                .withDueDate: .init(items: todos.filter { $0.dueDate != nil }, nextCursor: nil),
-                .withoutDueDate: .init(items: todos.filter { $0.dueDate == nil }, nextCursor: nil)
-            ]
-        )
-        let updateSpy = TodayUpdateDisplayOptionsUseCaseSpy()
-        let adapter = TodayStoreTestAdapter(
-            fetchUseCase: fetchSpy,
-            updateDisplayOptionsUseCase: updateSpy
-        )
-
-        try await verifyTodayDisplayOptions(
-            adapter: adapter,
-            fetchUseCaseSpy: fetchSpy,
-            updateDisplayOptionsUseCaseSpy: updateSpy
-        )
-    }
-
-    @Test("TodayFeature togglePinned는 Todo를 갱신하고 섹션을 다시 계산한다")
-    func TodayFeature_togglePinned는_Todo를_갱신하고_섹션을_다시_계산한다() async throws {
-        let todos = makeTodaySectionTodos()
-        let fetchSpy = TodayFetchTodosUseCaseSpy(
-            pagesByFilter: [
-                .withDueDate: .init(items: todos.filter { $0.dueDate != nil }, nextCursor: nil),
-                .withoutDueDate: .init(items: todos.filter { $0.dueDate == nil }, nextCursor: nil)
-            ]
-        )
-        let fetchByIdSpy = TodayFetchTodoByIdUseCaseSpy(todos: todos)
-        let upsertSpy = TodayUpsertTodoUseCaseSpy()
-        let adapter = TodayStoreTestAdapter(
-            fetchUseCase: fetchSpy,
-            fetchTodoByIdUseCase: fetchByIdSpy,
-            upsertUseCase: upsertSpy
-        )
-
-        try await verifyTodayTogglePinned(
-            adapter: adapter,
-            fetchUseCaseSpy: fetchSpy,
-            fetchTodoByIdUseCaseSpy: fetchByIdSpy,
-            upsertTodoUseCaseSpy: upsertSpy
-        )
-    }
-
-    @Test("TodayFeature completeTodo는 Todo를 제거하고 완료 이벤트를 남긴다")
-    func TodayFeature_completeTodo는_Todo를_제거하고_완료_이벤트를_남긴다() async throws {
-        let todos = makeTodaySectionTodos()
-        let fetchSpy = TodayFetchTodosUseCaseSpy(
-            pagesByFilter: [
-                .withDueDate: .init(items: todos.filter { $0.dueDate != nil }, nextCursor: nil),
-                .withoutDueDate: .init(items: todos.filter { $0.dueDate == nil }, nextCursor: nil)
-            ]
-        )
-        let fetchByIdSpy = TodayFetchTodoByIdUseCaseSpy(todos: todos)
-        let upsertSpy = TodayUpsertTodoUseCaseSpy()
-        let trackSpy = TodayTrackAnalyticsEventUseCaseSpy()
-        let adapter = TodayStoreTestAdapter(
-            fetchUseCase: fetchSpy,
-            fetchTodoByIdUseCase: fetchByIdSpy,
-            upsertUseCase: upsertSpy,
-            trackAnalyticsEventUseCase: trackSpy
-        )
-
-        try await verifyTodayCompleteTodo(
-            adapter: adapter,
-            fetchUseCaseSpy: fetchSpy,
-            fetchTodoByIdUseCaseSpy: fetchByIdSpy,
-            upsertTodoUseCaseSpy: upsertSpy,
-            trackAnalyticsEventUseCaseSpy: trackSpy
-        )
-    }
-
-    @Test("TodayFeature fetchData 실패는 에러 표시 상태를 만든다")
-    func TodayFeature_fetchData_실패는_에러_표시_상태를_만든다() async {
+    @Test("TodayFeature checkCurrentDate는 날짜가 바뀔 때만 오늘 완료 Todo를 다시 조회한다")
+    func TodayFeature_checkCurrentDate는_날짜가_바뀔_때만_오늘_완료_Todo를_다시_조회한다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let calendar = Calendar.current
+        let nextDay = try #require(calendar.date(byAdding: .day, value: 1, to: now))
         let fetchSpy = TodayFetchTodosUseCaseSpy()
-        fetchSpy.error = TodayTestError.failure
-        let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy)
+        let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy, now: now)
+        await adapter.fetchData()
 
-        await verifyTodayFetchFailureShowsAlert(adapter: adapter)
+        await adapter.checkCurrentDate(now)
+        let sameDayQueries = await fetchSpy.calledQueries()
+        let sameDayQueryCount = sameDayQueries.count
+        #expect(sameDayQueryCount == 3)
+
+        fetchSpy.completedTodayPage = TodoPage(
+            items: [makeTodayTodo(id: "next-day", isCompleted: true, dueDate: nextDay)],
+            nextCursor: nil
+        )
+        await adapter.checkCurrentDate(nextDay)
+
+        let queries = await fetchSpy.calledQueries()
+        let lastQuery = try #require(queries.last)
+        #expect(queries.count == 4)
+        #expect(lastQuery.completionFilter == .completed)
+        #expect(lastQuery.sortDateFrom == adapter.todayInterval.start)
+        #expect(lastQuery.sortDateTo == adapter.todayInterval.end)
+        #expect(adapter.completedTodayTodos.map(\.id) == ["next-day"])
+        #expect(adapter.todayAchievement?.completedCount == 1)
+        #expect(adapter.todayAchievement?.totalCount == 1)
     }
+
+    @Test("TodayFeature는 이전 날짜의 완료 조회 결과를 반영하지 않는다")
+    func TodayFeature는_이전_날짜의_완료_조회_결과를_반영하지_않는다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let calendar = Calendar.current
+        let previousDay = try #require(calendar.date(byAdding: .day, value: -1, to: now))
+        let adapter = TodayStoreTestAdapter(now: now)
+        let previousInterval = TodayFeature.dayInterval(containing: previousDay)
+        let staleItem = try #require(TodayTodoItem(from: makeTodayTodo(
+            id: "stale",
+            isCompleted: true,
+            dueDate: previousDay
+        )))
+
+        await adapter.receiveCompletedTodayTodos([staleItem], interval: previousInterval)
+
+        #expect(adapter.completedTodayTodos.isEmpty)
+        #expect(!adapter.isTodayDataLoaded)
+        #expect(adapter.todayAchievement == nil)
+    }
+
+    @Test("TodayFeature는 최초 조회 중 날짜가 바뀌면 새 날짜 전체 데이터를 다시 조회한다")
+    func TodayFeature는_최초_조회_중_날짜가_바뀌면_새_날짜_전체_데이터를_다시_조회한다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let calendar = Calendar.current
+        let nextDay = try #require(calendar.date(byAdding: .day, value: 1, to: now))
+        let previousInterval = TodayFeature.dayInterval(containing: now)
+        let incompleteTodo = makeTodayTodo(id: "next-incomplete", dueDate: nextDay)
+        let completedTodo = makeTodayTodo(
+            id: "next-completed",
+            isCompleted: true,
+            dueDate: nextDay
+        )
+        let fetchSpy = TodayFetchTodosUseCaseSpy(
+            pagesByFilter: [
+                .withDueDate: TodoPage(items: [incompleteTodo], nextCursor: nil),
+                .withoutDueDate: TodoPage(items: [], nextCursor: nil)
+            ],
+            completedTodayPage: TodoPage(items: [completedTodo], nextCursor: nil)
+        )
+        let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy, now: now)
+
+        await adapter.checkCurrentDate(nextDay)
+
+        let queries = await fetchSpy.calledQueries()
+        let queryCount = queries.count
+        #expect(queryCount == 3)
+        #expect(adapter.isTodayDataLoaded)
+        #expect(adapter.todayTodos.map(\.id) == ["next-incomplete", "next-completed"])
+        #expect(adapter.todayAchievement?.completedCount == 1)
+        #expect(adapter.todayAchievement?.totalCount == 2)
+
+        let staleItem = try #require(TodayTodoItem(from: makeTodayTodo(
+            id: "stale",
+            dueDate: nextDay
+        )))
+
+        await adapter.receiveTodos(
+            incomplete: [staleItem],
+            completedToday: [],
+            interval: previousInterval
+        )
+
+        #expect(adapter.isTodayDataLoaded)
+        #expect(adapter.todayTodos.map(\.id) == ["next-incomplete", "next-completed"])
+        #expect(adapter.todayAchievement?.completedCount == 1)
+        #expect(adapter.todayAchievement?.totalCount == 2)
+    }
+
+    @Test("TodayFeature completeTodo는 오늘 Todo를 완료 목록으로 한 번만 이동한다")
+    func TodayFeature_completeTodo는_오늘_Todo를_완료_목록으로_한_번만_이동한다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let todo = makeTodayTodo(id: "today", dueDate: now)
+        let fetchSpy = TodayFetchTodosUseCaseSpy(
+            pagesByFilter: [
+                .withDueDate: TodoPage(items: [todo], nextCursor: nil),
+                .withoutDueDate: TodoPage(items: [], nextCursor: nil)
+            ]
+        )
+        let fetchByIdSpy = TodayFetchTodoByIdUseCaseSpy(todos: [todo])
+        let adapter = TodayStoreTestAdapter(
+            fetchUseCase: fetchSpy,
+            fetchTodoByIdUseCase: fetchByIdSpy,
+            now: now
+        )
+        await adapter.fetchData()
+        let item = try #require(adapter.todos.first)
+
+        await adapter.completeTodo(item)
+
+        let completedItem = try #require(adapter.completedTodayTodos.first)
+        await adapter.receiveUpdatedTodo(completedItem)
+        await adapter.receiveUpdatedTodo(completedItem)
+
+        #expect(adapter.todos.isEmpty)
+        #expect(adapter.completedTodayTodos.map(\.id) == ["today"])
+        #expect(adapter.todayAchievement?.completedCount == 1)
+        #expect(adapter.todayAchievement?.totalCount == 1)
+    }
+
+    @Test("TodayFeature completeTodo는 저장된 최신 마감일로 오늘 완료 목록을 갱신한다")
+    func TodayFeature_completeTodo는_저장된_최신_마감일로_오늘_완료_목록을_갱신한다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let tomorrow = try #require(Calendar.current.date(byAdding: .day, value: 1, to: now))
+        let original = makeTodayTodo(id: "today", dueDate: now)
+        let latest = makeTodayTodo(id: "today", dueDate: tomorrow)
+        let fetchSpy = TodayFetchTodosUseCaseSpy(
+            pagesByFilter: [
+                .withDueDate: TodoPage(items: [original], nextCursor: nil),
+                .withoutDueDate: TodoPage(items: [], nextCursor: nil)
+            ]
+        )
+        let adapter = TodayStoreTestAdapter(
+            fetchUseCase: fetchSpy,
+            fetchTodoByIdUseCase: TodayFetchTodoByIdUseCaseSpy(todos: [latest]),
+            now: now
+        )
+        await adapter.fetchData()
+        let item = try #require(adapter.todos.first)
+
+        await adapter.completeTodo(item)
+
+        #expect(adapter.todos.isEmpty)
+        #expect(adapter.completedTodayTodos.isEmpty)
+        #expect(adapter.todayAchievement?.completedCount == 0)
+        #expect(adapter.todayAchievement?.totalCount == 0)
+    }
+
+    @Test("TodayFeature completeTodo 실패는 오늘 달성 상태를 유지한다")
+    func TodayFeature_completeTodo_실패는_오늘_달성_상태를_유지한다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let todo = makeTodayTodo(id: "today", dueDate: now)
+        let fetchSpy = TodayFetchTodosUseCaseSpy(
+            pagesByFilter: [
+                .withDueDate: TodoPage(items: [todo], nextCursor: nil),
+                .withoutDueDate: TodoPage(items: [], nextCursor: nil)
+            ]
+        )
+        let upsertSpy = TodayUpsertTodoUseCaseSpy()
+        upsertSpy.error = TodayTestError.failure
+        let adapter = TodayStoreTestAdapter(
+            fetchUseCase: fetchSpy,
+            fetchTodoByIdUseCase: TodayFetchTodoByIdUseCaseSpy(todos: [todo]),
+            upsertUseCase: upsertSpy,
+            now: now
+        )
+        await adapter.fetchData()
+        let item = try #require(adapter.todos.first)
+
+        await adapter.completeTodo(item)
+
+        #expect(adapter.todos.map(\.id) == ["today"])
+        #expect(adapter.completedTodayTodos.isEmpty)
+        #expect(adapter.todayAchievement?.completedCount == 0)
+        #expect(adapter.todayAchievement?.totalCount == 1)
+        #expect(adapter.showAlert)
+    }
+
+    @Test("TodayFeature 달성 상태는 isChecked와 표시 옵션의 영향을 받지 않는다")
+    func TodayFeature_달성_상태는_isChecked와_표시_옵션의_영향을_받지_않는다() async throws {
+        let now = try #require(makeFixedTodayNow())
+        let checkedTodo = makeTodayTodo(id: "checked", isChecked: true, dueDate: now)
+        let completedTodo = makeTodayTodo(id: "completed", isCompleted: true, dueDate: now)
+        let fetchSpy = TodayFetchTodosUseCaseSpy(
+            pagesByFilter: [
+                .withDueDate: TodoPage(items: [checkedTodo], nextCursor: nil),
+                .withoutDueDate: TodoPage(items: [], nextCursor: nil)
+            ],
+            completedTodayPage: TodoPage(items: [completedTodo], nextCursor: nil)
+        )
+        let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy, now: now)
+        await adapter.fetchData()
+
+        await adapter.setDueDateVisibility(.withoutDueDateOnly)
+        await adapter.setFocusVisibility(.focusedOnly)
+
+        #expect(adapter.todayAchievement?.completedCount == 1)
+        #expect(adapter.todayAchievement?.totalCount == 2)
+        #expect(adapter.todayAchievement?.status == .inProgress)
+    }
+
 }
 
 private func makeFixedTodayNow() -> Date? {
