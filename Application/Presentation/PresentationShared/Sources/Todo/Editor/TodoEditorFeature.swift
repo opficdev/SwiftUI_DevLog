@@ -24,6 +24,10 @@ public struct TodoEditorFeature {
         public var content: String = ""
         public var referenceItems: [Int: TodoReferenceItem] = [:]
         public var dueDate: Date?
+        public var selectedDueDate: Date {
+            get { dueDate ?? Date() }
+            set { dueDate = newValue }
+        }
         public var loading = LoadingFeature.State()
         public var tags: OrderedSet<String> = []
         public var tagText: String = ""
@@ -150,6 +154,12 @@ public struct TodoEditorFeature {
             LoadingFeature()
         }
         BindingReducer()
+            .onChange(of: \.isCompleted) { _, isCompleted in
+                Reduce { state, _ in
+                    state.completedAt = isCompleted ? now : nil
+                    return .none
+                }
+            }
         Reduce { state, action in
             switch action {
             case .alert:
@@ -158,7 +168,7 @@ public struct TodoEditorFeature {
                 if state.tabViewTag == .preview {
                     return resolveMarkdownEffect(content: state.content)
                 }
-            case .binding(\.dueDate):
+            case .binding(\.dueDate), .binding(\.selectedDueDate):
                 if let tomorrowDate = Calendar.current.date(byAdding: .day, value: 1, to: now),
                    let dueDate = state.dueDate {
                     state.dueDate = max(dueDate, tomorrowDate)

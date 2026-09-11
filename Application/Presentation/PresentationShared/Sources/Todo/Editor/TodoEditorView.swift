@@ -439,19 +439,11 @@ private struct InspectorView: View {
                             Spacer()
                             Picker(
                                 String(localized: "todo_category", bundle: PresentationResources.bundle),
-                                selection: Binding(
-                                    get: { store.category.id },
-                                    set: { categoryId in
-                                        guard let item = store.categories.first(where: {
-                                            $0.id == categoryId
-                                        }) else { return }
-                                        store.send(.binding(.set(\.category, item)))
-                                    }
-                                )
+                                selection: $store.category
                             ) {
                                 ForEach(store.categories, id: \.id) { item in
                                     Text(item.localizedName)
-                                        .tag(item.id)
+                                        .tag(item)
                                 }
                             }
                             .pickerStyle(.menu)
@@ -461,12 +453,7 @@ private struct InspectorView: View {
 
                         Divider().overlay(Color.border)
 
-                        Toggle(
-                            isOn: Binding(
-                                get: { store.isCompleted },
-                                set: { store.send(.setCompleted($0)) }
-                            )
-                        ) {
+                        Toggle(isOn: $store.isCompleted) {
                             HStack(spacing: 12) {
                                 optionIcon("circle", color: Color.textSecondary)
                                 Text(String(localized: "todo_completed", bundle: PresentationResources.bundle))
@@ -477,12 +464,7 @@ private struct InspectorView: View {
 
                         Divider().overlay(Color.border)
 
-                        Toggle(
-                            isOn: Binding(
-                                get: { store.isPinned },
-                                set: { store.send(.binding(.set(\.isPinned, $0))) }
-                            )
-                        ) {
+                        Toggle(isOn: $store.isPinned) {
                             HStack(spacing: 12) {
                                 optionIcon("star.fill", color: Color.warning)
                                 Text(String(localized: "todo_pinned", bundle: PresentationResources.bundle))
@@ -578,10 +560,7 @@ private struct InspectorView: View {
     }
 
     private var dueDateControl: some View {
-        DueDatePicker(selection: Binding(
-            get: { store.dueDate ?? Date() },
-            set: { store.send(.binding(.set(\.dueDate, $0))) }
-        )) {
+        DueDatePicker(selection: $store.selectedDueDate) {
             HStack(spacing: 12) {
                 optionIcon("calendar", color: Color.textSecondary)
                 Text(String(localized: "todo_due_date", bundle: PresentationResources.bundle))
