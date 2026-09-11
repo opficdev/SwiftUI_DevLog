@@ -95,18 +95,18 @@ struct SearchFeatureTests {
         await adapter.setSearchQuery(" swift ")
         await clock.advance(by: .milliseconds(400))
         await adapter.receiveAppliedSearchQuery("swift")
-        await adapter.receiveSearchResults(todos: [TodoListItem(from: todo)!])
+        await adapter.receiveSearchResults(todos: [SearchTodoItem(todo: todo)])
 
         #expect(adapter.searchQuery == " swift ")
         #expect(!adapter.showAllTodos)
         #expect(todoSpy.queries.map(\.keyword) == ["swift"])
-        #expect(adapter.todos == [TodoListItem(from: todo)])
+        #expect(adapter.todos == [SearchTodoItem(todo: todo)])
         #expect(!adapter.isLoading)
     }
 
     @Test("빈 검색어는 검색 결과를 비우고 로딩을 종료한다")
     func 빈_검색어는_검색_결과를_비우고_로딩을_종료한다() async {
-        let todo = TodoListItem(from: makeSearchTodo(id: "todo-1"))!
+        let todo = SearchTodoItem(todo: makeSearchTodo(id: "todo-1"))
         let adapter = SearchStoreTestAdapter(
             initialTodos: [todo],
             isLoading: true
@@ -120,7 +120,7 @@ struct SearchFeatureTests {
 
     @Test("# 단독 검색어는 안내 상태로 전환하고 조회를 시작하지 않는다")
     func 해시_단독_검색어는_안내_상태로_전환하고_조회를_시작하지_않는다() async {
-        let todo = TodoListItem(from: makeSearchTodo(id: "todo-1"))!
+        let todo = SearchTodoItem(todo: makeSearchTodo(id: "todo-1"))
         let todoSpy = SearchFetchTodosUseCaseSpy()
         let adapter = SearchStoreTestAdapter(
             initialTodos: [todo],
@@ -143,10 +143,10 @@ struct SearchFeatureTests {
         let adapter = SearchStoreTestAdapter(fetchTodosUseCase: todoSpy)
 
         await adapter.applySearchQuery(" #123 ")
-        await adapter.receiveSearchResults(todos: [TodoListItem(from: todo)!])
+        await adapter.receiveSearchResults(todos: [SearchTodoItem(todo: todo)])
 
         #expect(todoSpy.queries.map(\.keyword) == ["#123"])
-        #expect(adapter.todos == [TodoListItem(from: todo)])
+        #expect(adapter.todos == [SearchTodoItem(todo: todo)])
     }
 
     @Test("검색 실패 시 공통 에러 알림을 표시하고 로딩을 종료한다")
