@@ -20,7 +20,7 @@ let project = Project(
             sources: ["Sources/**/*.swift"],
             resources: [
                 "Sources/Resource/Assets.xcassets",
-                "../Presentation/PresentationShared/Resources/Assets.xcassets",
+                "../Shared/Resources/ColorPalette.xcassets",
                 "Sources/Resource/GoogleService-Info.plist",
                 "../Presentation/PresentationShared/Resources/Localizable.xcstrings",
             ],

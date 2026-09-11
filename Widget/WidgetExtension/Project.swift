@@ -26,7 +26,7 @@ let project = Project(
             ],
             resources: [
                 "Resource/Assets.xcassets",
-                "../../Application/Presentation/PresentationShared/Resources/Assets.xcassets",
+                "../../Application/Shared/Resources/ColorPalette.xcassets",
                 "Resource/Localizable.xcstrings"
             ],
             entitlements: .file(path: "Resource/DevLogWidget.entitlements"),

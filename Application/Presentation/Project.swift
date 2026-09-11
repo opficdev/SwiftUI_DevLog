@@ -42,6 +42,7 @@ let project = Project(
             sources: ["PresentationShared/Sources/**/*.swift"],
             resources: [
                 "PresentationShared/Resources/Assets.xcassets",
+                "../Shared/Resources/ColorPalette.xcassets",
                 "PresentationShared/Resources/Localizable.xcstrings",
             ],
             scripts: [
