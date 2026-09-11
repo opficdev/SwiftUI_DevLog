@@ -535,7 +535,10 @@ private struct InspectorView: View {
                                     action: { store.send(.removeTag($0)) }
                                 )
                             }
-                            Text("같은 태그는 한 번만 추가할 수 있어요")   // l10n
+                            Text(String(
+                                localized: "todo_tag_duplicate_hint",
+                                bundle: PresentationResources.bundle
+                            ))
                         }
                         .padding(20)
                         .background {
