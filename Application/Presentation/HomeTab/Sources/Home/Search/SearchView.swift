@@ -49,18 +49,16 @@ struct SearchView: View {
 
     private var topBar: some View {
         VStack(alignment: .leading) {
-            HStack(spacing: 12) {
-                Button {
-                    store.send(.binding(.set(\.isSearching, false)))
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundStyle(Color.textSecondary)
-                }
-                .buttonStyle(.plain)
-                Text(String(localized: "search_title", bundle: PresentationResources.bundle))
-                    .font(.title.bold())
+            Button {
+                store.send(.binding(.set(\.isSearching, false)))
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .foregroundStyle(Color.textSecondary)
+                    .font(.title)
+                    .padding(6)
             }
+            .adaptiveButtonStyle(shape: .circle, color: .border)
             SearchField(store: store)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
