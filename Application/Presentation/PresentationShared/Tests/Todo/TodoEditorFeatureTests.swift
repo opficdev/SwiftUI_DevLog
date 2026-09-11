@@ -97,6 +97,32 @@ struct TodoEditorFeatureTests {
         ])
     }
 
+    @Test("숨김 카테고리 Todo도 ID로 선택 상태를 유지한다")
+    func 숨김_카테고리_Todo도_ID로_선택_상태를_유지한다() async {
+        let visiblePreference = TodoCategoryPreference(category: .system(.doc), isVisible: true)
+        let hiddenPreference = TodoCategoryPreference(category: .system(.issue), isVisible: false)
+        let adapter = TodoEditorStoreTestAdapter(
+            todo: makeTodoEditorTodo(category: .system(.issue)),
+            fetchPreferencesUseCase: TodoEditorFetchPreferencesUseCaseSpy(
+                preferences: [visiblePreference, hiddenPreference]
+            )
+        )
+
+        await adapter.onAppear()
+
+        #expect(adapter.selectedCategoryID == TodoCategoryItem(from: hiddenPreference).id)
+        #expect(adapter.categories.contains { $0.id == adapter.selectedCategoryID })
+
+        await adapter.setSelectedCategoryID(TodoCategoryItem(from: visiblePreference).id)
+        #expect(adapter.category == TodoCategoryItem(from: visiblePreference))
+
+        await adapter.setSelectedCategoryID(TodoCategoryItem(from: hiddenPreference).id)
+        #expect(adapter.category == TodoCategoryItem(from: hiddenPreference))
+
+        await adapter.setSelectedCategoryID("missing-category")
+        #expect(adapter.category == TodoCategoryItem(from: hiddenPreference))
+    }
+
     @Test("태그 추가와 삭제는 OrderedSet 상태를 변경한다")
     func 태그_추가와_삭제는_OrderedSet_상태를_변경한다() async {
         let adapter = TodoEditorStoreTestAdapter(category: .system(.doc))

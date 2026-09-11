@@ -30,6 +30,7 @@ final class TodoEditorStoreTestAdapter {
     var tags: [String] { Array(store.state.tags) }
     var categories: [TodoCategoryItem] { store.state.categories }
     var category: TodoCategoryItem { store.state.category }
+    var selectedCategoryID: String { store.state.selectedCategoryID }
     var hasChanges: Bool { store.state.hasChanges }
     var isReadyToSubmit: Bool { store.state.isReadyToSubmit }
     var saveResult: TodoEditorFeature.SaveResult? { store.state.saveResult }
@@ -134,6 +135,12 @@ final class TodoEditorStoreTestAdapter {
     func setPinned(_ isPinned: Bool) async {
         await store.send(.binding(.set(\.isPinned, isPinned))) {
             $0.isPinned = isPinned
+        }
+    }
+
+    func setSelectedCategoryID(_ id: String) async {
+        await store.send(.binding(.set(\.selectedCategoryID, id))) {
+            $0.selectedCategoryID = id
         }
     }
 

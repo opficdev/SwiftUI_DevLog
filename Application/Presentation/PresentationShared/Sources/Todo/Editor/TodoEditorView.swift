@@ -439,11 +439,11 @@ private struct InspectorView: View {
                             Spacer()
                             Picker(
                                 String(localized: "todo_category", bundle: PresentationResources.bundle),
-                                selection: $store.category
+                                selection: $store.selectedCategoryID
                             ) {
                                 ForEach(store.categories, id: \.id) { item in
                                     Text(item.localizedName)
-                                        .tag(item)
+                                        .tag(item.id)
                                 }
                             }
                             .pickerStyle(.menu)

@@ -35,6 +35,13 @@ public struct TodoEditorFeature {
         public var editorHeaderHeight = CGFloat.zero
         public var categories: [TodoCategoryItem] = []
         public var category = TodoCategoryItem(from: .system(.etc))
+        public var selectedCategoryID: String {
+            get { category.id }
+            set {
+                guard let category = categories.first(where: { $0.id == newValue }) else { return }
+                self.category = category
+            }
+        }
         public var saveResult: SaveResult?
         let id: String
         let isChecked: Bool
