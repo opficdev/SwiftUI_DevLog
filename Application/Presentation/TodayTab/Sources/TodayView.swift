@@ -61,6 +61,7 @@ public struct TodayView: View {
             .safeAreaInset(edge: .top, spacing: 0) { topBar }
             .background(Color.appBackground.ignoresSafeArea())
             .refreshable { await store.send(.refresh).finish() }
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: TodayRoute.self, destination: destination)
             .sheet(isPresented: $store.isCategoryFilterPresented) {
                 CategoryFilterSheet(store: store)
