@@ -58,7 +58,7 @@ struct SearchView: View {
                     .font(.title)
                     .padding(6)
             }
-            .adaptiveButtonStyle(shape: .circle, color: .border)
+            .adaptiveButtonStyle(shape: .circle, color: .border, glassEffect: .enabled)
             SearchField(store: store)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

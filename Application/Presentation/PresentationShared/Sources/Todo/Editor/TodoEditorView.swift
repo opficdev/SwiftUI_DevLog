@@ -182,7 +182,7 @@ private struct ToolBar: View {
                 }
             }
             .font(.title)
-            .adaptiveButtonStyle(shape: .circle)
+            .adaptiveButtonStyle(shape: .circle, glassEffect: .enabled)
             Spacer()
             Text(store.navigationTitle)
                 .font(.title3.bold())
@@ -214,11 +214,11 @@ private struct EditorToolbarActions: View {
                     .foregroundStyle(Color.primary)
             }
             .font(.title)
-            .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+            .adaptiveButtonStyle(shape: .circle, color: Color.surface, glassEffect: .enabled)
             if store.isLoading {
                 ProgressView()
                     .frame(width: iconSize, height: iconSize)
-                    .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+                    .adaptiveButtonStyle(shape: .circle, color: Color.surface, glassEffect: .enabled)
             } else {
                 Button {
                     onSubmit()
@@ -233,7 +233,7 @@ private struct EditorToolbarActions: View {
                     }
                 }
                 .font(.title)
-                .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+                .adaptiveButtonStyle(shape: .circle, color: Color.surface, glassEffect: .enabled)
                 .disabled(!store.isReadyToSubmit)
             }
         }
@@ -417,7 +417,7 @@ private struct InspectorView: View {
                         .foregroundStyle(Color.primary)
                 }
                 .font(.title)
-                .adaptiveButtonStyle(shape: .circle, color: Color.surface)
+                .adaptiveButtonStyle(shape: .circle, color: Color.surface, glassEffect: .enabled)
             }
         }
         .padding(.horizontal)
