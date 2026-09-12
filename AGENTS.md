@@ -20,6 +20,7 @@
 - Read all matching task-specific documents before planning, editing, reviewing, or verifying.
 - For architecture work, also read `README.md` before editing.
 - The main agent owns investigation, editing, verification, and the final report.
+- Build-only verification is allowed. Do not run, launch, install, boot, or open the app or Simulator unless the user explicitly requests it in the current turn.
 - Do not require a `Design Brief`, Spec, `Task Packet`, or role-specific result before starting work.
 - If repository-local instructions conflict with global memory, follow the repository-local instructions.
 - Write DevLog PR and review text in Korean.
