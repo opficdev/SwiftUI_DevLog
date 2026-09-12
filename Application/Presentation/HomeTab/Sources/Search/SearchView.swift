@@ -234,7 +234,6 @@ private struct SearchResults: View {
                 .background {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.surface)
-                        .strokeBorder(Color.border, lineWidth: 2)
                 }
                 if store.shouldShowMoreTodos {
                     Button {
@@ -355,7 +354,6 @@ private struct RecentSearchQuries: View {
             .background {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.surface)
-                    .strokeBorder(Color.border, lineWidth: 2)
             }
         }
         .frame(maxWidth: .infinity)

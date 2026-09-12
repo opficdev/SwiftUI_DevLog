@@ -126,7 +126,6 @@ public struct TodayView: View {
         .background {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.surface)
-                .strokeBorder(Color.border, lineWidth: 2)
         }
     }
 
@@ -213,7 +212,6 @@ public struct TodayView: View {
         .background {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.surface)
-                .strokeBorder(Color.border, lineWidth: 2)
         }
     }
 
@@ -313,7 +311,6 @@ private struct CategoryFilterSheet: View {
                 .background {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.surface)
-                        .strokeBorder(Color.border, lineWidth: 2)
                 }
                 .padding()
             }
@@ -403,7 +400,6 @@ private struct TodoSection: View {
             .background {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.surface)
-                    .strokeBorder(Color.border, lineWidth: 2)
             }
         }
     }

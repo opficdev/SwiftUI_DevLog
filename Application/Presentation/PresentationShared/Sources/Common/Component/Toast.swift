@@ -336,12 +336,5 @@ private struct ToastCardView<Label: View>: View {
                         .fill(.ultraThinMaterial)
                 }
             }
-            .overlay {
-                if #unavailable(iOS 26.0) {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(Color(.systemGray4).opacity(0.2), lineWidth: 1)
-                }
-            }
-            .shadow(color: Color(.systemGray2).opacity(0.4), radius: 18, x: 0, y: 10)
     }
 }
