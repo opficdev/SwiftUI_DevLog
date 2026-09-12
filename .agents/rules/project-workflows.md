@@ -21,12 +21,6 @@ This reference holds DevLog-specific working rules that should live with the pro
 - CI is build validation, not a full test run, unless the workflow changes.
 - Avoid unrelated generated project and `Package.resolved` churn. Generated Xcode workspace/project files should not be tracked unless the project explicitly changes that policy.
 
-## SDD execution authority
-
-- An approved Spec records behavioral constraints, acceptance criteria, and prohibited actions.
-- A `Task Packet` records role assignment and current-turn execution authority separately from the Spec.
-- Record app or Simulator execution, external writes, CI or PR actions, and verification commands separately in both artifacts. Do not infer authorization from a Spec or a `Task Packet` field that does not grant it.
-
 ## Xcode project file work
 
 - Inspect Swift imports and Tuist target dependencies together.

@@ -6,7 +6,7 @@ This reference defines the DevLog-specific flow and boundaries for AI-assisted a
 
 The goal is not to make the AI decide more architecture policy. The goal is to make the AI stop before it makes project-specific architecture decisions that should be confirmed by the user.
 
-Use this reference with `AGENTS.md`, `.agents/rules/general.md`, and `.agents/roles.md`.
+Use this reference with `AGENTS.md` and `.agents/rules/general.md`.
 
 This repository is a Tuist-generated, workspace-based modular iOS app. There is no root `Package.swift`; module projects are generated from `Workspace.swift` and each module's `Project.swift`.
 
