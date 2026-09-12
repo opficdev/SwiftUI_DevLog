@@ -21,11 +21,8 @@ public struct TodayView: View {
         isSelected: Bool,
         windowEvent: TodoEditorWindowEvent
     ) {
-        @Dependency(\.todayFetchDisplayOptionsUseCase) var fetchDisplayOptionsUseCase
         self._store = State(initialValue: Store(
-            initialState: TodayFeature.State(
-                displayOptions: fetchDisplayOptionsUseCase.execute()
-            )
+            initialState: TodayFeature.State()
         ) {
             TodayFeature()
         })
@@ -38,26 +35,35 @@ public struct TodayView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
                     Section {
-                        scopePicker
-                        if displaySections.isEmpty, !store.isLoading {
+                        if store.sections.isEmpty, !store.isLoading {
                             emptyContent
-                                .padding(.horizontal)
                         } else {
-                            ForEach(displaySections) { section in
-                                todoSection(section)
-                                    .padding(.horizontal)
+                            ForEach(store.sections) { section in
+                                TodoSection(
+                                    section: section,
+                                    onComplete: { store.send(.completeTodo($0)) }
+                                )
                             }
                         }
                     } header: {
-                        achievementCard
+                        VStack {
+                            achievementCard
+                            filterBar
+                        }
+                        .padding(.bottom, 6)
+                        .background(Color.appBackground)
                     }
                 }
+                .padding(.horizontal)
                 .padding(.bottom, 24)
             }
             .safeAreaInset(edge: .top, spacing: 0) { topBar }
             .background(Color.appBackground.ignoresSafeArea())
             .refreshable { await store.send(.refresh).finish() }
             .navigationDestination(for: TodayRoute.self, destination: destination)
+            .sheet(isPresented: $store.isCategoryFilterPresented) {
+                CategoryFilterSheet(store: store)
+            }
         }
         .onChange(of: isSelected, initial: true) { _, isSelected in
             if isSelected {
@@ -110,7 +116,6 @@ public struct TodayView: View {
                 Spacer(minLength: 8)
 
                 progressCount
-                filterMenu
             }
 
             ProgressView(value: store.todayAchievement?.progress ?? 0)
@@ -122,149 +127,74 @@ public struct TodayView: View {
                 .fill(Color.surface)
                 .strokeBorder(Color.border, lineWidth: 2)
         }
-        .padding(.horizontal)
-        .background(Color.appBackground)
     }
 
+    @ViewBuilder
     private var progressCount: some View {
-        Group {
-            if let achievement = store.todayAchievement {
-                HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    Text("\(achievement.completedCount)")
-                        .font(.title2.bold())
-                        .foregroundStyle(Color.accent)
-                    Text("/")
-                    Text("\(achievement.totalCount)")
-                }
+        if let achievement = store.todayAchievement {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text("\(achievement.completedCount)")
+                    .font(.title2.bold())
+                    .foregroundStyle(Color.accent)
+                Text("/")
+                Text("\(achievement.totalCount)")
+            }
+            .font(.callout.weight(.semibold))
+            .foregroundStyle(Color.textSecondary)
+        } else {
+            Text("-- / --")
                 .font(.callout.weight(.semibold))
                 .foregroundStyle(Color.textSecondary)
-            } else {
-                Text("-- / --")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(Color.textSecondary)
-            }
-        }
-    }
-
-    private var filterMenu: some View {
-        Menu {
-            Picker(
-                String(
-                    localized: "today_due_visibility_label",
-                    bundle: PresentationResources.bundle
-                ),
-                selection: $store.displayOptions.dueDateVisibility
-            ) {
-                ForEach(TodayDisplayOptions.DueDateVisibility.allCases, id: \.self) { option in
-                    Text(option.title).tag(option)
-                }
-            }
-
-            Toggle(
-                String(
-                    localized: "today_pinned_only",
-                    bundle: PresentationResources.bundle
-                ),
-                isOn: $store.displayOptions.isFocusedOnly
-            )
-        } label: {
-            Image(systemName: "ellipsis")
-                .font(.headline)
-                .foregroundStyle(Color.textSecondary)
-                .padding(8)
         }
     }
 
     @ViewBuilder
-    private var scopePicker: some View {
-        let summaryCounts = store.summaryCounts
-
+    private var filterBar: some View {
         ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(TodayFeature.SectionScope.allCases, id: \.self) { scope in
-                    let isSelected = store.selectedSectionScope == scope
+            LazyHStack(spacing: 8) {
+                ForEach(TodayFeature.TodoScope.allCases, id: \.self) { scope in
+                    let isSelected = store.selectedTodoScope == scope
                     Button {
                         withAnimation(.easeInOut) {
-                            _ = store.send(.setSectionScope(scope))
+                            _ = store.send(.setTodoScope(scope))
                         }
                     } label: {
                         HStack(spacing: 6) {
                             Text(scope.title)
-                            Text("\(summaryCounts[scope, default: 0])")
+                            Text("\(store.summaryCounts[scope, default: 0])")
                                 .fontWeight(.bold)
                         }
                         .font(.callout)
-                        .foregroundStyle(isSelected ? Color.accent : Color.textSecondary)
+                        .foregroundStyle(isSelected ? Color.accent : .textSecondary)
                     }
                     .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .clear)
                 }
+
+                let category = store.selectedCategory
+                let isSelected = category != nil
+                Button {
+                    store.send(.binding(.set(\.isCategoryFilterPresented, true)))
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: category?.symbolName ?? "tray.2")
+                            .foregroundStyle(category?.color ?? Color.textSecondary)
+                        Text(
+                            category?.localizedName
+                                ?? String(
+                                    localized: "todo_category",
+                                    bundle: PresentationResources.bundle
+                                )
+                        )
+                    }
+                    .font(.callout)
+                    .foregroundStyle(isSelected ? Color.accent : .textSecondary)
+                }
+                .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .clear)
             }
         }
         .scrollIndicators(.hidden)
+        .padding(.horizontal, -16)
         .contentMargins(.horizontal, 16, for: .scrollContent)
-    }
-
-    private var displaySections: [TodayDisplaySection] {
-        guard store.selectedSectionScope == .all else {
-            return store.sections.map(TodayDisplaySection.init)
-        }
-
-        let todayItems = visibleTodayTodos
-        let todayItemIDs = Set(todayItems.filter { !$0.isCompleted }.map(\.id))
-        let remainingSections = store.sections.compactMap { section -> TodayDisplaySection? in
-            let items = section.items.filter { !todayItemIDs.contains($0.id) }
-            guard !items.isEmpty else { return nil }
-            return TodayDisplaySection(section: section, items: items)
-        }
-        let order: [TodayFeature.SectionCategory] = [.overdue, .dueSoon, .focused, .later, .unscheduled]
-        var sections = order.compactMap { category in
-            remainingSections.first { $0.category == category }
-        }
-
-        guard !todayItems.isEmpty else { return sections }
-        let todaySection = TodayDisplaySection(todayItems: todayItems)
-        let insertionIndex = sections.firstIndex { $0.category != .overdue } ?? sections.endIndex
-        sections.insert(todaySection, at: insertionIndex)
-        return sections
-    }
-
-    private var visibleTodayTodos: [TodayTodoItem] {
-        let items = TodayFeature.displayedTodos(
-            todos: store.todayTodos,
-            displayOptions: store.displayOptions
-        )
-        return items.filter(\.isPinned) + items.filter { !$0.isPinned }
-    }
-
-    private func todoSection(_ section: TodayDisplaySection) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Text(section.title)
-                    .font(.title3.bold())
-                    .foregroundStyle(section.accentColor)
-                Text("\(section.items.count)")
-                    .font(.callout.bold())
-                    .foregroundStyle(section.accentColor)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(section.accentColor.opacity(0.1), in: .capsule)
-                Spacer()
-                if section.id == .today {
-                    Text(String(localized: "today_pinned_first", bundle: PresentationResources.bundle))
-                        .font(.callout)
-                        .foregroundStyle(Color.textSecondary)
-                }
-            }
-
-            LazyVStack(spacing: 12) {
-                ForEach(section.items) { item in
-                    TodayTodoCard(
-                        item: item,
-                        onComplete: { store.send(.completeTodo(item)) }
-                    )
-                }
-            }
-        }
     }
 
     private var emptyContent: some View {
@@ -321,34 +251,22 @@ public struct TodayView: View {
     }
 
     private var emptyStateContent: EmptyStateContent {
-        switch store.selectedSectionScope {
-        case .all:
-            if store.todos.isEmpty {
-                return EmptyStateContent(
-                    title: String(localized: "today_empty_all_title", bundle: PresentationResources.bundle),
-                    message: String(localized: "today_empty_all_message", bundle: PresentationResources.bundle)
-                )
-            }
+        if store.todos.isEmpty, store.completedTodayTodos.isEmpty {
+            return EmptyStateContent(
+                title: String(localized: "today_empty_all_title", bundle: PresentationResources.bundle),
+                message: String(localized: "today_empty_all_message", bundle: PresentationResources.bundle)
+            )
+        }
+        if store.hasActiveFilters {
             return EmptyStateContent(
                 title: String(localized: "today_empty_filtered_title", bundle: PresentationResources.bundle),
                 message: String(localized: "today_empty_filtered_message", bundle: PresentationResources.bundle)
             )
-        case .focused:
-            return EmptyStateContent(
-                title: String(localized: "today_empty_focused_title", bundle: PresentationResources.bundle),
-                message: String(localized: "today_empty_focused_message", bundle: PresentationResources.bundle)
-            )
-        case .overdue:
-            return EmptyStateContent(
-                title: String(localized: "today_empty_overdue_title", bundle: PresentationResources.bundle),
-                message: String(localized: "today_empty_overdue_message", bundle: PresentationResources.bundle)
-            )
-        case .dueSoon:
-            return EmptyStateContent(
-                title: String(localized: "today_empty_due_soon_title", bundle: PresentationResources.bundle),
-                message: String(localized: "today_empty_due_soon_message", bundle: PresentationResources.bundle)
-            )
         }
+        return EmptyStateContent(
+            title: String(localized: "today_empty_all_title", bundle: PresentationResources.bundle),
+            message: String(localized: "today_empty_all_message", bundle: PresentationResources.bundle)
+        )
     }
 
     private struct EmptyStateContent {
@@ -357,42 +275,138 @@ public struct TodayView: View {
     }
 }
 
-private struct TodayDisplaySection: Identifiable {
-    enum Identifier: Hashable {
-        case today
-        case category(TodayFeature.SectionCategory)
-    }
+private struct CategoryFilterSheet: View {
+    let store: StoreOf<TodayFeature>
 
-    let id: Identifier
-    let category: TodayFeature.SectionCategory?
-    let title: String
-    let items: [TodayTodoItem]
-    let accentColor: Color
-
-    init(_ section: TodayFeature.SectionContent) {
-        self.init(section: section, items: section.items)
-    }
-
-    init(section: TodayFeature.SectionContent, items: [TodayTodoItem]) {
-        self.id = .category(section.category)
-        self.category = section.category
-        self.title = section.category.displayTitle
-        self.items = items
-        self.accentColor = section.category == .overdue ? .danger : .primary
-    }
-
-    init(todayItems: [TodayTodoItem]) {
-        self.id = .today
-        self.category = nil
-        self.title = String(localized: "today_section_today", bundle: PresentationResources.bundle)
-        self.items = todayItems
-        self.accentColor = .primary
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    CategoryFilterRow(
+                        category: nil,
+                        title: String(
+                            localized: "today_filter_all_categories",
+                            bundle: PresentationResources.bundle
+                        ),
+                        isSelected: store.selectedCategoryID == nil,
+                        action: { store.send(.setCategory(nil)) }
+                    )
+                    if !store.visibleCategories.isEmpty {
+                        Divider()
+                    }
+                    ForEach(
+                        Array(zip(store.visibleCategories.indices, store.visibleCategories)),
+                        id: \.1.id
+                    ) { index, category in
+                        CategoryFilterRow(
+                            category: category,
+                            title: category.localizedName,
+                            isSelected: store.selectedCategoryID == category.id,
+                            action: { store.send(.setCategory(category.id)) }
+                        )
+                        if index < store.visibleCategories.count - 1 {
+                            Divider()
+                        }
+                    }
+                }
+                .background {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.surface)
+                        .strokeBorder(Color.border, lineWidth: 2)
+                }
+                .padding()
+            }
+            .background(Color.appBackground.ignoresSafeArea())
+            .navigationTitle(String(localized: "todo_category", bundle: PresentationResources.bundle))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        store.send(.binding(.set(\.isCategoryFilterPresented, false)))
+                    } label: {
+                        Text(String(localized: "profile_done", bundle: PresentationResources.bundle))
+                    }
+                }
+            }
+        }
+        .presentationDragIndicator(.visible)
     }
 }
 
-private struct TodayTodoCard: View {
+private struct CategoryFilterRow: View {
+    let category: TodoCategoryItem?
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: category?.symbolName ?? "tray.2")
+                    .foregroundStyle(category?.color ?? Color.textSecondary)
+                Text(title)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                }
+            }
+            .font(.callout)
+            .foregroundStyle(isSelected ? Color.accent : .textSecondary)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct TodoSection: View {
+    let section: TodayFeature.SectionContent
+    let onComplete: (TodayTodoItem) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Text(section.title)
+                    .font(.title3.bold())
+                    .foregroundStyle(section.category.accentColor)
+                Text("\(section.items.count)")
+                    .font(.callout.bold())
+                    .foregroundStyle(section.category.accentColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(section.category.accentColor.opacity(0.1), in: .capsule)
+                Spacer()
+                if section.category == .today {
+                    Text(String(localized: "today_pinned_first", bundle: PresentationResources.bundle))
+                        .font(.callout)
+                        .foregroundStyle(Color.textSecondary)
+                }
+            }
+
+            LazyVStack(spacing: 0) {
+                ForEach(Array(zip(section.items.indices, section.items)), id: \.1.id) { index, item in
+                    TodoRow(
+                        item: item,
+                        onComplete: { onComplete(item) }
+                    )
+                    if index < section.items.count - 1 {
+                        Divider()
+                    }
+                }
+            }
+            .background {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.surface)
+                    .strokeBorder(Color.border, lineWidth: 2)
+            }
+        }
+    }
+}
+
+private struct TodoRow: View {
     @Environment(\.colorScheme) private var colorScheme
-    @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(30)
+    @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(24)
     let item: TodayTodoItem
     let onComplete: () -> Void
     private var isDarkMode: Bool { colorScheme == .dark }
@@ -400,7 +414,6 @@ private struct TodayTodoCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             completionStatus
-
             NavigationLink(value: TodayRoute.todo(TodoIdItem(id: item.id))) {
                 HStack(spacing: 8) {
                     VStack(alignment: .leading, spacing: 8) {
@@ -429,11 +442,6 @@ private struct TodayTodoCard: View {
             .todoDetailPreview(todoId: item.id)
         }
         .padding(20)
-        .background {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.surface)
-                .strokeBorder(Color.border, lineWidth: 2)
-        }
     }
 
     @ViewBuilder
@@ -504,48 +512,20 @@ private struct TodayTodoCard: View {
     }
 }
 
-private extension TodayDisplayOptions.DueDateVisibility {
+private extension TodayFeature.TodoScope {
     var title: String {
         switch self {
-        case .all:
-            return String(localized: "today_due_visibility_all", bundle: PresentationResources.bundle)
-        case .withDueDateOnly:
-            return String(localized: "today_due_visibility_with_due", bundle: PresentationResources.bundle)
-        case .withoutDueDateOnly:
-            return String(localized: "today_due_visibility_without_due", bundle: PresentationResources.bundle)
-        }
-    }
-}
-
-private extension TodayFeature.SectionScope {
-    var title: String {
-        switch self {
-        case .all:
-            return String(localized: "today_summary_all", bundle: PresentationResources.bundle)
-        case .focused:
-            return String(localized: "today_summary_focused", bundle: PresentationResources.bundle)
-        case .overdue:
-            return String(localized: "today_summary_overdue", bundle: PresentationResources.bundle)
-        case .dueSoon:
-            return String(localized: "today_summary_due_soon", bundle: PresentationResources.bundle)
+        case .remaining:
+            return String(localized: "today_filter_remaining", bundle: PresentationResources.bundle)
+        case .important:
+            return String(localized: "today_filter_important", bundle: PresentationResources.bundle)
         }
     }
 }
 
 private extension TodayFeature.SectionCategory {
-    var displayTitle: String {
-        switch self {
-        case .overdue:
-            return String(localized: "today_section_overdue", bundle: PresentationResources.bundle)
-        case .dueSoon:
-            return String(localized: "today_section_upcoming", bundle: PresentationResources.bundle)
-        case .focused:
-            return String(localized: "today_section_focused", bundle: PresentationResources.bundle)
-        case .later:
-            return String(localized: "today_section_later", bundle: PresentationResources.bundle)
-        case .unscheduled:
-            return String(localized: "today_section_unscheduled", bundle: PresentationResources.bundle)
-        }
+    var accentColor: Color {
+        self == .overdue ? .danger : .primary
     }
 }
 

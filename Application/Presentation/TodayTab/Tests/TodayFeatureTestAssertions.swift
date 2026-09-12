@@ -61,91 +61,35 @@ func verifyTodayFetchData<Adapter: TodayStateDriving>(
     #expect(cursors.allSatisfy { $0 == nil })
     #expect(adapter.todos.map(\.id) == ["focused", "overdue", "due-soon", "later", "unscheduled"])
     #expect(adapter.summaryCounts == [
-        .all: 5,
-        .focused: 1,
-        .overdue: 1,
-        .dueSoon: 2
+        .remaining: 5,
+        .important: 1
     ])
     #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .focused, itemIds: ["focused"]),
         TodayDisplayedSection(category: .overdue, itemIds: ["overdue"]),
-        TodayDisplayedSection(category: .dueSoon, itemIds: ["due-soon"]),
+        TodayDisplayedSection(category: .upcoming, itemIds: ["focused", "due-soon"]),
         TodayDisplayedSection(category: .later, itemIds: ["later"]),
         TodayDisplayedSection(category: .unscheduled, itemIds: ["unscheduled"])
     ])
 }
 
 @MainActor
-func verifyTodaySectionScopeToggle<Adapter: TodayStateDriving>(
+func verifyTodayTodoScope<Adapter: TodayStateDriving>(
     adapter: Adapter,
     fetchUseCaseSpy: TodayFetchTodosUseCaseSpy
 ) async throws {
     try await verifyTodayFetchData(adapter: adapter, fetchUseCaseSpy: fetchUseCaseSpy)
 
-    await adapter.setSectionScope(.focused)
+    await adapter.setTodoScope(.important)
 
-    #expect(adapter.selectedSectionScope == .focused)
+    #expect(adapter.selectedTodoScope == .important)
     #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .focused, itemIds: ["focused"])
+        TodayDisplayedSection(category: .upcoming, itemIds: ["focused"])
     ])
 
-    await adapter.setSectionScope(.focused)
+    await adapter.setTodoScope(.remaining)
 
-    #expect(adapter.selectedSectionScope == .all)
-    #expect(adapter.displayedSections.count == 5)
-
-    await adapter.setSectionScope(.overdue)
-
-    #expect(adapter.selectedSectionScope == .overdue)
-    #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .overdue, itemIds: ["overdue"])
-    ])
-}
-
-@MainActor
-func verifyTodayDisplayOptions<Adapter: TodayStateDriving>(
-    adapter: Adapter,
-    fetchUseCaseSpy: TodayFetchTodosUseCaseSpy,
-    updateDisplayOptionsUseCaseSpy: TodayUpdateDisplayOptionsUseCaseSpy
-) async throws {
-    try await verifyTodayFetchData(adapter: adapter, fetchUseCaseSpy: fetchUseCaseSpy)
-
-    await adapter.setDueDateVisibility(.withoutDueDateOnly)
-
-    #expect(adapter.displayOptions.dueDateVisibility == .withoutDueDateOnly)
-    #expect(adapter.summaryCounts == [
-        .all: 1,
-        .focused: 0,
-        .overdue: 0,
-        .dueSoon: 0
-    ])
-    #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .unscheduled, itemIds: ["unscheduled"])
-    ])
-
-    await adapter.setDueDateVisibility(.all)
-    await adapter.setFocusVisibility(.focusedOnly)
-
-    #expect(adapter.displayOptions.focusVisibility == .focusedOnly)
-    #expect(adapter.summaryCounts == [
-        .all: 1,
-        .focused: 1,
-        .overdue: 0,
-        .dueSoon: 1
-    ])
-    #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .focused, itemIds: ["focused"])
-    ])
-
-    await adapter.resetDisplayOptions()
-
-    #expect(adapter.displayOptions == .default)
-    #expect(updateDisplayOptionsUseCaseSpy.options == [
-        TodayDisplayOptions(dueDateVisibility: .withoutDueDateOnly, focusVisibility: .all),
-        TodayDisplayOptions(dueDateVisibility: .all, focusVisibility: .all),
-        TodayDisplayOptions(dueDateVisibility: .all, focusVisibility: .focusedOnly),
-        .default
-    ])
+    #expect(adapter.selectedTodoScope == .remaining)
+    #expect(adapter.displayedSections.count == 4)
 }
 
 @MainActor
@@ -170,14 +114,12 @@ func verifyTodayCompleteTodo<Adapter: TodayStateDriving>(
     #expect(upsertTodoUseCaseSpy.todos.last?.isCompleted == true)
     #expect(trackAnalyticsEventUseCaseSpy.hasTrackedTodoComplete)
     #expect(adapter.summaryCounts == [
-        .all: 4,
-        .focused: 1,
-        .overdue: 1,
-        .dueSoon: 1
+        .remaining: 4,
+        .important: 1
     ])
     #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .focused, itemIds: ["focused"]),
         TodayDisplayedSection(category: .overdue, itemIds: ["overdue"]),
+        TodayDisplayedSection(category: .upcoming, itemIds: ["focused"]),
         TodayDisplayedSection(category: .later, itemIds: ["later"]),
         TodayDisplayedSection(category: .unscheduled, itemIds: ["unscheduled"])
     ])

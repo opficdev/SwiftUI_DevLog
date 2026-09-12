@@ -110,19 +110,19 @@ final class TodayUpsertTodoUseCaseSpy: UpsertTodoUseCase {
     }
 }
 
-struct TodayFetchDisplayOptionsUseCaseSpy: FetchTodayDisplayOptionsUseCase {
-    var options: TodayDisplayOptions = .default
+final class TodayFetchCategoryPreferencesUseCaseSpy: FetchTodoCategoryPreferencesUseCase {
+    var preferences: [TodoCategoryPreference]
+    var error: Error?
+    private(set) var callCount = 0
 
-    func execute() -> TodayDisplayOptions {
-        options
+    init(preferences: [TodoCategoryPreference] = []) {
+        self.preferences = preferences
     }
-}
 
-final class TodayUpdateDisplayOptionsUseCaseSpy: UpdateTodayDisplayOptionsUseCase {
-    private(set) var options = [TodayDisplayOptions]()
-
-    func execute(_ options: TodayDisplayOptions) {
-        self.options.append(options)
+    func execute() async throws -> [TodoCategoryPreference] {
+        callCount += 1
+        if let error { throw error }
+        return preferences
     }
 }
 
@@ -149,7 +149,8 @@ func makeTodayTodo(
     number: Int = 1,
     title: String = "Todo",
     content: String = "content",
-    dueDate: Date? = nil
+    dueDate: Date? = nil,
+    category: TodoCategory = .system(.feature)
 ) -> Todo {
     let now = Date(timeIntervalSince1970: 0)
     return Todo(
@@ -166,7 +167,7 @@ func makeTodayTodo(
         deletedAt: nil,
         dueDate: dueDate,
         tags: [],
-        category: .system(.feature)
+        category: category
     )
 }
 

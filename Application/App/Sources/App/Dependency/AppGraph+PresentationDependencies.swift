@@ -107,13 +107,10 @@ private extension AppGraph {
     func prepareTodayDependencies(_ dependencies: inout DependencyValues) {
         TodayPresentationDependencyPreparation.prepare(
             &dependencies,
-            fetchDisplayOptionsUseCase: userPreferencesGraphSet
-                .userPreferencesUseCaseGraph
-                .fetchTodayDisplayOptionsUseCase,
             fetchTodosUseCase: todoGraphSet.todoUseCaseGraph.fetchTodosUseCase,
-            updateDisplayOptionsUseCase: userPreferencesGraphSet
-                .userPreferencesUseCaseGraph
-                .updateTodayDisplayOptionsUseCase
+            fetchCategoryPreferencesUseCase: todoGraphSet
+                .todoCategoryUseCaseGraph
+                .fetchTodoCategoryPreferencesUseCase
         )
     }
 

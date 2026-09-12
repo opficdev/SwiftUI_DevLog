@@ -13,7 +13,6 @@ public struct TodayTodoItem: Identifiable, Hashable {
     public let number: Int
     public let title: String
     public let content: String
-    public let tags: [String]
     public let isPinned: Bool
     public let isCompleted: Bool
     public let updatedAt: Date
@@ -25,7 +24,6 @@ public struct TodayTodoItem: Identifiable, Hashable {
         self.number = todo.number
         self.title = todo.title
         self.content = todo.content
-        self.tags = todo.tags
         self.isPinned = todo.isPinned
         self.isCompleted = todo.isCompleted
         self.updatedAt = todo.updatedAt

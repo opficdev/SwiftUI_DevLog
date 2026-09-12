@@ -7,7 +7,6 @@
 
 import Foundation
 import PresentationShared
-import Core
 import Domain
 @testable import TodayTab
 
@@ -15,19 +14,17 @@ enum TodayTestError: Error {
     case failure
 }
 
-enum TodayTestSectionScope: Hashable, CaseIterable {
-    case all
-    case focused
-    case overdue
-    case dueSoon
+enum TodayTestTodoScope: Hashable, CaseIterable {
+    case remaining
+    case important
 }
 
 enum TodayTestSectionCategory: Hashable {
+    case overdue
+    case today
+    case upcoming
     case later
     case unscheduled
-    case focused
-    case overdue
-    case dueSoon
 }
 
 struct TodayDisplayedSection: Equatable {
@@ -43,19 +40,20 @@ protocol TodayStateDriving {
     var todayAchievement: TodayFeature.TodayAchievement? { get }
     var todayInterval: DateInterval { get }
     var isTodayDataLoaded: Bool { get }
-    var selectedSectionScope: TodayTestSectionScope { get }
-    var displayOptions: TodayDisplayOptions { get }
+    var selectedTodoScope: TodayTestTodoScope { get }
+    var selectedCategoryID: String? { get }
+    var isCategoryFilterPresented: Bool { get }
+    var visibleCategoryIDs: [String] { get }
     var showAlert: Bool { get }
     var isLoading: Bool { get }
     var displayedSections: [TodayDisplayedSection] { get }
-    var summaryCounts: [TodayTestSectionScope: Int] { get }
+    var summaryCounts: [TodayTestTodoScope: Int] { get }
 
     func fetchData() async
     func checkCurrentDate(_ date: Date) async
-    func setSectionScope(_ scope: TodayTestSectionScope) async
-    func setDueDateVisibility(_ visibility: TodayDisplayOptions.DueDateVisibility) async
-    func setFocusVisibility(_ visibility: TodayDisplayOptions.FocusVisibility) async
-    func resetDisplayOptions() async
+    func setTodoScope(_ scope: TodayTestTodoScope) async
+    func setCategory(_ categoryID: String?) async
+    func setCategoryFilterPresented(_ isPresented: Bool) async
     func completeTodo(_ item: TodayTodoItem) async
 }
 
@@ -69,12 +67,14 @@ struct TodayStoreTestAdapter: TodayStateDriving {
     var todayAchievement: TodayFeature.TodayAchievement? { store.state.todayAchievement }
     var todayInterval: DateInterval { store.state.todayInterval }
     var isTodayDataLoaded: Bool { store.state.isTodayDataLoaded }
-    var selectedSectionScope: TodayTestSectionScope { store.state.selectedSectionScope.testValue }
-    var displayOptions: TodayDisplayOptions { store.state.displayOptions }
+    var selectedTodoScope: TodayTestTodoScope { store.state.selectedTodoScope.testValue }
+    var selectedCategoryID: String? { store.state.selectedCategoryID }
+    var isCategoryFilterPresented: Bool { store.state.isCategoryFilterPresented }
+    var visibleCategoryIDs: [String] { store.state.visibleCategories.map(\.id) }
     var showAlert: Bool { store.state.alert != nil }
     var isLoading: Bool { store.state.isLoading }
     var displayedSections: [TodayDisplayedSection] { store.state.sections.map(\.testValue) }
-    var summaryCounts: [TodayTestSectionScope: Int] {
+    var summaryCounts: [TodayTestTodoScope: Int] {
         Dictionary(
             uniqueKeysWithValues: store.state.summaryCounts.map { key, value in
                 (key.testValue, value)
@@ -84,26 +84,21 @@ struct TodayStoreTestAdapter: TodayStateDriving {
 
     init(
         fetchUseCase: FetchTodosUseCase = TodayFetchTodosUseCaseSpy(),
+        fetchCategoryPreferencesUseCase: FetchTodoCategoryPreferencesUseCase
+            = TodayFetchCategoryPreferencesUseCaseSpy(),
         fetchTodoByIdUseCase: FetchTodoByIdUseCase = TodayFetchTodoByIdUseCaseSpy(),
         upsertUseCase: UpsertTodoUseCase = TodayUpsertTodoUseCaseSpy(),
-        fetchDisplayOptionsUseCase: FetchTodayDisplayOptionsUseCase = TodayFetchDisplayOptionsUseCaseSpy(),
-        updateDisplayOptionsUseCase: UpdateTodayDisplayOptionsUseCase = TodayUpdateDisplayOptionsUseCaseSpy(),
         trackAnalyticsEventUseCase: TrackAnalyticsEventUseCase = TodayTrackAnalyticsEventUseCaseSpy(),
         now: Date = Date(),
         configureDependencies: ((inout DependencyValues) -> Void)? = nil
     ) {
-        store = TestStore(
-            initialState: TodayFeature.State(
-                displayOptions: fetchDisplayOptionsUseCase.execute(),
-                now: now
-            )
-        ) {
+        store = TestStore(initialState: TodayFeature.State(now: now)) {
             TodayFeature()
         } withDependencies: {
             $0.todayFetchTodosUseCase = fetchUseCase
+            $0.fetchTodoCategoryPreferencesUseCase = fetchCategoryPreferencesUseCase
             $0.fetchTodoByIdUseCase = fetchTodoByIdUseCase
             $0.upsertTodoUseCase = upsertUseCase
-            $0.updateTodayDisplayOptionsUseCase = updateDisplayOptionsUseCase
             $0.trackAnalyticsEventUseCase = trackAnalyticsEventUseCase
             $0.date.now = now
             $0.continuousClock = ContinuousClock()
@@ -145,23 +140,16 @@ struct TodayStoreTestAdapter: TodayStateDriving {
         await store.send(.store(.updateTodo(item)))
     }
 
-    func setSectionScope(_ scope: TodayTestSectionScope) async {
-        await store.send(.setSectionScope(scope.featureValue))
+    func setTodoScope(_ scope: TodayTestTodoScope) async {
+        await store.send(.setTodoScope(scope.featureValue))
     }
 
-    func setDueDateVisibility(_ visibility: TodayDisplayOptions.DueDateVisibility) async {
-        await store.send(.binding(.set(\.displayOptions.dueDateVisibility, visibility)))
-        await drainReceivedActions()
+    func setCategory(_ categoryID: String?) async {
+        await store.send(.setCategory(categoryID))
     }
 
-    func setFocusVisibility(_ visibility: TodayDisplayOptions.FocusVisibility) async {
-        await store.send(.binding(.set(\.displayOptions.focusVisibility, visibility)))
-        await drainReceivedActions()
-    }
-
-    func resetDisplayOptions() async {
-        await store.send(.resetDisplayOptions)
-        await drainReceivedActions()
+    func setCategoryFilterPresented(_ isPresented: Bool) async {
+        await store.send(.binding(.set(\.isCategoryFilterPresented, isPresented)))
     }
 
     func completeTodo(_ item: TodayTodoItem) async {
@@ -176,32 +164,20 @@ struct TodayStoreTestAdapter: TodayStateDriving {
     }
 }
 
-private extension TodayTestSectionScope {
-    var featureValue: TodayFeature.SectionScope {
+private extension TodayTestTodoScope {
+    var featureValue: TodayFeature.TodoScope {
         switch self {
-        case .all:
-            return .all
-        case .focused:
-            return .focused
-        case .overdue:
-            return .overdue
-        case .dueSoon:
-            return .dueSoon
+        case .remaining: .remaining
+        case .important: .important
         }
     }
 }
 
-private extension TodayFeature.SectionScope {
-    var testValue: TodayTestSectionScope {
+private extension TodayFeature.TodoScope {
+    var testValue: TodayTestTodoScope {
         switch self {
-        case .all:
-            return .all
-        case .focused:
-            return .focused
-        case .overdue:
-            return .overdue
-        case .dueSoon:
-            return .dueSoon
+        case .remaining: .remaining
+        case .important: .important
         }
     }
 }
@@ -209,16 +185,11 @@ private extension TodayFeature.SectionScope {
 private extension TodayFeature.SectionCategory {
     var testValue: TodayTestSectionCategory {
         switch self {
-        case .later:
-            return .later
-        case .unscheduled:
-            return .unscheduled
-        case .focused:
-            return .focused
-        case .overdue:
-            return .overdue
-        case .dueSoon:
-            return .dueSoon
+        case .overdue: .overdue
+        case .today: .today
+        case .upcoming: .upcoming
+        case .later: .later
+        case .unscheduled: .unscheduled
         }
     }
 }

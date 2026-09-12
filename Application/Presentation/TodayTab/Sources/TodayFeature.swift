@@ -12,19 +12,17 @@ import PresentationShared
 
 @Reducer
 struct TodayFeature {
-    enum SectionScope: Hashable, CaseIterable {
-        case all
-        case focused
-        case overdue
-        case dueSoon
+    enum TodoScope: Hashable, CaseIterable {
+        case remaining
+        case important
     }
 
     enum SectionCategory: Hashable {
         case later
         case unscheduled
-        case focused
+        case today
         case overdue
-        case dueSoon
+        case upcoming
     }
 
     struct SectionContent: Identifiable, Equatable {
@@ -35,9 +33,9 @@ struct TodayFeature {
     }
 
     struct SectionCollection {
-        var focused: [TodayTodoItem] = []
         var overdue: [TodayTodoItem] = []
-        var dueSoon: [TodayTodoItem] = []
+        var today: [TodayTodoItem] = []
+        var upcoming: [TodayTodoItem] = []
         var later: [TodayTodoItem] = []
         var unscheduled: [TodayTodoItem] = []
     }
@@ -48,8 +46,8 @@ struct TodayFeature {
         case refresh
         case fetchData
         case checkCurrentDate(Date)
-        case setSectionScope(SectionScope)
-        case resetDisplayOptions
+        case setTodoScope(TodoScope)
+        case setCategory(String?)
         case completeTodo(TodayTodoItem)
         case store(StoreAction)
         case loading(LoadingFeature.Action)
@@ -62,15 +60,16 @@ struct TodayFeature {
                 interval: DateInterval
             )
             case setCompletedTodayTodos([TodayTodoItem], interval: DateInterval)
+            case setCategories([TodoCategoryItem])
             case updateTodo(TodayTodoItem)
             case removeTodo(String)
         }
     }
 
     @Dependency(\.todayFetchTodosUseCase) var fetchTodosUseCase
+    @Dependency(\.fetchTodoCategoryPreferencesUseCase) var fetchCategoryPreferencesUseCase
     @Dependency(\.fetchTodoByIdUseCase) var fetchTodoByIdUseCase
     @Dependency(\.upsertTodoUseCase) var upsertTodoUseCase
-    @Dependency(\.updateTodayDisplayOptionsUseCase) var updateTodayDisplayOptionsUseCase
     @Dependency(\.trackAnalyticsEventUseCase) var trackAnalyticsEventUseCase
     @Dependency(\.date.now) var now
 
@@ -86,18 +85,20 @@ struct TodayFeature {
             switch action {
             case .alert:
                 break
-            case .binding(\.displayOptions.dueDateVisibility),
-                 .binding(\.displayOptions.focusVisibility),
-                 .binding(\.displayOptions.isFocusedOnly):
-                return updateDisplayOptionsEffect(state.displayOptions)
             case .binding:
                 break
             case .refresh:
                 let interval = prepareTodayInterval(state: &state, now: now)
-                return fetchTodosEffect(interval: interval, showsIndicator: false)
+                return .concatenate(
+                    fetchTodosEffect(interval: interval, showsIndicator: false),
+                    fetchCategoriesEffect()
+                )
             case .fetchData:
                 let interval = prepareTodayInterval(state: &state, now: now)
-                return fetchTodosEffect(interval: interval)
+                return .concatenate(
+                    fetchTodosEffect(interval: interval),
+                    fetchCategoriesEffect()
+                )
             case .checkCurrentDate(let date):
                 let interval = Self.dayInterval(containing: date)
                 guard state.todayInterval != interval else { break }
@@ -109,15 +110,10 @@ struct TodayFeature {
                     return fetchTodosEffect(interval: interval, showsIndicator: false)
                 }
                 return fetchCompletedTodayTodosEffect(interval: interval)
-            case .setSectionScope(let scope):
-                if state.selectedSectionScope == scope, scope != .all {
-                    state.selectedSectionScope = .all
-                } else {
-                    state.selectedSectionScope = scope
-                }
-            case .resetDisplayOptions:
-                state.displayOptions = .default
-                return updateDisplayOptionsEffect(state.displayOptions)
+            case .setTodoScope(let scope):
+                state.selectedTodoScope = scope
+            case .setCategory(let categoryID):
+                state.selectedCategoryID = categoryID
             case .completeTodo(let item):
                 return completeTodoEffect(item)
             case .store(.setAlert):
@@ -132,6 +128,13 @@ struct TodayFeature {
                 guard state.todayInterval == interval else { break }
                 state.completedTodayTodos = todos
                 state.isCompletedTodayDataLoaded = true
+            case .store(.setCategories(let categories)):
+                state.categories = categories
+                let visibleCategoryIDs = Set(state.visibleCategories.map(\.id))
+                if let categoryID = state.selectedCategoryID,
+                   !visibleCategoryIDs.contains(categoryID) {
+                    state.selectedCategoryID = nil
+                }
             case .store(.updateTodo(let item)):
                 if item.isCompleted {
                     state.todos.removeAll { $0.id == item.id }
@@ -170,11 +173,6 @@ extension DependencyValues {
         get { self[TodayFetchTodosUseCaseKey.self] }
         set { self[TodayFetchTodosUseCaseKey.self] = newValue }
     }
-
-    var updateTodayDisplayOptionsUseCase: UpdateTodayDisplayOptionsUseCase {
-        get { self[UpdateTodayDisplayOptionsUseCaseKey.self] }
-        set { self[UpdateTodayDisplayOptionsUseCaseKey.self] = newValue }
-    }
 }
 
 private enum TodayFetchTodosUseCaseKey: DependencyKey {
@@ -183,16 +181,6 @@ private enum TodayFetchTodosUseCaseKey: DependencyKey {
     }
 
     static var testValue: FetchTodosUseCase {
-        liveValue
-    }
-}
-
-private enum UpdateTodayDisplayOptionsUseCaseKey: DependencyKey {
-    static var liveValue: UpdateTodayDisplayOptionsUseCase {
-        preconditionFailure("UpdateTodayDisplayOptionsUseCase must be provided.")
-    }
-
-    static var testValue: UpdateTodayDisplayOptionsUseCase {
         liveValue
     }
 }
@@ -277,6 +265,17 @@ private extension TodayFeature {
         }
     }
 
+    func fetchCategoriesEffect() -> Effect<Action> {
+        .run { [fetchCategoryPreferencesUseCase] send in
+            do {
+                let preferences = try await fetchCategoryPreferencesUseCase.execute()
+                await send(.store(.setCategories(preferences.map(TodoCategoryItem.init(from:)))))
+            } catch {
+                await send(.store(.setAlert))
+            }
+        }
+    }
+
     static func completedTodayQuery(interval: DateInterval) -> TodoQuery {
         TodoQuery(
             completionFilter: .completed,
@@ -288,12 +287,6 @@ private extension TodayFeature {
             pageSize: Self.pageSize,
             fetchAllPages: true
         )
-    }
-
-    func updateDisplayOptionsEffect(_ options: TodayDisplayOptions) -> Effect<Action> {
-        .run { [updateTodayDisplayOptionsUseCase] _ in
-            updateTodayDisplayOptionsUseCase.execute(options)
-        }
     }
 
     func completeTodoEffect(_ item: TodayTodoItem) -> Effect<Action> {

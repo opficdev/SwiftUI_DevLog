@@ -13,61 +13,55 @@ import Domain
 
 @MainActor
 struct TodayFeatureTests {
-    @Test("TodayFeature groupedSectionItems는 주입된 now 기준으로 섹션을 분류한다")
-    func TodayFeature_groupedSectionItems는_주입된_now_기준으로_섹션을_분류한다() throws {
+    @Test("TodayFeature groupedSectionItems는 중요 여부와 무관하게 날짜로 분류한다")
+    func todayFeature_groupedSectionItems는_중요_여부와_무관하게_날짜로_분류한다() throws {
         let now = try #require(makeFixedTodayNow())
         let items = makeFixedTodayTodoItems(now: now)
+        let interval = TodayFeature.dayInterval(containing: now)
 
-        let sections = TodayFeature.groupedSectionItems(from: items, now: now)
+        let sections = TodayFeature.groupedSectionItems(from: items, interval: interval)
 
-        #expect(sections.focused.map(\.id) == ["focused"])
         #expect(sections.overdue.map(\.id) == ["overdue"])
-        #expect(sections.dueSoon.map(\.id) == ["due-soon"])
+        #expect(sections.today.isEmpty)
+        #expect(sections.upcoming.map(\.id) == ["focused", "due-soon"])
         #expect(sections.later.map(\.id) == ["later"])
         #expect(sections.unscheduled.map(\.id) == ["unscheduled"])
     }
 
-    @Test("TodayFeature summaryValue는 주입된 now 기준으로 요약 값을 계산한다")
-    func TodayFeature_summaryValue는_주입된_now_기준으로_요약_값을_계산한다() throws {
+    @Test("TodayFeature filteredTodos는 보기와 카테고리 조건을 함께 적용한다")
+    func todayFeature_filteredTodos는_보기와_카테고리_조건을_함께_적용한다() throws {
         let now = try #require(makeFixedTodayNow())
-        let todos = makeFixedTodayTodoItems(now: now)
+        let todos = [
+            makeTodayTodo(
+                id: "match",
+                isPinned: true,
+                dueDate: now,
+                category: .system(.feature)
+            ),
+            makeTodayTodo(
+                id: "other-scope",
+                dueDate: now,
+                category: .system(.feature)
+            ),
+            makeTodayTodo(
+                id: "other-category",
+                isPinned: true,
+                dueDate: now,
+                category: .system(.doc)
+            )
+        ].compactMap(TodayTodoItem.init(from:))
 
-        #expect(
-            TodayFeature.summaryValue(
-                for: .all,
-                todos: todos,
-                displayOptions: .default,
-                now: now
-            ) == 5
+        let filtered = TodayFeature.filteredTodos(
+            todos,
+            scope: .important,
+            categoryID: SystemTodoCategory.feature.rawValue
         )
-        #expect(
-            TodayFeature.summaryValue(
-                for: .focused,
-                todos: todos,
-                displayOptions: .default,
-                now: now
-            ) == 1
-        )
-        #expect(
-            TodayFeature.summaryValue(
-                for: .overdue,
-                todos: todos,
-                displayOptions: .default,
-                now: now
-            ) == 1
-        )
-        #expect(
-            TodayFeature.summaryValue(
-                for: .dueSoon,
-                todos: todos,
-                displayOptions: .default,
-                now: now
-            ) == 2
-        )
+
+        #expect(filtered.map(\.id) == ["match"])
     }
 
     @Test("TodayFeature fetchData는 요약과 섹션 상태를 갱신한다")
-    func TodayFeature_fetchData는_요약과_섹션_상태를_갱신한다() async throws {
+    func todayFeature_fetchData는_요약과_섹션_상태를_갱신한다() async throws {
         let todos = makeTodaySectionTodos()
         let fetchSpy = TodayFetchTodosUseCaseSpy(
             pagesByFilter: [
@@ -81,7 +75,7 @@ struct TodayFeatureTests {
     }
 
     @Test("TodayFeature fetchData는 오늘 완료 Todo를 별도 조회해 달성 상태를 만든다")
-    func TodayFeature_fetchData는_오늘_완료_Todo를_별도_조회해_달성_상태를_만든다() async throws {
+    func todayFeature_fetchData는_오늘_완료_Todo를_별도_조회해_달성_상태를_만든다() async throws {
         let now = try #require(makeFixedTodayNow())
         let incompleteToday = makeTodayTodo(id: "incomplete-today", dueDate: now)
         let completedToday = makeTodayTodo(id: "completed-today", isCompleted: true, dueDate: now)
@@ -100,11 +94,11 @@ struct TodayFeatureTests {
         #expect(adapter.todayTodos.map(\.id) == ["incomplete-today", "completed-today"])
         #expect(adapter.todayAchievement?.completedCount == 1)
         #expect(adapter.todayAchievement?.totalCount == 2)
-        #expect(adapter.summaryCounts[.all] == 1)
+        #expect(adapter.summaryCounts[.remaining] == 1)
     }
 
     @Test("TodayFeature checkCurrentDate는 날짜가 바뀔 때만 오늘 완료 Todo를 다시 조회한다")
-    func TodayFeature_checkCurrentDate는_날짜가_바뀔_때만_오늘_완료_Todo를_다시_조회한다() async throws {
+    func todayFeature_checkCurrentDate는_날짜가_바뀔_때만_오늘_완료_Todo를_다시_조회한다() async throws {
         let now = try #require(makeFixedTodayNow())
         let calendar = Calendar.current
         let nextDay = try #require(calendar.date(byAdding: .day, value: 1, to: now))
@@ -135,7 +129,7 @@ struct TodayFeatureTests {
     }
 
     @Test("TodayFeature는 이전 날짜의 완료 조회 결과를 반영하지 않는다")
-    func TodayFeature는_이전_날짜의_완료_조회_결과를_반영하지_않는다() async throws {
+    func todayFeature는_이전_날짜의_완료_조회_결과를_반영하지_않는다() async throws {
         let now = try #require(makeFixedTodayNow())
         let calendar = Calendar.current
         let previousDay = try #require(calendar.date(byAdding: .day, value: -1, to: now))
@@ -155,7 +149,7 @@ struct TodayFeatureTests {
     }
 
     @Test("TodayFeature는 최초 조회 중 날짜가 바뀌면 새 날짜 전체 데이터를 다시 조회한다")
-    func TodayFeature는_최초_조회_중_날짜가_바뀌면_새_날짜_전체_데이터를_다시_조회한다() async throws {
+    func todayFeature는_최초_조회_중_날짜가_바뀌면_새_날짜_전체_데이터를_다시_조회한다() async throws {
         let now = try #require(makeFixedTodayNow())
         let calendar = Calendar.current
         let nextDay = try #require(calendar.date(byAdding: .day, value: 1, to: now))
@@ -203,7 +197,7 @@ struct TodayFeatureTests {
     }
 
     @Test("TodayFeature completeTodo는 오늘 Todo를 완료 목록으로 한 번만 이동한다")
-    func TodayFeature_completeTodo는_오늘_Todo를_완료_목록으로_한_번만_이동한다() async throws {
+    func todayFeature_completeTodo는_오늘_Todo를_완료_목록으로_한_번만_이동한다() async throws {
         let now = try #require(makeFixedTodayNow())
         let todo = makeTodayTodo(id: "today", dueDate: now)
         let fetchSpy = TodayFetchTodosUseCaseSpy(
@@ -234,7 +228,7 @@ struct TodayFeatureTests {
     }
 
     @Test("TodayFeature completeTodo는 저장된 최신 마감일로 오늘 완료 목록을 갱신한다")
-    func TodayFeature_completeTodo는_저장된_최신_마감일로_오늘_완료_목록을_갱신한다() async throws {
+    func todayFeature_completeTodo는_저장된_최신_마감일로_오늘_완료_목록을_갱신한다() async throws {
         let now = try #require(makeFixedTodayNow())
         let tomorrow = try #require(Calendar.current.date(byAdding: .day, value: 1, to: now))
         let original = makeTodayTodo(id: "today", dueDate: now)
@@ -262,7 +256,7 @@ struct TodayFeatureTests {
     }
 
     @Test("TodayFeature completeTodo 실패는 오늘 달성 상태를 유지한다")
-    func TodayFeature_completeTodo_실패는_오늘_달성_상태를_유지한다() async throws {
+    func todayFeature_completeTodo_실패는_오늘_달성_상태를_유지한다() async throws {
         let now = try #require(makeFixedTodayNow())
         let todo = makeTodayTodo(id: "today", dueDate: now)
         let fetchSpy = TodayFetchTodosUseCaseSpy(
@@ -291,8 +285,8 @@ struct TodayFeatureTests {
         #expect(adapter.showAlert)
     }
 
-    @Test("TodayFeature 달성 상태는 isChecked와 표시 옵션의 영향을 받지 않는다")
-    func TodayFeature_달성_상태는_isChecked와_표시_옵션의_영향을_받지_않는다() async throws {
+    @Test("TodayFeature 달성 상태는 목록 필터의 영향을 받지 않는다")
+    func todayFeature_달성_상태는_목록_필터의_영향을_받지_않는다() async throws {
         let now = try #require(makeFixedTodayNow())
         let checkedTodo = makeTodayTodo(id: "checked", isChecked: true, dueDate: now)
         let completedTodo = makeTodayTodo(id: "completed", isCompleted: true, dueDate: now)
@@ -306,8 +300,8 @@ struct TodayFeatureTests {
         let adapter = TodayStoreTestAdapter(fetchUseCase: fetchSpy, now: now)
         await adapter.fetchData()
 
-        await adapter.setDueDateVisibility(.withoutDueDateOnly)
-        await adapter.setFocusVisibility(.focusedOnly)
+        await adapter.setTodoScope(.important)
+        await adapter.setCategory(SystemTodoCategory.doc.rawValue)
 
         #expect(adapter.todayAchievement?.completedCount == 1)
         #expect(adapter.todayAchievement?.totalCount == 2)

@@ -5,7 +5,6 @@
 //  Created by opfic on 6/14/26.
 //
 
-import Core
 import Foundation
 import PresentationShared
 
@@ -34,20 +33,18 @@ extension TodayFeature {
     @ObservableState
     struct State: Equatable {
         @Presents var alert: AlertState<Never>?
-        var todos: [TodayTodoItem] = []
-        var completedTodayTodos: [TodayTodoItem] = []
-        var selectedSectionScope: SectionScope = .all
-        var displayOptions: TodayDisplayOptions
+        var todos = [TodayTodoItem]()
+        var completedTodayTodos = [TodayTodoItem]()
+        var categories = [TodoCategoryItem]()
+        var selectedTodoScope = TodoScope.remaining
+        var selectedCategoryID: String?
+        var isCategoryFilterPresented = false
         var loading = LoadingFeature.State()
         var todayInterval: DateInterval
         var isIncompleteDataLoaded = false
         var isCompletedTodayDataLoaded = false
 
-        init(
-            displayOptions: TodayDisplayOptions = .default,
-            now: Date = Date()
-        ) {
-            self.displayOptions = displayOptions
+        init(now: Date = Date()) {
             self.todayInterval = TodayFeature.dayInterval(containing: now)
         }
 
@@ -57,6 +54,18 @@ extension TodayFeature {
 
         var isTodayDataLoaded: Bool {
             isIncompleteDataLoaded && isCompletedTodayDataLoaded
+        }
+
+        var visibleCategories: [TodoCategoryItem] {
+            categories.filter(\.isVisible)
+        }
+
+        var selectedCategory: TodoCategoryItem? {
+            visibleCategories.first { $0.id == selectedCategoryID }
+        }
+
+        var hasActiveFilters: Bool {
+            selectedTodoScope == .important || selectedCategoryID != nil
         }
 
         var todayTodos: [TodayTodoItem] {
@@ -77,86 +86,67 @@ extension TodayFeature {
             )
         }
 
-        var sections: [SectionContent] {
-            let now = Date()
-            let items = TodayFeature.groupedSectionItems(
-                from: TodayFeature.displayedTodos(
-                    todos: todos,
-                    displayOptions: displayOptions
-                ),
-                now: now
+        var filteredTodos: [TodayTodoItem] {
+            TodayFeature.filteredTodos(
+                todos,
+                scope: selectedTodoScope,
+                categoryID: selectedCategoryID
             )
-
-            switch selectedSectionScope {
-            case .all:
-                return
-                    TodayFeature.makeSection(
-                        category: .focused,
-                        title: String(localized: "today_section_focused", bundle: PresentationResources.bundle),
-                        items: items.focused
-                    )
-                    + TodayFeature.makeSection(
-                        category: .overdue,
-                        title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
-                        items: items.overdue
-                    )
-                    + TodayFeature.makeSection(
-                        category: .dueSoon,
-                        title: String.localizedStringWithFormat(
-                            String(localized: "today_section_due_soon_format", bundle: PresentationResources.bundle),
-                            Int64(TodayFeature.upcomingWindowDays)
-                        ),
-                        items: items.dueSoon
-                    )
-                    + TodayFeature.makeSection(
-                        category: .later,
-                        title: String(localized: "today_section_later", bundle: PresentationResources.bundle),
-                        items: items.later
-                    )
-                    + TodayFeature.makeSection(
-                        category: .unscheduled,
-                        title: String(localized: "today_section_unscheduled", bundle: PresentationResources.bundle),
-                        items: items.unscheduled
-                    )
-            case .focused:
-                return TodayFeature.makeSection(
-                    category: .focused,
-                    title: String(localized: "today_section_focused", bundle: PresentationResources.bundle),
-                    items: items.focused
-                )
-            case .overdue:
-                return TodayFeature.makeSection(
-                    category: .overdue,
-                    title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
-                    items: items.overdue
-                )
-            case .dueSoon:
-                return TodayFeature.makeSection(
-                    category: .dueSoon,
-                    title: String.localizedStringWithFormat(
-                        String(localized: "today_section_due_soon_format", bundle: PresentationResources.bundle),
-                        Int64(TodayFeature.upcomingWindowDays)
-                    ),
-                    items: items.dueSoon
-                )
-            }
         }
 
-        var summaryCounts: [SectionScope: Int] {
-            let now = Date()
-            return Dictionary(
-                uniqueKeysWithValues: SectionScope.allCases.map { scope in
-                    (
-                        scope,
-                        TodayFeature.summaryValue(
-                            for: scope,
-                            todos: todos,
-                            displayOptions: displayOptions,
-                            now: now
-                        )
-                    )
-                }
+        var filteredCompletedTodayTodos: [TodayTodoItem] {
+            TodayFeature.filteredTodos(
+                completedTodayTodos,
+                scope: selectedTodoScope,
+                categoryID: selectedCategoryID
             )
+        }
+
+        var sections: [SectionContent] {
+            var collection = TodayFeature.groupedSectionItems(
+                from: filteredTodos,
+                interval: todayInterval
+            )
+            collection.today.append(contentsOf: filteredCompletedTodayTodos)
+
+            return
+                TodayFeature.makeSection(
+                    category: .overdue,
+                    title: String(localized: "today_section_overdue", bundle: PresentationResources.bundle),
+                    items: collection.overdue
+                )
+                + TodayFeature.makeSection(
+                    category: .today,
+                    title: String(localized: "today_section_today", bundle: PresentationResources.bundle),
+                    items: collection.today
+                )
+                + TodayFeature.makeSection(
+                    category: .upcoming,
+                    title: String(localized: "today_section_upcoming", bundle: PresentationResources.bundle),
+                    items: collection.upcoming
+                )
+                + TodayFeature.makeSection(
+                    category: .later,
+                    title: String(localized: "today_section_later", bundle: PresentationResources.bundle),
+                    items: collection.later
+                )
+                + TodayFeature.makeSection(
+                    category: .unscheduled,
+                    title: String(localized: "today_section_unscheduled", bundle: PresentationResources.bundle),
+                    items: collection.unscheduled
+                )
+        }
+
+        var summaryCounts: [TodoScope: Int] {
+            let todos = TodayFeature.filteredTodos(
+                todos,
+                scope: .remaining,
+                categoryID: selectedCategoryID
+            )
+            return [
+                .remaining: todos.count,
+                .important: todos.filter(\.isPinned).count
+            ]
         }
     }
 
@@ -197,113 +187,56 @@ extension TodayFeature {
         )
     }
 
-    static func summaryValue(
-        for scope: SectionScope,
-        todos: [TodayTodoItem],
-        displayOptions: TodayDisplayOptions,
-        now: Date
-    ) -> Int {
-        let displayedTodos = displayedTodos(
-            todos: todos,
-            displayOptions: displayOptions
-        )
-
-        switch scope {
-        case .all:
-            return displayedTodos.count
-        case .focused:
-            return displayedTodos.filter(\.isPinned).count
-        case .overdue:
-            return displayedTodos.filter { isOverdue($0, now: now) }.count
-        case .dueSoon:
-            return displayedTodos.filter { isDueSoon($0, now: now) }.count
-        }
-    }
-
-    static func displayedTodos(
-        todos: [TodayTodoItem],
-        displayOptions: TodayDisplayOptions
+    static func filteredTodos(
+        _ todos: [TodayTodoItem],
+        scope: TodoScope,
+        categoryID: String?
     ) -> [TodayTodoItem] {
-        let dueDateFilteredTodos: [TodayTodoItem]
-        switch displayOptions.dueDateVisibility {
-        case .all:
-            dueDateFilteredTodos = todos
-        case .withDueDateOnly:
-            dueDateFilteredTodos = todos.filter { $0.dueDate != nil }
-        case .withoutDueDateOnly:
-            dueDateFilteredTodos = todos.filter { $0.dueDate == nil }
-        }
-
-        switch displayOptions.focusVisibility {
-        case .all:
-            return dueDateFilteredTodos
-        case .focusedOnly:
-            return dueDateFilteredTodos.filter(\.isPinned)
+        todos.filter { item in
+            if scope == .important, !item.isPinned { return false }
+            if let categoryID, item.category.storageValue != categoryID { return false }
+            return true
         }
     }
 
     static func groupedSectionItems(
         from items: [TodayTodoItem],
-        now: Date
-    ) -> TodayFeature.SectionCollection {
-        let calendar = Calendar.current
-        let startOfToday = calendar.startOfDay(for: now)
-        guard let windowEnd = calendar.date(
+        interval: DateInterval,
+        calendar: Calendar = .autoupdatingCurrent
+    ) -> SectionCollection {
+        guard let upcomingEnd = calendar.date(
             byAdding: .day,
-            value: TodayFeature.upcomingWindowDays,
-            to: startOfToday
+            value: upcomingWindowDays,
+            to: interval.end
         ) else {
-            return TodayFeature.SectionCollection(
-                focused: items.filter(\.isPinned),
-                unscheduled: items.filter { !$0.isPinned && $0.dueDate == nil }
-            )
+            return SectionCollection(unscheduled: pinnedFirst(items.filter { $0.dueDate == nil }))
         }
 
-        var collection = TodayFeature.SectionCollection()
+        var collection = SectionCollection()
 
         for item in items {
-            if item.isPinned {
-                collection.focused.append(item)
-                continue
-            }
-
             guard let dueDate = item.dueDate else {
                 collection.unscheduled.append(item)
                 continue
             }
 
-            let dueDay = calendar.startOfDay(for: dueDate)
-            if dueDay < startOfToday {
+            if dueDate < interval.start {
                 collection.overdue.append(item)
-            } else if dueDay <= windowEnd {
-                collection.dueSoon.append(item)
+            } else if dueDate < interval.end {
+                collection.today.append(item)
+            } else if dueDate < upcomingEnd {
+                collection.upcoming.append(item)
             } else {
                 collection.later.append(item)
             }
         }
 
+        collection.overdue = pinnedFirst(collection.overdue)
+        collection.today = pinnedFirst(collection.today)
+        collection.upcoming = pinnedFirst(collection.upcoming)
+        collection.later = pinnedFirst(collection.later)
+        collection.unscheduled = pinnedFirst(collection.unscheduled)
         return collection
-    }
-
-    static func isOverdue(_ item: TodayTodoItem, now: Date) -> Bool {
-        guard let dueDate = item.dueDate else { return false }
-        let calendar = Calendar.current
-        return calendar.startOfDay(for: dueDate) < calendar.startOfDay(for: now)
-    }
-
-    static func isDueSoon(_ item: TodayTodoItem, now: Date) -> Bool {
-        guard let dueDate = item.dueDate else { return false }
-        let calendar = Calendar.current
-        let startOfToday = calendar.startOfDay(for: now)
-        guard let windowEnd = calendar.date(
-            byAdding: .day,
-            value: TodayFeature.upcomingWindowDays,
-            to: startOfToday
-        ) else {
-            return false
-        }
-        let dueDay = calendar.startOfDay(for: dueDate)
-        return startOfToday <= dueDay && dueDay <= windowEnd
     }
 
     static func makeSection(
@@ -313,5 +246,9 @@ extension TodayFeature {
     ) -> [SectionContent] {
         guard !items.isEmpty else { return [] }
         return [SectionContent(category: category, title: title, items: items)]
+    }
+
+    private static func pinnedFirst(_ items: [TodayTodoItem]) -> [TodayTodoItem] {
+        items.filter(\.isPinned) + items.filter { !$0.isPinned }
     }
 }
