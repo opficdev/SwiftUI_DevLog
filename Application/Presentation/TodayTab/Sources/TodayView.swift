@@ -41,6 +41,7 @@ public struct TodayView: View {
                             ForEach(store.sections) { section in
                                 TodoSection(
                                     section: section,
+                                    onSelect: { path.append(.todo(TodoIdItem(id: $0.id))) },
                                     onComplete: { store.send(.completeTodo($0)) }
                                 )
                             }
@@ -340,7 +341,9 @@ private struct CategoryFilterRow: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            action()
+        } label: {
             HStack(spacing: 6) {
                 Image(systemName: category?.symbolName ?? "tray.2")
                     .foregroundStyle(category?.color ?? Color.textSecondary)
@@ -362,6 +365,7 @@ private struct CategoryFilterRow: View {
 
 private struct TodoSection: View {
     let section: TodayFeature.SectionContent
+    let onSelect: (TodayTodoItem) -> Void
     let onComplete: (TodayTodoItem) -> Void
 
     var body: some View {
@@ -388,6 +392,7 @@ private struct TodoSection: View {
                 ForEach(Array(zip(section.items.indices, section.items)), id: \.1.id) { index, item in
                     TodoRow(
                         item: item,
+                        onSelect: { onSelect(item) },
                         onComplete: { onComplete(item) }
                     )
                     if index < section.items.count - 1 {
@@ -408,13 +413,16 @@ private struct TodoRow: View {
     @Environment(\.colorScheme) private var colorScheme
     @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(24)
     let item: TodayTodoItem
+    let onSelect: () -> Void
     let onComplete: () -> Void
     private var isDarkMode: Bool { colorScheme == .dark }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             completionStatus
-            NavigationLink(value: TodayRoute.todo(TodoIdItem(id: item.id))) {
+            Button {
+                onSelect()
+            } label: {
                 HStack(spacing: 8) {
                     VStack(alignment: .leading, spacing: 8) {
                         todoInformation
@@ -437,9 +445,9 @@ private struct TodoRow: View {
                         .font(.callout.bold())
                         .foregroundStyle(Color.textTertiary)
                 }
+                .todoDetailPreview(todoId: item.id)
             }
             .buttonStyle(.plain)
-            .todoDetailPreview(todoId: item.id)
         }
         .padding(20)
     }
@@ -453,7 +461,9 @@ private struct TodoRow: View {
                 .foregroundStyle(Color.success)
                 .frame(width: completionSize, height: completionSize)
         } else {
-            Button(action: onComplete) {
+            Button {
+                onComplete()
+            } label: {
                 Image(systemName: "circle")
                     .resizable()
                     .scaledToFit()
