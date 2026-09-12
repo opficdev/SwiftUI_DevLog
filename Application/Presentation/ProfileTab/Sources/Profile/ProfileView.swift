@@ -409,7 +409,7 @@ private struct ProfileCard: View {
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                 }
-                .foregroundStyle(Color.gray)
+                .foregroundStyle(Color.onPrimaryContainer)
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)

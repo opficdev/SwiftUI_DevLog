@@ -33,7 +33,7 @@ public struct TodayView: View {
     public var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
+                LazyVStack(alignment: .leading, spacing: 8, pinnedViews: [.sectionHeaders]) {
                     Section {
                         if store.sections.isEmpty, !store.isLoading {
                             emptyContent
@@ -45,18 +45,17 @@ public struct TodayView: View {
                                     onComplete: { store.send(.completeTodo($0)) }
                                 )
                             }
+                            .padding(.bottom, 12)
                         }
                     } header: {
                         VStack {
                             achievementCard
                             filterBar
                         }
-                        .padding(.bottom, 6)
                         .background(Color.appBackground)
                     }
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 24)
             }
             .safeAreaInset(edge: .top, spacing: 0) { topBar }
             .background(Color.appBackground.ignoresSafeArea())
@@ -109,7 +108,7 @@ public struct TodayView: View {
 
                 Text(achievementStatusTitle)
                     .font(.callout.weight(.semibold))
-                    .foregroundStyle(Color.accent)
+                    .foregroundStyle(Color.onPrimaryContainer)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.primaryContainer, in: .capsule)
@@ -165,9 +164,9 @@ public struct TodayView: View {
                                 .fontWeight(.bold)
                         }
                         .font(.callout)
-                        .foregroundStyle(isSelected ? Color.accent : .textSecondary)
+                        .foregroundStyle(isSelected ? Color.onPrimaryContainer : .onControlBackground)
                     }
-                    .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .clear)
+                    .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .controlBackground)
                 }
 
                 let category = store.selectedCategory
@@ -177,7 +176,7 @@ public struct TodayView: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: category?.symbolName ?? "tray.2")
-                            .foregroundStyle(category?.color ?? Color.textSecondary)
+                            .foregroundStyle(category?.color ?? Color.onControlBackground)
                         Text(
                             category?.localizedName
                                 ?? String(
@@ -187,9 +186,9 @@ public struct TodayView: View {
                         )
                     }
                     .font(.callout)
-                    .foregroundStyle(isSelected ? Color.accent : .textSecondary)
+                    .foregroundStyle(isSelected ? Color.onPrimaryContainer : .onControlBackground)
                 }
-                .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .clear)
+                .adaptiveButtonStyle(color: isSelected ? Color.primaryContainer : .controlBackground)
             }
         }
         .scrollIndicators(.hidden)
@@ -406,12 +405,10 @@ private struct TodoSection: View {
 }
 
 private struct TodoRow: View {
-    @Environment(\.colorScheme) private var colorScheme
     @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(24)
     let item: TodayTodoItem
     let onSelect: () -> Void
     let onComplete: () -> Void
-    private var isDarkMode: Bool { colorScheme == .dark }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -479,11 +476,11 @@ private struct TodoRow: View {
                 Text(category.localizedName)
             }
             .font(.caption.weight(.semibold))
-            .foregroundStyle(isDarkMode ? .white : category.color)
+            .foregroundStyle(category.color)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(
-                category.color.opacity(isDarkMode ? 1 : 0.2),
+                category.color.opacity(0.2),
                 in: .rect(cornerRadius: 8)
             )
 
