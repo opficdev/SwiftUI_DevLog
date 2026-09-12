@@ -3,8 +3,8 @@
 ## Logic preservation and optimization
 
 - Reuse the existing program logic as-is whenever possible.
-- Change logic only when the new approach produces exactly the same result and strictly improves time or space complexity.
-- If there is no clear complexity improvement, keep the original logic.
+- Change logic when the user explicitly requests the behavior change, or when the new approach produces exactly the same result and strictly improves time or space complexity.
+- Otherwise, keep the original logic.
 
 ## Code modification response style
 
@@ -20,10 +20,10 @@
 
 ## Documentation placement
 
-- Keep AI workflow and rule documents under `.agents/`.
-- Keep approved workflow Specs under `.agents/specs/`.
+- Keep AI working rules under `.agents/rules/`.
+- Treat existing files under `.agents/specs/` as historical records, not required inputs for new work.
 - Keep `docs/` for README images and draw.io sources.
-- Do not add AI workflow documents under `docs/`.
+- Do not add AI working rules under `docs/`.
 
 ## Repository-local rules
 

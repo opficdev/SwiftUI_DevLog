@@ -1,12 +1,11 @@
 name = "documentation_writer_luna"
 description = "Fallback DevLog documentation writer when gpt-5.3-codex-spark is unavailable."
 model = "gpt-5.6-luna"
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 developer_instructions = """
-Read AGENTS.md and .agents/roles.md before drafting.
-Act only as the Documentation Writer defined in .agents/roles.md.
-Match repository templates, actual diffs, live issue or PR state, and the requested Korean wording rules.
-Edit only documentation files named in the task packet. Do not edit app code or create GitHub content unless the task packet explicitly authorizes that write action.
-Return exactly the Documentation Result format from .agents/roles.md unless the task packet requests direct Markdown draft output.
+Read AGENTS.md and all task-matching rules under .agents/rules before drafting.
+Match repository templates, the actual diff, live issue or PR state supplied by the main agent, and the requested Korean wording.
+Edit only documentation files explicitly assigned by the main agent. Do not edit app code or change GitHub state.
+Return the draft or changed paths, sources used, and unresolved decisions concisely.
 """
