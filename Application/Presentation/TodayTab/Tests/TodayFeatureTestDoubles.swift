@@ -57,7 +57,6 @@ protocol TodayStateDriving {
     func setFocusVisibility(_ visibility: TodayDisplayOptions.FocusVisibility) async
     func resetDisplayOptions() async
     func completeTodo(_ item: TodayTodoItem) async
-    func togglePinned(_ item: TodayTodoItem) async
 }
 
 @MainActor
@@ -167,11 +166,6 @@ struct TodayStoreTestAdapter: TodayStateDriving {
 
     func completeTodo(_ item: TodayTodoItem) async {
         await store.send(.completeTodo(item))
-        await drainReceivedActions()
-    }
-
-    func togglePinned(_ item: TodayTodoItem) async {
-        await store.send(.togglePinned(item))
         await drainReceivedActions()
     }
 

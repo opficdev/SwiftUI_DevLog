@@ -149,39 +149,6 @@ func verifyTodayDisplayOptions<Adapter: TodayStateDriving>(
 }
 
 @MainActor
-func verifyTodayTogglePinned<Adapter: TodayStateDriving>(
-    adapter: Adapter,
-    fetchUseCaseSpy: TodayFetchTodosUseCaseSpy,
-    fetchTodoByIdUseCaseSpy: TodayFetchTodoByIdUseCaseSpy,
-    upsertTodoUseCaseSpy: TodayUpsertTodoUseCaseSpy
-) async throws {
-    try await verifyTodayFetchData(adapter: adapter, fetchUseCaseSpy: fetchUseCaseSpy)
-
-    let item = try #require(adapter.todos.first { $0.id == "later" })
-    await adapter.togglePinned(item)
-
-    await waitUntilTodayMainActor {
-        adapter.todos.first { $0.id == "later" }?.isPinned == true
-    }
-
-    #expect(fetchTodoByIdUseCaseSpy.todoIds == ["later"])
-    #expect(upsertTodoUseCaseSpy.todos.last?.id == "later")
-    #expect(upsertTodoUseCaseSpy.todos.last?.isPinned == true)
-    #expect(adapter.summaryCounts == [
-        .all: 5,
-        .focused: 2,
-        .overdue: 1,
-        .dueSoon: 2
-    ])
-    #expect(adapter.displayedSections == [
-        TodayDisplayedSection(category: .focused, itemIds: ["focused", "later"]),
-        TodayDisplayedSection(category: .overdue, itemIds: ["overdue"]),
-        TodayDisplayedSection(category: .dueSoon, itemIds: ["due-soon"]),
-        TodayDisplayedSection(category: .unscheduled, itemIds: ["unscheduled"])
-    ])
-}
-
-@MainActor
 func verifyTodayCompleteTodo<Adapter: TodayStateDriving>(
     adapter: Adapter,
     fetchUseCaseSpy: TodayFetchTodosUseCaseSpy,

@@ -260,8 +260,7 @@ public struct TodayView: View {
                 ForEach(section.items) { item in
                     TodayTodoCard(
                         item: item,
-                        onComplete: { store.send(.completeTodo(item)) },
-                        onTogglePinned: { store.send(.togglePinned(item)) }
+                        onComplete: { store.send(.completeTodo(item)) }
                     )
                 }
             }
@@ -396,7 +395,6 @@ private struct TodayTodoCard: View {
     @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(30)
     let item: TodayTodoItem
     let onComplete: () -> Void
-    let onTogglePinned: () -> Void
     private var isDarkMode: Bool { colorScheme == .dark }
 
     var body: some View {
@@ -421,11 +419,6 @@ private struct TodayTodoCard: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Image(systemName: item.isPinned ? "star.fill" : "star")
-                        .font(.title3)
-                        .foregroundStyle(item.isPinned ? Color.warning : .textTertiary)
-                        .onTapGesture { onTogglePinned() }
 
                     Image(systemName: "chevron.right")
                         .font(.callout.bold())

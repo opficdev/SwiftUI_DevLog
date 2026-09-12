@@ -139,31 +139,6 @@ struct TodayFeatureSupportTests {
         )
     }
 
-    @Test("TodayFeature togglePinned는 Todo를 갱신하고 섹션을 다시 계산한다")
-    func TodayFeature_togglePinned는_Todo를_갱신하고_섹션을_다시_계산한다() async throws {
-        let todos = makeTodaySectionTodos()
-        let fetchSpy = TodayFetchTodosUseCaseSpy(
-            pagesByFilter: [
-                .withDueDate: .init(items: todos.filter { $0.dueDate != nil }, nextCursor: nil),
-                .withoutDueDate: .init(items: todos.filter { $0.dueDate == nil }, nextCursor: nil)
-            ]
-        )
-        let fetchByIdSpy = TodayFetchTodoByIdUseCaseSpy(todos: todos)
-        let upsertSpy = TodayUpsertTodoUseCaseSpy()
-        let adapter = TodayStoreTestAdapter(
-            fetchUseCase: fetchSpy,
-            fetchTodoByIdUseCase: fetchByIdSpy,
-            upsertUseCase: upsertSpy
-        )
-
-        try await verifyTodayTogglePinned(
-            adapter: adapter,
-            fetchUseCaseSpy: fetchSpy,
-            fetchTodoByIdUseCaseSpy: fetchByIdSpy,
-            upsertTodoUseCaseSpy: upsertSpy
-        )
-    }
-
     @Test("TodayFeature completeTodo는 Todo를 제거하고 완료 이벤트를 남긴다")
     func TodayFeature_completeTodo는_Todo를_제거하고_완료_이벤트를_남긴다() async throws {
         let todos = makeTodaySectionTodos()

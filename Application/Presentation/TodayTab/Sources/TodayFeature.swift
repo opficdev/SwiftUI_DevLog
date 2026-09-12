@@ -51,7 +51,6 @@ struct TodayFeature {
         case setSectionScope(SectionScope)
         case resetDisplayOptions
         case completeTodo(TodayTodoItem)
-        case togglePinned(TodayTodoItem)
         case store(StoreAction)
         case loading(LoadingFeature.Action)
 
@@ -121,8 +120,6 @@ struct TodayFeature {
                 return updateDisplayOptionsEffect(state.displayOptions)
             case .completeTodo(let item):
                 return completeTodoEffect(item)
-            case .togglePinned(let item):
-                return togglePinnedEffect(item)
             case .store(.setAlert):
                 state.alert = Self.alertState()
             case .store(.setTodos(let incomplete, let completedToday, let interval)):
@@ -315,28 +312,6 @@ private extension TodayFeature {
                     return
                 }
                 await send(.store(.updateTodo(item)))
-                await send(.loading(.end(target: .default, mode: .delayed)))
-            } catch {
-                await send(.loading(.end(target: .default, mode: .delayed)))
-                await send(.store(.setAlert))
-            }
-        }
-    }
-
-    func togglePinnedEffect(_ item: TodayTodoItem) -> Effect<Action> {
-        .run { [fetchTodoByIdUseCase, upsertTodoUseCase, now] send in
-            await send(.loading(.begin(target: .default, mode: .delayed)))
-            do {
-                var todo = try await fetchTodoByIdUseCase.execute(item.id)
-                todo.isPinned.toggle()
-                todo.updatedAt = now
-                try await upsertTodoUseCase.execute(todo)
-                guard let todayTodoItem = TodayTodoItem(from: todo) else {
-                    await send(.loading(.end(target: .default, mode: .delayed)))
-                    await send(.store(.setAlert))
-                    return
-                }
-                await send(.store(.updateTodo(todayTodoItem)))
                 await send(.loading(.end(target: .default, mode: .delayed)))
             } catch {
                 await send(.loading(.end(target: .default, mode: .delayed)))
