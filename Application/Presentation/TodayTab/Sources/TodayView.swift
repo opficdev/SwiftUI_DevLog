@@ -41,8 +41,9 @@ public struct TodayView: View {
                             ForEach(store.sections) { section in
                                 TodoSection(
                                     section: section,
+                                    isNavigationEnabled: !store.isTodoInspectorPresented,
                                     onSelect: { path.append(.todo(TodoIdItem(id: $0.id))) },
-                                    onComplete: { store.send(.completeTodo($0)) }
+                                    onInspect: { store.send(.showTodoInspector($0)) }
                                 )
                             }
                             .padding(.bottom, 12)
@@ -64,6 +65,9 @@ public struct TodayView: View {
             .sheet(isPresented: $store.isCategoryFilterPresented) {
                 CategoryFilterSheet(store: store)
             }
+        }
+        .inspector(isPresented: $store.isTodoInspectorPresented) {
+            todoInspector
         }
         .onChange(of: isSelected, initial: true) { _, isSelected in
             if isSelected {
@@ -214,6 +218,17 @@ public struct TodayView: View {
         }
     }
 
+    @ViewBuilder
+    private var todoInspector: some View {
+        if let editorStore = store.scope(state: \.todoEditor, action: \.todoEditor) {
+            TodoEditorView(
+                store: editorStore,
+                onClose: { store.send(.dismissTodoInspector) }
+            )
+            .inspectorColumnWidth(min: 320, ideal: 420, max: 520)
+        }
+    }
+
     private func destination(_ route: TodayRoute) -> some View {
         switch route {
         case .todo(let item):
@@ -361,8 +376,9 @@ private struct CategoryFilterRow: View {
 
 private struct TodoSection: View {
     let section: TodayFeature.SectionContent
+    let isNavigationEnabled: Bool
     let onSelect: (TodayTodoItem) -> Void
-    let onComplete: (TodayTodoItem) -> Void
+    let onInspect: (TodayTodoItem) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -388,8 +404,9 @@ private struct TodoSection: View {
                 ForEach(Array(zip(section.items.indices, section.items)), id: \.1.id) { index, item in
                     TodoRow(
                         item: item,
+                        isNavigationEnabled: isNavigationEnabled,
                         onSelect: { onSelect(item) },
-                        onComplete: { onComplete(item) }
+                        onInspect: { onInspect(item) }
                     )
                     if index < section.items.count - 1 {
                         Divider()
@@ -405,105 +422,79 @@ private struct TodoSection: View {
 }
 
 private struct TodoRow: View {
-    @ScaledMetric(relativeTo: .title2) private var completionSize = CGFloat(24)
     let item: TodayTodoItem
+    let isNavigationEnabled: Bool
     let onSelect: () -> Void
-    let onComplete: () -> Void
+    let onInspect: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            completionStatus
-            Button {
-                onSelect()
-            } label: {
-                HStack(spacing: 8) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        todoInformation
-                        Text(item.title)
-                            .font(.headline)
-                            .strikethrough(item.isCompleted)
-                            .foregroundStyle(item.isCompleted ? Color.textSecondary : .primary)
+        Button {
+            guard isNavigationEnabled else { return }
+            onSelect()
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.title)
+                        .font(.headline)
+                        .strikethrough(item.isCompleted)
+                        .foregroundStyle(item.isCompleted ? Color.textSecondary : .primary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                    if !item.content.isEmpty {
+                        Text(item.content)
+                            .font(.subheadline)
+                            .foregroundStyle(Color.textSecondary)
+                            .lineLimit(1)
                             .multilineTextAlignment(.leading)
-                        if !item.content.isEmpty {
-                            Text(item.content)
-                                .font(.callout)
-                                .foregroundStyle(Color.textSecondary)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.leading)
-                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Image(systemName: "chevron.right")
-                        .font(.callout.bold())
-                        .foregroundStyle(Color.textTertiary)
+                    todoMetadata
                 }
-                .todoDetailPreview(todoId: item.id)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(20)
-    }
-
-    @ViewBuilder
-    private var completionStatus: some View {
-        if item.isCompleted {
-            Image(systemName: "checkmark.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .foregroundStyle(Color.success)
-                .frame(width: completionSize, height: completionSize)
-        } else {
-            Button {
-                onComplete()
-            } label: {
-                Image(systemName: "circle")
-                    .resizable()
-                    .scaledToFit()
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.callout.bold())
                     .foregroundStyle(Color.textTertiary)
-                    .frame(width: completionSize, height: completionSize)
+                    .opacity(isNavigationEnabled ? 1 : 0)
             }
-            .buttonStyle(.plain)
+            .overlay {
+                TodoInspectorInteractionView(action: onInspect)
+            }
         }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
     }
 
     @ViewBuilder
-    private var todoInformation: some View {
+    private var todoMetadata: some View {
         let category = TodoCategoryItem(from: item.category)
-        HStack(spacing: 8) {
-            HStack(spacing: 4) {
-                Image(systemName: category.symbolName)
-                Text(category.localizedName)
-            }
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(category.color)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                category.color.opacity(0.2),
-                in: .rect(cornerRadius: 8)
-            )
+        HStack(spacing: 10) {
+            Text("#\(item.number)")
+                .foregroundStyle(Color.accent)
+
+            Image(systemName: category.symbolName)
+                .foregroundStyle(category.color)
 
             if let dueDate = item.dueDate {
                 HStack(spacing: 4) {
                     Image(systemName: "clock")
                     Text(dueDateText(dueDate))
                 }
-                .font(.caption.weight(.semibold))
                 .foregroundStyle(dueDateColor(dueDate))
             }
         }
+        .font(.caption.weight(.semibold))
+        .lineLimit(1)
     }
 
     private func dueDateText(_ date: Date) -> String {
         let calendar = Calendar.autoupdatingCurrent
         if calendar.isDateInToday(date) {
-            return date.formatted(date: .omitted, time: .shortened)
+            return String(localized: "today_section_today", bundle: PresentationResources.bundle)
         }
         if calendar.isDateInYesterday(date) {
             return String(localized: "today_due_yesterday", bundle: PresentationResources.bundle)
         }
-        return date.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated).hour().minute())
+        return date.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated))
     }
 
     private func dueDateColor(_ date: Date) -> Color {
@@ -511,7 +502,60 @@ private struct TodoRow: View {
         if calendar.startOfDay(for: date) < calendar.startOfDay(for: Date()) {
             return .danger
         }
-        return .accent
+        return .textSecondary
+    }
+}
+
+private struct TodoInspectorInteractionView: UIViewRepresentable {
+    let action: () -> Void
+
+    func makeCoordinator() -> TodoInspectorInteractionCoordinator {
+        TodoInspectorInteractionCoordinator()
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+        context.coordinator.update(action: action)
+        context.coordinator.install(on: view)
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        context.coordinator.update(action: action)
+    }
+}
+
+private final class TodoInspectorInteractionCoordinator: NSObject {
+    private weak var view: UIView?
+    private var contextMenuInteraction: UIContextMenuInteraction?
+    private var action: (() -> Void)?
+
+    func update(action: @escaping () -> Void) {
+        self.action = action
+    }
+
+    func install(on view: UIView) {
+        guard self.view !== view else { return }
+
+        if let contextMenuInteraction {
+            self.view?.removeInteraction(contextMenuInteraction)
+        }
+
+        let contextMenuInteraction = UIContextMenuInteraction(delegate: self)
+        view.addInteraction(contextMenuInteraction)
+        self.view = view
+        self.contextMenuInteraction = contextMenuInteraction
+    }
+}
+
+extension TodoInspectorInteractionCoordinator: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(
+        _ interaction: UIContextMenuInteraction,
+        configurationForMenuAtLocation location: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        action?()
+        return nil
     }
 }
 

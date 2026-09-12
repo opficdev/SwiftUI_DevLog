@@ -60,6 +60,40 @@ struct TodayFeatureTests {
         #expect(filtered.map(\.id) == ["match"])
     }
 
+    @Test("TodayFeature는 선택한 Todo로 Inspector 편집 상태를 구성하고 닫는다")
+    func todayFeature는_선택한_Todo로_Inspector_편집_상태를_구성하고_닫는다() async throws {
+        let todo = makeTodayTodo(id: "inspector", title: "수정 전")
+        let item = try #require(TodayTodoItem(from: todo))
+        let adapter = TodayStoreTestAdapter()
+        await adapter.receiveUpdatedTodo(item)
+
+        await adapter.showTodoInspector(item)
+
+        #expect(adapter.isTodoInspectorPresented)
+        #expect(adapter.todoEditorTitle == "수정 전")
+
+        await adapter.setTodoInspectorPresented(false)
+
+        #expect(!adapter.isTodoInspectorPresented)
+        #expect(adapter.todoEditorTitle == nil)
+    }
+
+    @Test("TodayFeature는 Inspector에서 수정한 Todo를 목록에 반영하고 닫는다")
+    func todayFeature는_Inspector에서_수정한_Todo를_목록에_반영하고_닫는다() async throws {
+        var todo = makeTodayTodo(id: "inspector", title: "수정 전")
+        let item = try #require(TodayTodoItem(from: todo))
+        let adapter = TodayStoreTestAdapter()
+        await adapter.receiveUpdatedTodo(item)
+        await adapter.showTodoInspector(item)
+        todo.title = "수정 후"
+
+        await adapter.updateTodoFromInspector(todo)
+
+        #expect(adapter.todos.first?.title == "수정 후")
+        #expect(!adapter.isTodoInspectorPresented)
+        #expect(adapter.todoEditorTitle == nil)
+    }
+
     @Test("TodayFeature fetchData는 요약과 섹션 상태를 갱신한다")
     func todayFeature_fetchData는_요약과_섹션_상태를_갱신한다() async throws {
         let todos = makeTodaySectionTodos()

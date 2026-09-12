@@ -39,6 +39,9 @@ extension TodayFeature {
         var selectedTodoScope = TodoScope.remaining
         var selectedCategoryID: String?
         var isCategoryFilterPresented = false
+        var isTodoInspectorPresented = false
+        var todoEditor: TodoEditorFeature.State?
+        var dismissesTodoInspectorAfterSaving = false
         var loading = LoadingFeature.State()
         var todayInterval: DateInterval
         var isIncompleteDataLoaded = false

@@ -49,6 +49,9 @@ struct TodayFeature {
         case setTodoScope(TodoScope)
         case setCategory(String?)
         case completeTodo(TodayTodoItem)
+        case showTodoInspector(TodayTodoItem)
+        case dismissTodoInspector
+        case todoEditor(TodoEditorFeature.Action)
         case store(StoreAction)
         case loading(LoadingFeature.Action)
 
@@ -85,6 +88,10 @@ struct TodayFeature {
             switch action {
             case .alert:
                 break
+            case .binding(\.isTodoInspectorPresented):
+                if !state.isTodoInspectorPresented {
+                    dismissTodoInspector(state: &state)
+                }
             case .binding:
                 break
             case .refresh:
@@ -116,6 +123,24 @@ struct TodayFeature {
                 state.selectedCategoryID = categoryID
             case .completeTodo(let item):
                 return completeTodoEffect(item)
+            case .showTodoInspector(let item):
+                guard let item = latestItem(id: item.id, state: state) else { break }
+                state.todoEditor = TodoEditorFeature.State(todo: item.todo)
+                state.dismissesTodoInspectorAfterSaving = false
+                state.isTodoInspectorPresented = true
+            case .dismissTodoInspector:
+                dismissTodoInspector(state: &state)
+            case .todoEditor(.delegate(.updated(let todo))):
+                guard let item = TodayTodoItem(from: todo) else {
+                    return .send(.store(.setAlert))
+                }
+                state.dismissesTodoInspectorAfterSaving = true
+                return .send(.store(.updateTodo(item)))
+            case .todoEditor(.loading(.end(target: .default, mode: .immediate))):
+                guard state.dismissesTodoInspectorAfterSaving else { break }
+                return .send(.dismissTodoInspector)
+            case .todoEditor:
+                break
             case .store(.setAlert):
                 state.alert = Self.alertState()
             case .store(.setTodos(let incomplete, let completedToday, let interval)):
@@ -165,6 +190,9 @@ struct TodayFeature {
             return .none
         }
         .ifLet(\.$alert, action: \.alert)
+        .ifLet(\.todoEditor, action: \.todoEditor) {
+            TodoEditorFeature()
+        }
     }
 }
 
@@ -186,6 +214,17 @@ private enum TodayFetchTodosUseCaseKey: DependencyKey {
 }
 
 private extension TodayFeature {
+    func latestItem(id: String, state: State) -> TodayTodoItem? {
+        state.todos.first { $0.id == id }
+            ?? state.completedTodayTodos.first { $0.id == id }
+    }
+
+    func dismissTodoInspector(state: inout State) {
+        state.isTodoInspectorPresented = false
+        state.todoEditor = nil
+        state.dismissesTodoInspectorAfterSaving = false
+    }
+
     func prepareTodayInterval(state: inout State, now: Date) -> DateInterval {
         let interval = Self.dayInterval(containing: now)
         guard state.todayInterval != interval else { return interval }

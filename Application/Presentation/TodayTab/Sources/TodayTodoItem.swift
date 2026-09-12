@@ -9,6 +9,7 @@ import Foundation
 import Domain
 
 public struct TodayTodoItem: Identifiable, Hashable {
+    let todo: Todo
     public let id: String
     public let number: Int
     public let title: String
@@ -20,6 +21,7 @@ public struct TodayTodoItem: Identifiable, Hashable {
     public let category: TodoCategory
 
     init?(from todo: Todo) {
+        self.todo = todo
         self.id = todo.id
         self.number = todo.number
         self.title = todo.title

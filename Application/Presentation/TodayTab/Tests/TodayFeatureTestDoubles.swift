@@ -43,6 +43,8 @@ protocol TodayStateDriving {
     var selectedTodoScope: TodayTestTodoScope { get }
     var selectedCategoryID: String? { get }
     var isCategoryFilterPresented: Bool { get }
+    var isTodoInspectorPresented: Bool { get }
+    var todoEditorTitle: String? { get }
     var visibleCategoryIDs: [String] { get }
     var showAlert: Bool { get }
     var isLoading: Bool { get }
@@ -55,6 +57,9 @@ protocol TodayStateDriving {
     func setCategory(_ categoryID: String?) async
     func setCategoryFilterPresented(_ isPresented: Bool) async
     func completeTodo(_ item: TodayTodoItem) async
+    func showTodoInspector(_ item: TodayTodoItem) async
+    func setTodoInspectorPresented(_ isPresented: Bool) async
+    func updateTodoFromInspector(_ todo: Todo) async
 }
 
 @MainActor
@@ -70,6 +75,8 @@ struct TodayStoreTestAdapter: TodayStateDriving {
     var selectedTodoScope: TodayTestTodoScope { store.state.selectedTodoScope.testValue }
     var selectedCategoryID: String? { store.state.selectedCategoryID }
     var isCategoryFilterPresented: Bool { store.state.isCategoryFilterPresented }
+    var isTodoInspectorPresented: Bool { store.state.isTodoInspectorPresented }
+    var todoEditorTitle: String? { store.state.todoEditor?.title }
     var visibleCategoryIDs: [String] { store.state.visibleCategories.map(\.id) }
     var showAlert: Bool { store.state.alert != nil }
     var isLoading: Bool { store.state.isLoading }
@@ -154,6 +161,21 @@ struct TodayStoreTestAdapter: TodayStateDriving {
 
     func completeTodo(_ item: TodayTodoItem) async {
         await store.send(.completeTodo(item))
+        await drainReceivedActions()
+    }
+
+    func showTodoInspector(_ item: TodayTodoItem) async {
+        await store.send(.showTodoInspector(item))
+    }
+
+    func setTodoInspectorPresented(_ isPresented: Bool) async {
+        await store.send(.binding(.set(\.isTodoInspectorPresented, isPresented)))
+    }
+
+    func updateTodoFromInspector(_ todo: Todo) async {
+        await store.send(.todoEditor(.delegate(.updated(todo))))
+        await drainReceivedActions()
+        await store.send(.todoEditor(.loading(.end(target: .default, mode: .immediate))))
         await drainReceivedActions()
     }
 
