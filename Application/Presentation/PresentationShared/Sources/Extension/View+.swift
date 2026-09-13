@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+public enum AdaptiveButtonGlassEffect {
+    case enabled
+    case disabled
+}
+
 public extension View {
     @ViewBuilder
     func onScrollOffsetChange(action: @escaping (CGFloat) -> Void) -> some View {
@@ -95,21 +100,39 @@ public extension View {
     @ViewBuilder
     func adaptiveButtonStyle<S: InsettableShape>(
         shape: S = Capsule(),
-        color: Color = .clear
+        color: Color = .clear,
+        glassEffect: AdaptiveButtonGlassEffect = .disabled
     ) -> some View {
         if #available(iOS 26.0, *) {
-            self.foregroundStyle(Color(.label))
-                .padding(8)
-                .glassEffect(.regular.tint(color), in: shape)
-                .clipShape(shape)
+            switch glassEffect {
+            case .enabled:
+                self.foregroundStyle(Color(.label))
+                    .padding(8)
+                    .glassEffect(.regular.tint(color), in: shape)
+                    .clipShape(shape)
+            case .disabled:
+                opaqueButtonStyle(shape: shape, color: color)
+            }
         } else {
-            self.foregroundStyle(Color(.label))
-                .padding(8)
-                .background {
+            opaqueButtonStyle(shape: shape, color: color)
+        }
+    }
+
+    private func opaqueButtonStyle<S: InsettableShape>(
+        shape: S,
+        color: Color
+    ) -> some View {
+        self.foregroundStyle(Color(.label))
+            .padding(8)
+            .background {
+                shape
+                    .fill(color == .clear ? Color(.systemGray5) : color)
+            }
+            .overlay {
+                if color == .clear {
                     shape
-                        .fill(color == .clear ? Color(.systemGray5) : color)
                         .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
                 }
-        }
+            }
     }
 }

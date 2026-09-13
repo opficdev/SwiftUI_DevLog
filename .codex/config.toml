@@ -1,0 +1,8 @@
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+writable_roots = [
+    "~/.local/state/tuist",
+    "~/.cache/tuist",
+    "~/Library/Developer/Xcode/DerivedData",
+]

@@ -735,7 +735,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "투데이"
+            "value" : "오늘"
           }
         }
       }
@@ -2032,6 +2032,91 @@
         }
       }
     },
+    "today_achievement_status_completed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "today_achievement_status_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tasks"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예정 없음"
+          }
+        }
+      }
+    },
+    "today_achievement_status_in_progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Progress"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진행 중"
+          }
+        }
+      }
+    },
+    "today_achievement_status_loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "불러오는 중"
+          }
+        }
+      }
+    },
+    "today_achievement_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's Progress"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo 완료"
+          }
+        }
+      }
+    },
     "today_complete_action" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2066,70 +2151,19 @@
         }
       }
     },
-    "today_due_visibility_all" : {
+    "today_due_yesterday" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All"
+            "value" : "Due Yesterday"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "전체"
-          }
-        }
-      }
-    },
-    "today_due_visibility_label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View Range"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "보기 범위"
-          }
-        }
-      }
-    },
-    "today_due_visibility_with_due" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "With Due Date Only"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "기한 있는 Todo만"
-          }
-        }
-      }
-    },
-    "today_due_visibility_without_due" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Without Due Date Only"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "기한 없는 Todo만"
+            "value" : "어제까지"
           }
         }
       }
@@ -2168,53 +2202,19 @@
         }
       }
     },
-    "today_empty_due_soon_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Todos due soon will appear here first."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "곧 마감되는 Todo가 생기면 이곳에서 먼저 볼 수 있어요."
-          }
-        }
-      }
-    },
-    "today_empty_due_soon_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There is no schedule within 7 days."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "7일 내 일정이 없어요."
-          }
-        }
-      }
-    },
     "today_empty_filtered_message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adjust the view range from the toolbar or return to the full view."
+            "value" : "Adjust the filters or return to Remaining."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "툴바에서 보기 범위를 조정하거나 전체 보기로 돌아가세요."
+            "value" : "필터를 조정하거나 남은 일 보기로 돌아가세요."
           }
         }
       }
@@ -2236,138 +2236,36 @@
         }
       }
     },
-    "today_empty_focused_message" : {
+    "today_filter_all_categories" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pinned todos will appear here right away."
+            "value" : "All Categories"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "중요 표시한 Todo가 생기면 이곳에서 바로 볼 수 있어요."
+            "value" : "모든 카테고리"
           }
         }
       }
     },
-    "today_empty_focused_title" : {
+    "today_pinned_first" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "There is nothing to focus on."
+            "value" : "Pinned First"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "집중할 일이 없어요."
-          }
-        }
-      }
-    },
-    "today_empty_overdue_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There are no overdue todos right now."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지금은 기한이 지난 Todo가 없어요."
-          }
-        }
-      }
-    },
-    "today_empty_overdue_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There are no overdue todos."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지난 마감 Todo가 없어요."
-          }
-        }
-      }
-    },
-    "today_pinned_only" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pinned Only"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "중요 표시만"
-          }
-        }
-      }
-    },
-    "today_pinned_only_description" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only pinned todos are shown."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "중요 표시한 Todo만 표시돼요."
-          }
-        }
-      }
-    },
-    "today_section_due_soon_format" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Due Within %1$lld Days"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld일 내 일정"
-          }
-        }
-      }
-    },
-    "today_section_focused" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focus"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "집중할 일"
+            "value" : "중요 항목 우선"
           }
         }
       }
@@ -2395,13 +2293,47 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overdue"
+            "value" : "Overdue Tasks"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "지난 마감"
+            "value" : "기한이 지난 Todo"
+          }
+        }
+      }
+    },
+    "today_section_today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Due Today"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘까지"
+          }
+        }
+      }
+    },
+    "today_section_upcoming" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다가오는 일정"
           }
         }
       }
@@ -2418,7 +2350,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "일정 미정"
+            "value" : "기한 없음"
           }
         }
       }
@@ -2440,7 +2372,7 @@
         }
       }
     },
-    "today_summary_all" : {
+    "today_filter_remaining" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -2457,24 +2389,7 @@
         }
       }
     },
-    "today_summary_due_soon" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Within 7 Days"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "7일 내"
-          }
-        }
-      }
-    },
-    "today_summary_focused" : {
+    "today_filter_important" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -2486,24 +2401,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "집중"
-          }
-        }
-      }
-    },
-    "today_summary_overdue" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overdue"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지연"
+            "value" : "중요"
           }
         }
       }

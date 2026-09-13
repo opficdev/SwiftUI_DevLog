@@ -12,6 +12,7 @@ import Domain
 
 final class TodayFetchTodosUseCaseSpy: FetchTodosUseCase {
     var pagesByFilter: [TodoQuery.DueDateFilter: TodoPage]
+    var completedTodayPage: TodoPage
     var error: Error?
     private let recorder = TodayFetchTodosUseCaseCallRecorder()
 
@@ -19,9 +20,11 @@ final class TodayFetchTodosUseCaseSpy: FetchTodosUseCase {
         pagesByFilter: [TodoQuery.DueDateFilter: TodoPage] = [
             .withDueDate: TodoPage(items: [], nextCursor: nil),
             .withoutDueDate: TodoPage(items: [], nextCursor: nil)
-        ]
+        ],
+        completedTodayPage: TodoPage = TodoPage(items: [], nextCursor: nil)
     ) {
         self.pagesByFilter = pagesByFilter
+        self.completedTodayPage = completedTodayPage
     }
 
     func execute(_ query: TodoQuery, cursor: TodoCursor?) async throws -> TodoPage {
@@ -29,6 +32,10 @@ final class TodayFetchTodosUseCaseSpy: FetchTodosUseCase {
 
         if let error {
             throw error
+        }
+
+        if query.completionFilter == .completed {
+            return completedTodayPage
         }
 
         return pagesByFilter[query.dueDateFilter] ?? TodoPage(items: [], nextCursor: nil)
@@ -103,19 +110,19 @@ final class TodayUpsertTodoUseCaseSpy: UpsertTodoUseCase {
     }
 }
 
-struct TodayFetchDisplayOptionsUseCaseSpy: FetchTodayDisplayOptionsUseCase {
-    var options: TodayDisplayOptions = .default
+final class TodayFetchCategoryPreferencesUseCaseSpy: FetchTodoCategoryPreferencesUseCase {
+    var preferences: [TodoCategoryPreference]
+    var error: Error?
+    private(set) var callCount = 0
 
-    func execute() -> TodayDisplayOptions {
-        options
+    init(preferences: [TodoCategoryPreference] = []) {
+        self.preferences = preferences
     }
-}
 
-final class TodayUpdateDisplayOptionsUseCaseSpy: UpdateTodayDisplayOptionsUseCase {
-    private(set) var options = [TodayDisplayOptions]()
-
-    func execute(_ options: TodayDisplayOptions) {
-        self.options.append(options)
+    func execute() async throws -> [TodoCategoryPreference] {
+        callCount += 1
+        if let error { throw error }
+        return preferences
     }
 }
 
@@ -138,26 +145,29 @@ func makeTodayTodo(
     id: String = "todo-1",
     isPinned: Bool = false,
     isCompleted: Bool = false,
+    isChecked: Bool = false,
     number: Int = 1,
     title: String = "Todo",
-    dueDate: Date? = nil
+    content: String = "content",
+    dueDate: Date? = nil,
+    category: TodoCategory = .system(.feature)
 ) -> Todo {
     let now = Date(timeIntervalSince1970: 0)
     return Todo(
         id: id,
         isPinned: isPinned,
         isCompleted: isCompleted,
-        isChecked: false,
+        isChecked: isChecked,
         number: number,
         title: title,
-        content: "content",
+        content: content,
         createdAt: now,
         updatedAt: now,
         completedAt: isCompleted ? now : nil,
         deletedAt: nil,
         dueDate: dueDate,
         tags: [],
-        category: .system(.feature)
+        category: category
     )
 }
 

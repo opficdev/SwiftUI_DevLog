@@ -49,7 +49,6 @@ public struct ProfileView: View {
             }
             .refreshable { await store.send(.refresh).finish() }
             .toolbarVisibility(.hidden, for: .navigationBar)
-            .frame(maxWidth: .infinity)
             .background(Color.appBackground)
             .navigationDestination(for: ProfileRoute.self, destination: destinationView)
         }
@@ -409,7 +408,7 @@ private struct ProfileCard: View {
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                 }
-                .foregroundStyle(Color.gray)
+                .foregroundStyle(Color.onPrimaryContainer)
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)

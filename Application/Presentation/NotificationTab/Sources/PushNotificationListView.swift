@@ -10,7 +10,6 @@ import Core
 import PresentationShared
 
 public struct PushNotificationListView: View {
-    @Environment(\.colorScheme) private var colorScheme
     @ScaledMetric(relativeTo: .body) private var headerHeight = 41
     @ScaledMetric(relativeTo: .largeTitle) private var labelWidth = 34
     @State private var headerOffset: CGFloat = 0
@@ -184,9 +183,10 @@ public struct PushNotificationListView: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "line.3.horizontal.decrease")
+                            .foregroundStyle(Color.onControlBackground)
                         filterBadge
                     }
-                    .adaptiveButtonStyle()
+                    .adaptiveButtonStyle(color: .controlBackground)
                 }
             }
 
@@ -202,8 +202,8 @@ public struct PushNotificationListView: View {
                         store.query.sortOrder.title
                     )
                 )
-                .foregroundStyle(condition ? .white : Color(.label))
-                .adaptiveButtonStyle(color: condition ? .blue : .clear)
+                .foregroundStyle(condition ? Color.onPrimaryContainer : .onControlBackground)
+                .adaptiveButtonStyle(color: condition ? .primaryContainer : .controlBackground)
             }
             .frame(height: headerHeight)
 
@@ -221,8 +221,8 @@ public struct PushNotificationListView: View {
                     Text(String(localized: "push_period", bundle: PresentationResources.bundle))
                     Image(systemName: "chevron.down")
                 }
-                .foregroundStyle(condition ? Color(.label) : .white)
-                .adaptiveButtonStyle(color: condition ? .clear : .blue)
+                .foregroundStyle(condition ? Color.onControlBackground : .onPrimaryContainer)
+                .adaptiveButtonStyle(color: condition ? .controlBackground : .primaryContainer)
             }
 
             Button {
@@ -232,26 +232,21 @@ public struct PushNotificationListView: View {
             } label: {
                 let condition = store.query.unreadOnly
                 Text(String(localized: "push_unread", bundle: PresentationResources.bundle))
-                    .foregroundStyle(condition ? .white : Color(.label))
-                    .adaptiveButtonStyle(color: condition ? .blue : .clear)
+                    .foregroundStyle(condition ? Color.onPrimaryContainer : .onControlBackground)
+                    .adaptiveButtonStyle(color: condition ? .primaryContainer : .controlBackground)
             }
             .frame(height: headerHeight)
         }
     }
 
     private var filterBadge: some View {
-        let isDark = colorScheme == .dark
-        let blue = Color(uiColor: .systemBlue)  //  흰 배경에 따른 청록색화 방지
-        let textColor: Color = isDark ? blue : .white
-        let backgroundColor: Color = isDark ? .white : blue
-
-        return Text("\(store.appliedFilterCount)")
+        Text("\(store.appliedFilterCount)")
             .font(.caption2.weight(.bold))
-            .foregroundColor(textColor)
+            .foregroundStyle(Color.onPrimaryContainer)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             .frame(width: 20, height: 20)
-            .background(Circle().fill(backgroundColor))
+            .background(Circle().fill(Color.primaryContainer))
     }
 
     // swiftlint:disable function_body_length

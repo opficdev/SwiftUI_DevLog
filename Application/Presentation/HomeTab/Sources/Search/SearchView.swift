@@ -58,7 +58,7 @@ struct SearchView: View {
                     .font(.title)
                     .padding(6)
             }
-            .adaptiveButtonStyle(shape: .circle, color: .border)
+            .adaptiveButtonStyle(shape: .circle, color: .border, glassEffect: .enabled)
             SearchField(store: store)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -86,7 +86,7 @@ struct SearchView: View {
             }
             Spacer()
         }
-        .foregroundStyle(Color.accent)
+        .foregroundStyle(Color.onPrimaryContainer)
         .padding()
         .background {
             Rectangle()
@@ -188,7 +188,7 @@ private struct SearchResults: View {
                     Int64(store.todos.count)
                 ))
                 .font(.callout.bold())
-                .foregroundStyle(Color.accent)
+                .foregroundStyle(Color.onPrimaryContainer)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Color.primaryContainer, in: .capsule)
@@ -234,7 +234,6 @@ private struct SearchResults: View {
                 .background {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.surface)
-                        .strokeBorder(Color.border, lineWidth: 2)
                 }
                 if store.shouldShowMoreTodos {
                     Button {
@@ -244,7 +243,7 @@ private struct SearchResults: View {
                             localized: "search_show_more",
                             bundle: PresentationResources.bundle)
                         )
-                        .foregroundStyle(Color.accent)
+                        .foregroundStyle(Color.onPrimaryContainer)
                         .font(.callout.bold())
                     }
                     .adaptiveButtonStyle(color: .primaryContainer)
@@ -257,21 +256,19 @@ private struct SearchResults: View {
 
 private struct SearchResultRow: View {
     @ScaledMetric(relativeTo: .title2) private var iconSize = CGFloat(48)
-    @Environment(\.colorScheme) private var colorScheme
     let item: SearchTodoItem
-    private var isDarkMode: Bool { colorScheme == .dark }
 
     var body: some View {
         let category = TodoCategoryItem(from: item.category)
 
         HStack(spacing: 12) {
             RoundedRectangle(cornerRadius: 14)
-                .fill(category.color.opacity(isDarkMode ? 1 : 0.2))
+                .fill(category.color.opacity(0.2))
                 .frame(width: iconSize, height: iconSize)
                 .overlay {
                     Image(systemName: category.symbolName)
                         .font(.title3.bold())
-                        .foregroundStyle(isDarkMode ? .white : category.color)
+                        .foregroundStyle(category.color)
                 }
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
@@ -355,7 +352,6 @@ private struct RecentSearchQuries: View {
             .background {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.surface)
-                    .strokeBorder(Color.border, lineWidth: 2)
             }
         }
         .frame(maxWidth: .infinity)

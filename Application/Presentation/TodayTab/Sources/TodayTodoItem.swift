@@ -9,21 +9,25 @@ import Foundation
 import Domain
 
 public struct TodayTodoItem: Identifiable, Hashable {
+    let todo: Todo
     public let id: String
     public let number: Int
     public let title: String
-    public let tags: [String]
+    public let content: String
     public let isPinned: Bool
+    public let isCompleted: Bool
     public let updatedAt: Date
     public let dueDate: Date?
     public let category: TodoCategory
 
     init?(from todo: Todo) {
+        self.todo = todo
         self.id = todo.id
         self.number = todo.number
         self.title = todo.title
-        self.tags = todo.tags
+        self.content = todo.content
         self.isPinned = todo.isPinned
+        self.isCompleted = todo.isCompleted
         self.updatedAt = todo.updatedAt
         self.dueDate = todo.dueDate
         self.category = todo.category

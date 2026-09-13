@@ -13,7 +13,6 @@ import Domain
 
 public struct TodoListView: View {
     @Environment(\.isTabContentActive) private var isTabContentActive
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openWindow) private var openWindow
     @Environment(\.isiOSAppOnMac) private var isiOSAppOnMac
     @ScaledMetric(relativeTo: .body) private var headerHeight = 41
@@ -335,9 +334,10 @@ public struct TodoListView: View {
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "line.3.horizontal.decrease")
+                                .foregroundStyle(Color.onControlBackground)
                             filterBadge
                         }
-                        .adaptiveButtonStyle()
+                        .adaptiveButtonStyle(color: .controlBackground)
                     }
                 }
 
@@ -368,8 +368,8 @@ public struct TodoListView: View {
                         )
                         Image(systemName: "chevron.down")
                     }
-                    .foregroundStyle(condition ? Color(.label) : .white)
-                    .adaptiveButtonStyle(color: condition ? .clear : .blue)
+                    .foregroundStyle(condition ? Color.onControlBackground : .onPrimaryContainer)
+                    .adaptiveButtonStyle(color: condition ? .controlBackground : .primaryContainer)
                 }
 
                 Menu {
@@ -390,8 +390,8 @@ public struct TodoListView: View {
                         Text(String(localized: "todo_list_filter_options", bundle: PresentationResources.bundle))
                         Image(systemName: "chevron.down")
                     }
-                    .foregroundStyle(condition ? .white : Color(.label))
-                    .adaptiveButtonStyle(color: condition ? .blue : .clear)
+                    .foregroundStyle(condition ? Color.onPrimaryContainer : .onControlBackground)
+                    .adaptiveButtonStyle(color: condition ? .primaryContainer : .controlBackground)
                 }
             }
         }
@@ -409,18 +409,13 @@ public struct TodoListView: View {
     }
 
     private var filterBadge: some View {
-        let isDark = colorScheme == .dark
-        let blue = Color(uiColor: .systemBlue)
-        let textColor: Color = isDark ? blue : .white
-        let backgroundColor: Color = isDark ? .white : blue
-
-        return Text("\(store.appliedFilterCount)")
+        Text("\(store.appliedFilterCount)")
             .font(.caption2.weight(.bold))
-            .foregroundColor(textColor)
+            .foregroundStyle(Color.onPrimaryContainer)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             .frame(width: 20, height: 20)
-            .background(Circle().fill(backgroundColor))
+            .background(Circle().fill(Color.primaryContainer))
     }
 
     private func selectTodo(_ todoId: String) {
