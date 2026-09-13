@@ -84,9 +84,10 @@ public struct TodoEditorView: View {
             .toolbarVisibility(.hidden, for: .navigationBar)
             .prominentAlert(store, state: \.alert, action: \.alert)
             .inspector(isPresented: $store.isInspectorPresented) {
+                Group {
                 switch store.inspectorContent {
                 case .options:
-                    InspectorView(
+                    TodoPropertiesView(
                         store: store,
                         showsEditorActions: movesActionsToInspector,
                         onSubmit: submit
@@ -127,6 +128,8 @@ public struct TodoEditorView: View {
                         }
                     }
                 }
+                }
+                .inspectorColumnWidth(min: 320, ideal: 420, max: 520)
             }
         }
     }
@@ -196,7 +199,7 @@ private struct ToolBar: View {
     }
 }
 
-private struct EditorToolbarActions: View {
+struct EditorToolbarActions: View {
     let store: StoreOf<TodoEditorFeature>
     let onSubmit: () -> Void
     @ScaledMetric(relativeTo: .title) private var iconSize = UIFont.preferredFont(
@@ -378,287 +381,6 @@ private struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.vertical, 8)
-    }
-}
-
-private struct InspectorView: View {
-    @Bindable var store: StoreOf<TodoEditorFeature>
-    @FocusState private var isTagFieldFocused: Bool
-    @ScaledMetric(relativeTo: .title) private var iconSize = UIFont.preferredFont(
-        forTextStyle: .title1,
-        compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
-    ).lineHeight
-    var showsEditorActions = false
-    var onSubmit: () -> Void = {}
-    let onClose: () -> Void
-    private let calendar = Calendar.current
-
-    var body: some View {
-        ZStack {
-            Color.appBackground.ignoresSafeArea()
-            VStack(spacing: 8) {
-                toolBar
-                content
-            }
-        }
-    }
-
-    private var toolBar: some View {
-        HStack {
-            Spacer()
-            if showsEditorActions {
-                EditorToolbarActions(store: store, onSubmit: onSubmit)
-            } else {
-                Button {
-                    onClose()
-                } label: {
-                    Image(systemName: "checkmark")
-                        .frame(width: iconSize, height: iconSize)
-                        .foregroundStyle(Color.primary)
-                }
-                .font(.title)
-                .adaptiveButtonStyle(shape: .circle, color: Color.surface, glassEffect: .enabled)
-            }
-        }
-        .padding(.horizontal)
-        .padding(.top, 12)
-        .overlay {
-            if !showsEditorActions {
-                Text(String(localized: "todo_details", bundle: PresentationResources.bundle))
-                    .font(.title3.bold())
-            }
-        }
-    }
-
-    private var content: some View {
-            ScrollView {
-                LazyVStack(spacing: 24) {
-                    VStack(spacing: 0) {
-                        HStack(spacing: 12) {
-                            optionIcon("tag.fill", color: Color.accent)
-                            Spacer()
-                            Picker(
-                                String(localized: "todo_category", bundle: PresentationResources.bundle),
-                                selection: $store.selectedCategoryID
-                            ) {
-                                ForEach(store.categories, id: \.id) { item in
-                                    Text(item.localizedName)
-                                        .tag(item.id)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                            .tint(Color.accent)
-                        }
-                        .padding(.vertical, 12)
-
-                        Divider().overlay(Color.border)
-
-                        Toggle(isOn: $store.isCompleted) {
-                            HStack(spacing: 12) {
-                                optionIcon("circle", color: Color.textSecondary)
-                                Text(String(localized: "todo_completed", bundle: PresentationResources.bundle))
-                            }
-                        }
-                        .tint(Color.accent)
-                        .padding(.vertical, 12)
-
-                        Divider().overlay(Color.border)
-
-                        Toggle(isOn: $store.isPinned) {
-                            HStack(spacing: 12) {
-                                optionIcon("star.fill", color: Color.warning)
-                                Text(String(localized: "todo_pinned", bundle: PresentationResources.bundle))
-                            }
-                        }
-                        .tint(Color.accent)
-                        .padding(.vertical, 12)
-
-                        Divider().overlay(Color.border)
-
-                        dueDateControl
-                            .padding(.vertical, 12)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
-                    .background {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.surface)
-                            .strokeBorder(Color.border, lineWidth: 2)
-                    }
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(String(localized: "todo_tags", bundle: PresentationResources.bundle))
-                            .font(.headline)
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack(spacing: 12) {
-                                TextField(
-                                    String(localized: "todo_add", bundle: PresentationResources.bundle),
-                                    text: $store.tagText
-                                )
-                                .frame(height: UIFont.preferredFont(forTextStyle: .title2).lineHeight)
-                                .textInputAutocapitalization(.never)
-                                .focused($isTagFieldFocused)
-                                .onSubmit { submitTag() }
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 12)
-                                .background {
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.surfaceSecondary)
-                                        .strokeBorder(Color.border, lineWidth: 2)
-                                }
-                                .tint(Color.accent)
-
-                                Button {
-                                    submitTag()
-                                } label: {
-                                    Image(systemName: "plus")
-                                        .font(.title2.weight(.semibold))
-                                        .foregroundStyle(canSubmitTag ? Color.surface : Color.textSecondary)
-                                        .padding(12)
-                                        .background(
-                                            canSubmitTag ? Color.accent : Color.surfaceSecondary,
-                                            in: Circle()
-                                        )
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(!canSubmitTag)
-                            }
-
-                            if store.tags.isEmpty {
-                                Text(String(localized: "todo_no_tags", bundle: PresentationResources.bundle))
-                                    .foregroundStyle(.secondary)
-                                    .padding(.vertical, 4)
-                            } else {
-                                TagList(
-                                    store.tags,
-                                    isEditing: true,
-                                    action: { store.send(.removeTag($0)) }
-                                )
-                            }
-                            Text(String(
-                                localized: "todo_tag_duplicate_hint",
-                                bundle: PresentationResources.bundle
-                            ))
-                        }
-                        .padding(20)
-                        .background {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.surface)
-                                .strokeBorder(Color.border, lineWidth: 2)
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-            }
-            .contentMargins(.top, 16, for: .scrollContent)
-    }
-
-    private func optionIcon(_ name: String, color: Color) -> some View {
-        Image(systemName: name)
-            .font(.title3)
-            .foregroundStyle(color)
-            .frame(width: 44, height: 44)
-            .background(color.opacity(0.08), in: Circle())
-    }
-
-    private var dueDateControl: some View {
-        DueDatePicker(selection: $store.selectedDueDate) {
-            HStack(spacing: 12) {
-                optionIcon("calendar", color: Color.textSecondary)
-                Text(String(localized: "todo_due_date", bundle: PresentationResources.bundle))
-                    .foregroundStyle(.primary)
-                Spacer()
-                if let dueDate = store.dueDate {
-                    Tag(dueDateText(for: dueDate), isEditing: true) {
-                        store.send(.binding(.set(\.dueDate, nil)))
-                    }
-                    .padding(.vertical, -4)
-                } else {
-                    Text(String(localized: "todo_none", bundle: PresentationResources.bundle))
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
-
-    private func close() {
-        isTagFieldFocused = false
-        onClose()
-    }
-
-    private func submitTag() {
-        guard canSubmitTag else { return }
-
-        let tagText = normalizedTagText
-        store.send(.addTag(tagText))
-        store.send(.binding(.set(\.tagText, "")))
-    }
-
-    private var normalizedTagText: String {
-        store.tagText.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private var canSubmitTag: Bool {
-        !normalizedTagText.isEmpty && !store.tags.contains(normalizedTagText)
-    }
-
-    private func dueDateText(for dueDate: Date) -> String {
-        let currentYear = calendar.component(.year, from: Date())
-        let dueDateYear = calendar.component(.year, from: dueDate)
-
-        if currentYear == dueDateYear {
-            return dueDate.formatted(
-                .dateTime.month(.defaultDigits).day(.defaultDigits)
-            )
-        }
-
-        return dueDate.formatted(
-            .dateTime.year(.twoDigits).month(.defaultDigits).day(.defaultDigits)
-        )
-    }
-}
-
-private struct DueDatePicker<Content: View>: View {
-    @Environment(\.isTabContentActive) private var isTabContentActive
-    @Environment(\.safeAreaInsets) private var safeAreaInsets
-    @State private var isPresented: Bool = false
-    @State private var height: CGFloat = .pi
-    @Binding var dueDate: Date
-    @ViewBuilder private var content: () -> Content
-
-    init(
-        selection dueDate: Binding<Date>,
-        @ViewBuilder content: @escaping () -> Content
-    ) {
-        self._dueDate = dueDate
-        self.content = content
-    }
-
-    var body: some View {
-        Button {
-            isPresented.toggle()
-        } label: {
-            content()
-        }
-        .sheet(isPresented: $isPresented.activePresentation(when: isTabContentActive)) {
-            DatePicker(
-                "",
-                selection: $dueDate,
-                displayedComponents: .date
-            )
-            .labelsHidden()
-            .datePickerStyle(.graphical)
-            .presentationDragIndicator(.visible)
-            .presentationDetents([.height(height)])
-            .background {
-                GeometryReader { geometry in
-                    Color.clear.onAppear {
-                        height = geometry.size.height + safeAreaInsets.bottom + safeAreaInsets.top
-                    }
-                }
-            }
-        }
     }
 }
 

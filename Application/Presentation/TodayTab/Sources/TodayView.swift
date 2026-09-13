@@ -40,6 +40,7 @@ public struct TodayView: View {
                         } else {
                             ForEach(store.sections) { section in
                                 TodoSection(
+
                                     section: section,
                                     isNavigationEnabled: !store.isTodoInspectorPresented,
                                     onSelect: { path.append(.todo(TodoIdItem(id: $0.id))) },
@@ -222,11 +223,15 @@ public struct TodayView: View {
     @ViewBuilder
     private var todoInspector: some View {
         if let editorStore = store.scope(state: \.todoEditor, action: \.todoEditor) {
-            TodoEditorView(
+            TodoPropertiesView(
                 store: editorStore,
+                showsEditorActions: true,
+                onSubmit: { editorStore.send(.upsertTodo) },
                 onClose: { store.send(.dismissTodoInspector) }
             )
             .inspectorColumnWidth(min: 320, ideal: 420, max: 520)
+            .onAppear { editorStore.send(.onAppear) }
+            .prominentAlert(editorStore, state: \.alert, action: \.alert)
         }
     }
 
