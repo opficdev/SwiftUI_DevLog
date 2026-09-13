@@ -52,7 +52,6 @@ struct MainView: View {
                 tabLabel(.profile)
             }
         }
-        .tabViewStyle(.sidebarAdaptable)
         .toastHost()
         .onAppear { store.send(.view(.onAppear)) }
         .onChange(of: selectedTab, initial: true) { _, tab in
