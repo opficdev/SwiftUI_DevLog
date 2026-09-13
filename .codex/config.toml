@@ -2,7 +2,7 @@ sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
 writable_roots = [
-    "/Users/opfic/.local/state/tuist",
-    "/Users/opfic/.cache/tuist",
-    "/Users/opfic/Library/Developer/Xcode/DerivedData",
+    "~/.local/state/tuist",
+    "~/.cache/tuist",
+    "~/Library/Developer/Xcode/DerivedData",
 ]
