@@ -51,7 +51,6 @@ public struct ProfileView: View {
             .toolbarVisibility(.hidden, for: .navigationBar)
             .background(Color.appBackground)
             .navigationDestination(for: ProfileRoute.self, destination: destinationView)
-            .border(Color.blue)
         }
         .onChange(of: isSelected, initial: true) { _, isSelected in
             if isSelected {
