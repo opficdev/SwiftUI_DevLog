@@ -133,7 +133,10 @@ private struct SideBar: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 16)
-        .background(Color.surface)
+        .background {
+            Color.surface
+                .ignoresSafeArea(.container, edges: .vertical)
+        }
     }
 
     private func tabButton(_ tab: MainTab) -> some View {
@@ -204,6 +207,7 @@ private struct ResizableSideBarModifier: ViewModifier {
                             .fill(Color.border)
                             .frame(width: 1)
                     }
+                    .ignoresSafeArea(.container, edges: .vertical)
             }
     }
 
