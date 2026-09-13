@@ -126,10 +126,11 @@ private struct SideBar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(MainTab.allCases, id: \.self) { tab in
+            let tabs = MainTab.allCases
+            ForEach(Array(zip(tabs.indices, tabs)), id: \.1) { index, tab in
+                if index == tabs.count - 1 { Spacer() }
                 tabButton(tab)
             }
-            Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 16)
