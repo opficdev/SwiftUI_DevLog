@@ -125,19 +125,27 @@ private struct SideBar: View {
     let unreadPushCount: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            let tabs = MainTab.allCases
-            ForEach(Array(zip(tabs.indices, tabs)), id: \.1) { index, tab in
-                if index == tabs.count - 1 { Spacer() }
-                tabButton(tab)
+        GeometryReader { geometry in
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(MainTab.allCases, id: \.self) { tab in
+                    if tab == .profile { Spacer() }
+                    tabButton(tab)
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 16)
+            .padding(.top, windowControlTopPadding(in: geometry))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 16)
         .background {
             Color.surface
                 .ignoresSafeArea(.container, edges: .vertical)
         }
+    }
+
+    private func windowControlTopPadding(in geometry: GeometryProxy) -> CGFloat {
+        guard #available(iOS 26.0, *),
+              UIDevice.current.userInterfaceIdiom == .pad else { return 0 }
+        return geometry.containerCornerInsets.topLeading.height
     }
 
     private func tabButton(_ tab: MainTab) -> some View {
