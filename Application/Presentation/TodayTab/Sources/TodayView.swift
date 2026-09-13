@@ -40,7 +40,6 @@ public struct TodayView: View {
                         } else {
                             ForEach(store.sections) { section in
                                 TodoSection(
-
                                     section: section,
                                     isNavigationEnabled: !store.isTodoInspectorPresented,
                                     onSelect: { path.append(.todo(TodoIdItem(id: $0.id))) },
@@ -50,7 +49,8 @@ public struct TodayView: View {
                             .padding(.bottom, 12)
                         }
                     } header: {
-                        VStack {
+                        VStack(alignment: .leading) {
+                            topBar
                             achievementCard
                             filterBar
                         }
@@ -59,8 +59,7 @@ public struct TodayView: View {
                 }
                 .padding(.horizontal)
             }
-            .safeAreaInset(edge: .top, spacing: 0) { topBar }
-            .background(Color.appBackground.ignoresSafeArea())
+            .background(Color.appBackground)
             .refreshable { await store.send(.refresh).finish() }
             .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: TodayRoute.self, destination: destination)
@@ -96,11 +95,7 @@ public struct TodayView: View {
     private var topBar: some View {
         Text(String(localized: "nav_today", bundle: PresentationResources.bundle))
             .font(.largeTitle.bold())
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
-            .padding(.top, 12)
             .padding(.bottom, 8)
-            .background(Color.appBackground, ignoresSafeAreaEdges: .top)
     }
 
     private var achievementCard: some View {
